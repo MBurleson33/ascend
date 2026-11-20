@@ -1,7 +1,7 @@
 """Regenerates sw.js. Run after changing index.html or any asset:  python3 tools/build_sw.py"""
 import glob, hashlib, json, os
 os.chdir(os.path.join(os.path.dirname(__file__), '..'))
-files = ['index.html', 'manifest.webmanifest'] + sorted(glob.glob('icons/*.png')) + sorted(glob.glob('assets/*/*.webp'))
+files = ['index.html', 'manifest.webmanifest'] + sorted(f for f in glob.glob('icons/*.png') if 'source' not in f) + sorted(glob.glob('assets/*.webp')) + sorted(glob.glob('assets/*/*.webp'))
 h = hashlib.sha1()
 for f in files: h.update(f.encode()); h.update(open(f, 'rb').read())
 version = 'ascend-' + h.hexdigest()[:10]
