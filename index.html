@@ -71,6 +71,11 @@ p{margin:6px 0}
 .vnname{align-self:flex-start;font:700 12px/1 Orbitron,sans-serif;letter-spacing:.1em;color:#05060d;background:linear-gradient(90deg,var(--c1),var(--c2));padding:6px 16px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
 .vnrole{font-size:12px;color:var(--dim);margin:4px 0 0}
 #vnText{font-size:16px;line-height:1.45;margin:8px 0 0;flex:1;min-height:70px}
+.vnch{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.vnch button{min-height:40px;padding:0 14px;font:600 14px 'Chakra Petch',sans-serif;color:#fff;border:1px solid var(--c1);background:rgba(62,240,255,.12);clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
+.vnch button:hover{background:rgba(62,240,255,.25)}
+.sqt{font:800 40px/1 Oxanium,sans-serif;color:var(--gold);text-shadow:0 0 16px rgba(255,207,90,.6);margin:8px 0;font-variant-numeric:tabular-nums}
+.sqtask{font:700 20px/1.3 'Chakra Petch',sans-serif;margin:4px 0}
 .vnnext{align-self:flex-end;color:var(--c1);font-size:12px;animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
 .dcoach{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(62,240,255,.18);text-align:left}
@@ -236,6 +241,7 @@ const TITLES = [
  {id:'wander', n:'Wanderer', d:'Walk 300 minutes', t:s => s.totals.walkMin >= 300},
  {id:'push', n:'Push-Up Initiate', d:'500 total push-ups', t:s => s.totals.pushups >= 500},
  {id:'forge', n:'Forged', d:'Finish 20 workouts', t:s => s.totals.workouts >= 20},
+ {id:'quick', n:'Quick Draw', d:'Clear 10 Sudden Quests', t:s => (s.totals.sudden || 0) >= 10},
  {id:'unbreak', n:'Unbreakable', d:'Reach a 30-day streak', t:s => s.bestStreak >= 30},
  {id:'road', n:'Road Runner', d:'Finish the 8-week run plan', t:s => s.runPlan.done},
  {id:'rd', n:'D-Rank Hunter', d:'Reach level 10', t:s => s.level >= 10},
@@ -341,6 +347,36 @@ const COACHES = {
    idle:["Hey! Hey! Wanna do push-ups? I wanna do push-ups!","Your stats are going up and I'm SO here for it!","Don't forget water! Hydration = power!"]}}
 };
 const EXPR = {greet_m:'smile', greet_a:'smile', greet_e:'smile', push:'happy', squat:'happy', cardio:'happy', next:'smile', half:'smile', status:'smile', clear:'happy', extra:'happy', done:'happy', penaltyRemind:'fierce', penaltyClear:'happy', levelup:'surprised', train:'happy', late:'fierce', idle:'smile', first:'smile'};
+const MORE = {
+ kaida:{ask:["Before we start: how's the body feeling today, {name}?"],
+  moodFired:["That's what I like to hear! Burn it on {next}. Go!"], moodTired:["Tired is fine. Quitting isn't. Just do {next} and see how you feel."], moodSore:["Sore means it's working. Go easy, but go. A slow walk still counts for cardio."],
+  sudden:["Sudden Quest! {task}. You've got 30 minutes. Move it!","Hey! Off that chair. {task}. Thirty minutes. Now!"], suddenDone:["Ha! Sudden Quest cleared. Reflexes of a hunter.","That's how you answer a surprise. Nice."],
+  suddenMiss:["That Sudden Quest expired. Next one, you're faster."], suddenSkip:["Fine. But the next one, you're taking."]},
+ rei:{ask:["Quick check-in. How are you feeling today?"],
+  moodFired:["Excellent. Channel it. Begin with {next}."], moodTired:["Understood. Start small: {next}. Momentum usually follows."], moodSore:["Soreness is adaptation. Prioritize the cardio quest today. A gentle walk is ideal."],
+  sudden:["A Sudden Quest has appeared: {task}. Thirty minutes. Optional, but recommended.","You've been still for a while. Sudden Quest: {task}. Thirty minutes."], suddenDone:["Sudden Quest complete. Adaptability is a rare stat.","Logged. Small efforts, scattered through the day, add up."],
+  suddenMiss:["The Sudden Quest expired. No penalty. Watch for the next one."], suddenSkip:["Declined. Noted. The next one may be more convenient."]},
+ bolt:{ask:["VIBE CHECK!! How you feeling today?!"],
+  moodFired:["LET'S GOOO! {next}, right now!"], moodTired:["Low battery mode, got it! Just {next}, that's it! Small wins!"], moodSore:["Sore = gains loading! Easy walk first, then see how you feel!"],
+  sudden:["SURPRISE QUEST!! {task}! 30 minutes on the clock! GO GO GO!","Pop quiz, partner! {task}! Thirty minutes!"], suddenDone:["SUDDEN QUEST CLEARED! You're so fast!","BOOM! Surprise attack countered!"],
+  suddenMiss:["Aw, missed that one! Next one's ours though!"], suddenSkip:["All good! I'll find you another one later!"]}
+};
+for (const k in MORE) Object.assign(COACHES[k].lines, MORE[k]);
+Object.assign(EXPR, {ask:'smile', moodFired:'happy', moodTired:'smile', moodSore:'smile', sudden:'surprised', suddenDone:'happy', suddenMiss:'fierce', suddenSkip:'smile'});
+const SUDDEN = [
+ {t:'Stand up and do {n} jumping jacks', n:20, cat:'agi'}, {t:'Hold a plank for {n} seconds', n:30, cat:'str'},
+ {t:'Do {n} squats right where you are', n:15, cat:'vit'}, {t:'Get up and walk around for {n} minutes', n:5, cat:'vit'},
+ {t:'Knock out {n} push-ups', n:10, cat:'str'}, {t:'Drink a full glass of water', n:0, cat:'sen'},
+ {t:'Stretch your hips and back for {n} minutes', n:2, cat:'vit'}, {t:'Do {n} calf raises', n:25, cat:'agi'},
+ {t:'Do {n} lunges on each leg', n:8, cat:'str'}, {t:'Wall sit for {n} seconds', n:30, cat:'vit'},
+ {t:'Take the stairs, or march in place for {n} minutes', n:3, cat:'agi'}, {t:'Do {n} desk push-ups', n:15, cat:'str'}
+];
+const SQ_MIN = 30, SQ_STALE = 3 * 3600e3;
+function makePops() {
+ const d = new Date(), base = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9).getTime(), slot = 4 * 3600e3, ri = RANKS.indexOf(rankOf(S.level)), m = 1 + ri * 0.5;
+ const pool = [...SUDDEN].sort(() => Math.random() - .5);
+ return [0, 1, 2].map(i => { const s = pool[i], n = Math.round(s.n * m); return {task:s.t.replace('{n}', n), cat:s.cat, xp:25 + 5 * ri, at:Math.round(base + i * slot + Math.random() * (slot - 3600e3)), status:'pending', exp:0}; });
+}
 
 /* ================= helpers ================= */
 const $ = s => document.querySelector(s);
@@ -445,7 +481,8 @@ function makeQuests() {
 }
 function newDay(t) {
  const wi = S.workoutIdx % WORKOUTS.length;
- S.today = {date:t, quests:makeQuests(), water:0, waterDone:false, complete:false, wkIdx:wi, wk:WORKOUTS[wi].ex.map(() => false), wkDone:false, runDone:false, walkXp:0};
+ S.today = {date:t, quests:makeQuests(), water:0, waterDone:false, complete:false, wkIdx:wi, wk:WORKOUTS[wi].ex.map(() => false), wkDone:false, runDone:false, walkXp:0, checkin:false};
+ S.today.pops = makePops();
 }
 function rollover() {
  const t = dstr();
@@ -469,7 +506,7 @@ function rollover() {
 }
 
 /* ================= coach dialogue ================= */
-const CL = {text:'', expr:'smile', shown:0, queue:[]};
+const CL = {text:'', expr:'smile', shown:0, queue:[], choices:[]};
 let typeInt = null, talkN = 0;
 const QSHORT = {push:'push-ups', squat:'squats', cardio:'cardio'};
 function ctx() {
@@ -500,9 +537,12 @@ function talk() {
 }
 function questLine(id) { const c = ctx(); say(id, line(id) + (c.next ? ' ' + line('next') : '')); }
 function trainLine() { const T = S.today, c = ctx(); say('train', line('train') + (T.complete ? (c.extra ? ' ' + c.extra : '') : ' ' + line('next'))); }
-function sayQueue(list, ev) { say(ev, list[0]); CL.queue = list.slice(1); }
-function say(ev, text) {
- CL.queue = [];
+function sayQueue(list, ev) { const items = list.map(x => typeof x === 'string' ? {ev, text:x} : x); say(items[0].ev, items[0].text, items[0].choices); CL.queue = items.slice(1); }
+const choicesHTML = () => CL.choices.map((c, i) => `<button data-a="vnchoice" data-i="${i}">${esc(c.label)}</button>`).join('');
+function showChoices() { const el = $('#vnCh'); if (el) el.innerHTML = CL.shown >= CL.text.length ? choicesHTML() : ''; }
+function say(ev, text, choices) {
+ CL.queue = []; CL.choices = choices || [];
+ const ch = $('#vnCh'); if (ch) ch.innerHTML = '';
  CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0;
  const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = '▼ tap';
  const p = $('#vnPort'); if (p) p.innerHTML = coachPic(CL.expr);
@@ -510,7 +550,7 @@ function say(ev, text) {
  typeInt = setInterval(() => {
   CL.shown = Math.min(CL.text.length, CL.shown + 1);
   const t = $('#vnText'); if (t) t.textContent = CL.text.slice(0, CL.shown);
-  if (CL.shown >= CL.text.length) { clearInterval(typeInt); const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = CL.queue.length ? '▼ more' : '▼ tap'; }
+  if (CL.shown >= CL.text.length) { clearInterval(typeInt); const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = CL.choices.length ? '' : CL.queue.length ? '▼ more' : '▼ tap'; showChoices(); }
  }, 22);
 }
 const coachBlock = (ev, txt) => { const c = coach(); return `<div class="dcoach">${coachPic(EXPR[ev])}<div><b>${c.name}</b><p>${esc(txt || line(ev))}</p></div></div>`; };
@@ -713,14 +753,18 @@ function vCoach() {
  const c = coach();
  return `<section class="panel vn wide" data-a="coachtap" aria-label="Coach dialogue, tap for more">
   <div class="vnport" id="vnPort">${coachPic(CL.expr)}</div>
-  <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${esc(CL.text.slice(0, CL.shown))}</p><span class="vnnext">${CL.queue.length && CL.shown >= CL.text.length ? '▼ more' : '▼ tap'}</span></div></section>`;
+  <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${esc(CL.text.slice(0, CL.shown))}</p><div class="vnch" id="vnCh">${CL.shown >= CL.text.length ? choicesHTML() : ''}</div><span class="vnnext">${CL.choices.length ? '' : CL.queue.length && CL.shown >= CL.text.length ? '▼ more' : '▼ tap'}</span></div></section>`;
 }
 function vQuests() {
  const T = S.today, P = S.penalty;
  const qrow = q => `<div class="quest"><div class="qh"><b>${q.label}</b><span class="qn ${q.done ? 'done' : ''}">${q.prog} / ${q.target}${q.unit}</span></div>
   <div class="bar ${q.done ? 'g' : ''}"><i style="width:${q.prog / q.target * 100}%"></i></div>
   ${q.done ? '' : `<div class="btns qb"><button class="b" data-a="qminus" data-id="${q.id}" aria-label="Remove ${q.steps[0]}">−${q.steps[0]}</button>${q.steps.map(s => `<button class="b" data-a="qadd" data-id="${q.id}" data-n="${s}">+${s}</button>`).join('')}<button class="b p" data-a="qfill" data-id="${q.id}">Done</button></div>`}</div>`;
+ const A = activePop();
  return `${vCoach()}
+ ${A ? `<section class="panel gold wide"><p class="sys" style="color:var(--gold)">Sudden Quest</p><p class="sqtask">${esc(A.task)}</p>
+  <p class="dim small">Reward +${A.xp} XP · ${A.cat.toUpperCase()} · time left</p><div class="sqt" id="sqTime">${fmt((A.exp - Date.now()) / 1000)}</div>
+  <div class="btns"><button class="b p" data-a="sqdone">Done</button><button class="b" data-a="sqskip">Skip</button></div></section>` : ''}
  ${P && !P.done ? `<section class="panel red wide"><p class="sys">Penalty Quest</p>${playerImg('fierce', 'penimg')}<h2>PUSH-UPS ×${P.target}</h2>
   <p class="dim small">You missed a day. Clear this before midnight or your ${S.streak}-day streak resets. No XP.</p>
   <div class="qh" style="margin-top:8px"><span></span><span class="qn">${P.prog} / ${P.target}</span></div><div class="bar r"><i style="width:${P.prog / P.target * 100}%"></i></div>
@@ -734,6 +778,7 @@ function vQuests() {
   ${T.waterDone ? '<div class="clear">Side Quest cleared</div>' : '<button class="b" data-a="water">+1 glass</button>'}</section>
  <section class="panel"><p class="sys">Bonus XP today</p><h2>EXTRA TRAINING</h2>
   <p>${T.wkDone ? '✓' : '○'} Workout · +40 XP</p><p>${T.runDone ? '✓' : '○'} Run plan session · +60 XP</p><p>${T.walkXp >= 30 ? '✓' : '○'} Walk · up to +30 XP (${T.walkXp} earned)</p>
+  <p class="dim small" style="margin-top:8px">Sudden Quests: ${(T.pops || []).filter(p => p.status === 'done').length} of 3 cleared. They pop up between 9 AM and 9 PM while Ascend is open.</p>
   <button class="b full" data-a="go" data-t="train" style="margin-top:8px">Go to Train</button></section>`;
 }
 function vTrain() {
@@ -793,13 +838,51 @@ const lateNow = () => new Date().getHours() >= 18 && !S.today.complete;
 function arrival(msgs) {
  const T = S.today, ev = opener();
  let txt;
- if (!S.introDone) { S.introDone = true; save(); const c = coach(), list = c.first.map(t => fill(t)); txt = list[0]; sayQueue(list, 'first'); }
- else { txt = line(ev); say(ev, txt); }
+ if (!S.introDone) { S.introDone = true; T.checkin = true; save(); const c = coach(), list = c.first.map(t => fill(t)); txt = list[0]; sayQueue(list, 'first'); }
+ else { txt = line(ev); sayQueue([{ev, text:txt}, ...(T.checkin ? [] : [checkinItem()])]); }
  dialog({title:'Daily Quest has arrived', body:`${(msgs || []).map(m => `<p style="color:var(--red)">${esc(m)}</p>`).join('')}
   <p class="dim small">${rankOf(S.level)}-Rank · Today's goals:</p>${T.quests.map(q => `<p>· ${q.label}: <b>${q.target}${q.unit}</b></p>`).join('')}
   ${S.penalty ? `<p style="color:var(--red)">· Penalty: <b>${S.penalty.target} push-ups</b></p>` : ''}${coachBlock(S.introDone && txt === CL.text && CL.queue.length ? 'first' : ev, txt)}`,
-  buttons:[{label:'Accept', cls:'p full', fn:() => { tab = 'quests'; render(); }}]});
+  buttons:[{label:'Accept', cls:'p full', fn:() => { quietUntil = Date.now() + 90e3; tab = 'quests'; render(); }}]});
 }
+function checkinItem() {
+ S.today.checkin = true;
+ const mood = k => () => say(k, line(k));
+ return {ev:'ask', text:line('ask'), choices:[{label:'Fired up', fn:mood('moodFired')}, {label:'Tired', fn:mood('moodTired')}, {label:'Sore', fn:mood('moodSore')}]};
+}
+/* ---- sudden quests ---- */
+let quietUntil = 0;
+const activePop = () => (S.today.pops || []).find(p => p.status === 'active');
+function suddenTick() {
+ if (!S.today || !S.introDone) return;
+ if (!S.today.pops) { S.today.pops = makePops(); save(); }
+ const now = Date.now(), a = activePop();
+ if (a) {
+  if (now >= a.exp) { a.status = 'missed'; quietUntil = now + 20 * 60e3; say('suddenMiss'); commit(); return; }
+  const t = $('#sqTime'); if (t) t.textContent = fmt((a.exp - now) / 1000);
+  return;
+ }
+ if (TM || !$('#cc').hidden || mOpen || CL.queue.length || CL.choices.length || now < quietUntil) return;
+ const due = S.today.pops.filter(x => x.status === 'pending' && x.at <= now);
+ if (!due.length) return;
+ const p = due[due.length - 1];
+ due.slice(0, -1).forEach(x => { x.status = 'skipped'; });
+ if (now - p.at > SQ_STALE) { p.status = 'skipped'; save(); return; }
+ p.status = 'active'; p.exp = now + SQ_MIN * 60e3; save();
+ cue(false);
+ const txt = line('sudden', {task:p.task});
+ say('sudden', txt, [{label:'On it!', fn:() => say('next', line(S.today.complete ? 'train' : 'next'))}, {label:'Not now', fn:suddenSkip}]);
+ dialog({cls:'gold', title:'SUDDEN QUEST', body:`<p class="sqtask">${esc(p.task)}</p><p>Reward: <b style="color:var(--gold)">+${p.xp} XP</b> · ${p.cat.toUpperCase()}</p><p class="dim small">You have ${SQ_MIN} minutes. Log it on the Quests screen when you're done.</p>${coachBlock('sudden', txt)}`,
+  buttons:[{label:'Accept', cls:'p', fn:() => { CL.choices = []; tab = 'quests'; render(); window.scrollTo(0, 0); }}, {label:'Not now', fn:() => { suddenSkip(); commit(); }}]});
+ tab === 'quests' && render();
+}
+function suddenDone() {
+ const a = activePop(); if (!a) return;
+ a.status = 'done'; quietUntil = Date.now() + 20 * 60e3; S.totals.sudden = (S.totals.sudden || 0) + 1;
+ addXp(a.xp, a.cat, `Sudden Quest: ${a.task}`);
+ const c = ctx(); say('suddenDone', line('suddenDone') + (!S.today.complete && c.next ? ' ' + line('next') : ''));
+}
+function suddenSkip() { const a = activePop(); if (!a) return; a.status = 'declined'; quietUntil = Date.now() + 20 * 60e3; say('suddenSkip'); }
 function setupFlow(after) { openCreator(() => openCoach(after)); }
 function onboard() {
  dialog({title:'You have been chosen.', body:`<p>You've become a Player. Clear Daily Quests to level up, raise your stats and rank up from E to S.</p><p class="dim small">What should the System call you?</p>`,
@@ -817,9 +900,14 @@ document.addEventListener('click', e => {
  const qs = id && S.today.quests.find(q => q.id === id);
  switch (a) {
   case 'coachtap':
-   if (CL.shown < CL.text.length) { CL.shown = CL.text.length; clearInterval(typeInt); const t = $('#vnText'); if (t) t.textContent = CL.text; }
-   else if (CL.queue.length) { const rest = CL.queue.slice(1), t = CL.queue[0]; say('first', t); CL.queue = rest; }
+   if (CL.shown < CL.text.length) { CL.shown = CL.text.length; clearInterval(typeInt); const t = $('#vnText'); if (t) t.textContent = CL.text; const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = CL.choices.length ? '' : CL.queue.length ? '▼ more' : '▼ tap'; showChoices(); }
+   else if (CL.choices.length) return;
+   else if (CL.queue.length) { const rest = CL.queue.slice(1), it = CL.queue[0]; say(it.ev, it.text, it.choices); CL.queue = rest; }
    else talk();
+   return;
+  case 'vnchoice': { const c = CL.choices[+el.dataset.i]; CL.choices = []; if (c) c.fn(); commit(); return; }
+  case 'sqdone': suddenDone(); break;
+  case 'sqskip': suddenSkip(); break;
    return;
   case 'qadd': questAdd(id, n); break;
   case 'qminus': questAdd(id, -qs.steps[0]); break;
@@ -886,6 +974,7 @@ document.addEventListener('submit', e => {
 const dayCheck = () => { const m = rollover(); if (m) { render(); arrival(m); } };
 document.addEventListener('visibilitychange', () => { if (!document.hidden) dayCheck(); });
 setInterval(dayCheck, 60000);
+setInterval(suddenTick, 1000);
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (TABS.includes(h)) { tab = h; render(); } });
 
 /* ================= boot ================= */
