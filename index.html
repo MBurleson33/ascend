@@ -95,12 +95,19 @@ p{margin:6px 0}
 .alert{display:flex;justify-content:space-between;align-items:center;text-align:left;width:100%;color:inherit;cursor:pointer;padding:14px 18px}
 .alert>span:first-child{display:grid;gap:2px}.alert .sys{margin:0}.alert .arr{font:700 28px Oxanium,sans-serif;color:var(--gold)}
 .sqrow{display:flex;align-items:baseline;gap:12px}
-.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-.seg button{min-height:44px;font:700 12px Orbitron,sans-serif;letter-spacing:.06em;border:1px solid rgba(62,240,255,.3);background:rgba(62,240,255,.05);color:var(--dim);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.seg button{min-height:44px;padding:0 2px;font:700 11px Orbitron,sans-serif;letter-spacing:.06em;border:1px solid rgba(62,240,255,.3);background:rgba(62,240,255,.05);color:var(--dim);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
 .seg button.on{background:linear-gradient(100deg,var(--c2),var(--c1));color:#fff;border-color:transparent}
 .ttl{background:none;border:0;padding:0;cursor:pointer;text-align:left}
 .nextt{font-size:13px;color:var(--dim);margin:6px 0 0}
 .tt .tp{display:block;height:4px;margin-top:6px;background:rgba(62,240,255,.12)}.tt .tp i{display:block;height:100%;background:var(--c1)}
+.plist{display:grid;gap:8px;margin-top:10px}
+.pm{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid rgba(62,240,255,.18)}
+.pm.me{border-color:rgba(62,240,255,.5);background:rgba(62,240,255,.06)}
+.pav{width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid;flex:none;background:#0b1430}
+.pav img{width:100%;height:100%;object-fit:cover;transform:scale(1.8);transform-origin:50% 36%}
+.pinfo{display:grid;flex:1;min-width:0}.pinfo b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pst{font:700 12px Oxanium,sans-serif;color:var(--dim);white-space:nowrap}.pst.ok{color:var(--ok)}
 .trial{padding:12px 0;border-top:1px solid rgba(62,240,255,.14)}
 .trial.lock{opacity:.55}
 .trial.ok b{color:var(--ok)}
@@ -592,7 +599,7 @@ if (S.curve !== 2) {
 if (S.shields === undefined) S.shields = 1;
 if (!S.tests) S.tests = [];
 if (S.rankIdx < 5 && S.level >= capOf() && !S.exam) S.exam = {to:S.rankIdx + 1, done:EXAMS[S.rankIdx + 1].map(() => false)};
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const save = () => { S.updated = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} scheduleSync(); };
 const statVal = k => 10 + Math.floor(S.cat[k] / STAT_STEP);
 const coachId = () => COACHES[S.coach] ? S.coach : 'kaida';
 const coach = () => COACHES[coachId()];
@@ -709,7 +716,7 @@ function nextDialog() {
  mOpen = true;
  ov.innerHTML = `<div class="panel dlg ${spec.cls || ''}" role="dialog" aria-modal="true">
   ${spec.sys !== false ? `<p class="sys">System</p>` : ''}${spec.title ? `<h2>${spec.title}</h2>` : ''}<div>${spec.body || ''}</div>
-  ${spec.input ? `<div class="field"><input id="dlgIn" maxlength="24" value="${esc(spec.input.value || '')}" placeholder="${esc(spec.input.placeholder || '')}"></div>` : ''}
+  ${spec.input ? `<div class="field"><input id="dlgIn" maxlength="${spec.input.max || 24}" value="${esc(spec.input.value || '')}" placeholder="${esc(spec.input.placeholder || '')}"></div>` : ''}
   ${spec.area ? `<textarea id="dlgArea" ${spec.area.readonly ? 'readonly' : ''} placeholder="Paste your save code here">${esc(spec.area.value || '')}</textarea>` : ''}
   <div class="btns">${(spec.buttons || [{label:'OK', cls:'p'}]).map((b, i) => `<button class="b ${b.cls || ''}" data-i="${i}">${b.label}</button>`).join('')}</div></div>`;
  ov.hidden = false;
@@ -960,6 +967,7 @@ function vQuests() {
   <div class="qh" style="margin-top:8px"><span></span><span class="qn">${P.prog} / ${P.target}</span></div><div class="bar r"><i style="width:${P.prog / P.target * 100}%"></i></div>
   <div class="btns qb"><button class="b" data-a="padd" data-n="5">+5</button><button class="b" data-a="padd" data-n="10">+10</button><button class="b r" data-a="padd" data-n="${P.target}">Done</button></div></section>` : ''}
  ${testDue() && S.totals.questDays >= 1 && !S.exam ? `<button class="panel wide alert" data-a="ptopen"><span><span class="sys">Monthly Power Test</span><b>See how strong you are today</b></span><span class="arr" style="color:var(--c1)">›</span></button>` : ''}
+ ${S.party && partyData ? `<button class="panel wide alert" data-a="goparty"><span><span class="sys">Party · ${esc(S.party.name || '')}</span><b>${partyToday()} of ${partyData.members.length} cleared today</b></span><span class="arr" style="color:var(--c1)">›</span></button>` : ''}
  ${S.exam ? `<button class="panel gold wide alert" data-a="go" data-t="status"><span><span class="sys" style="color:var(--gold)">Rank-Up Exam</span><b>${rankOf()} → ${RANKS[S.exam.to]} · ${S.exam.done.filter(Boolean).length}/${S.exam.done.length} trials passed</b></span><span class="arr">›</span></button>` : ''}
  <section class="panel wide"><div class="qtop"><h2>DAILY QUEST</h2><span class="dim small">${rankOf()}-Rank</span></div>
   ${T.quests.map(qrow).join('')}
@@ -1016,8 +1024,9 @@ function vTitles() {
    <span class="small">${S.title === t.id ? 'Equipped' : has ? 'Equip' : 'Locked'}</span></button>`).join('')}</div></section>`;
 }
 function vStatus() {
- const seg = `<div class="seg wide">${[['hunter', 'Hunter'], ['stats', 'Stats'], ['titles', `Titles ${S.titles.length}/${TITLES.length}`]].map(([k, n]) => `<button class="${sview === k ? 'on' : ''}" data-a="sview" data-v="${k}">${n}</button>`).join('')}</div>`;
+ const seg = `<div class="seg wide">${[['hunter', 'Hunter'], ['stats', 'Stats'], ['titles', 'Titles'], ['party', 'Party']].map(([k, n]) => `<button class="${sview === k ? 'on' : ''}" data-a="sview" data-v="${k}">${n}</button>`).join('')}</div>`;
  if (sview === 'titles') return seg + vTitles();
+ if (sview === 'party') { loadParty(); return seg + vParty(); }
  if (sview === 'stats') return seg + vStats();
  return seg + vHunter();
 }
@@ -1043,7 +1052,9 @@ function vLog() {
  return `<section class="panel"><h2>ACTIVITY LOG</h2>
   ${S.log.length ? `<ul class="log">${S.log.slice(0, 80).map(l => { const d = new Date(l.t); return `<li><span>${esc(l.why)}<br><span class="dim small">${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} · ${d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}</span></span><b>${l.n ? '+' + l.n : '★'}</b></li>`; }).join('')}</ul>` : '<p class="dim">Nothing yet. Clear a quest and it shows up here.</p>'}</section>
  ${storyHTML()}
+ <section class="panel"><h2>CLOUD SAVE</h2>${cloudHTML()}</section>
  <section class="panel"><h2>SETTINGS</h2>
+  <button class="toggle ${S.notify ? 'on' : ''}" data-a="tnotify"><span>Notifications <span class="dim small">(Sudden Quests, streak reminders)</span></span><span class="sw2"></span></button>
   <button class="toggle ${S.sound !== false ? 'on' : ''}" data-a="tsound"><span>Sound effects</span><span class="sw2"></span></button>
   <button class="toggle ${S.haptics !== false ? 'on' : ''}" data-a="thaptic"><span>Vibration <span class="dim small">(Android)</span></span><span class="sw2"></span></button></section>
  <section class="panel"><h2>INSTALL APP</h2>${installHTML()}</section>
@@ -1242,6 +1253,150 @@ const EXTRA_LINES = {
 for (const k in EXTRA_LINES) Object.assign(COACHES[k].lines, EXTRA_LINES[k]);
 Object.assign(EXPR, {gateClear:'happy', restDay:'smile', shieldBack:'happy', powerTest:'smile', powerUp:'surprised', story:'smile'});
 
+/* ================= cloud: sync, notifications, party ================= */
+const API = 'api';
+const cloudAvail = () => location.protocol.startsWith('http') && !location.hostname.endsWith('github.io');
+const rnd = (n, abc) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, b => abc[b % abc.length]).join(''); };
+var syncT = null, syncing = false, partyData = null, partyAt = 0, partyErr = '';
+async function api(path, opts) {
+ const init = opts ? {method:opts.method || 'POST', headers:{'Content-Type':'application/json'}, body:opts.body ? JSON.stringify(opts.body) : undefined, keepalive:!!opts.keepalive} : undefined;
+ const r = await fetch(`${API}/${path}`, init);
+ const j = await r.json().catch(() => ({}));
+ if (!r.ok) throw new Error(j.error || 'Could not reach the server');
+ return j;
+}
+const authQ = () => `id=${S.cloud.id}&token=${S.cloud.token}`;
+function scheduleSync() { if (!S.cloud || !cloudAvail()) return; clearTimeout(syncT); syncT = setTimeout(() => syncNow(), 2500); }
+async function syncNow(loud, keepalive) {
+ if (!S.cloud || !cloudAvail() || syncing || !navigator.onLine) return; syncing = true;
+ try {
+  await api('save', {body:{id:S.cloud.id, token:S.cloud.token, state:S, schedule:buildSchedule()}, keepalive});
+  S.cloud.last = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  if (loud) toast('Synced to the cloud.');
+  if (tab === 'log' && loud) render();
+ } catch (e) { if (loud) toast(e.message); }
+ syncing = false;
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && S.cloud) { clearTimeout(syncT); syncNow(false, true); } });
+function cloudCreate() { S.cloud = {id:rnd(8, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), token:rnd(28, 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'), last:0}; }
+async function cloudPull() {
+ if (!S.cloud || !cloudAvail() || !navigator.onLine) return;
+ try {
+  const r = await api(`save?${authQ()}`);
+  if (r.state && (r.updated || 0) > (S.updated || 0) + 3000) {
+   const cloud = S.cloud; S = r.state; S.cloud = cloud; rollover(); save(); render();
+   toast('Progress synced from your other device.');
+  }
+ } catch (e) {}
+}
+function linkPrompt() {
+ dialog({title:'Link an existing save', body:'<p class="dim small">Paste the sync code from your other device (Log → Cloud save). This replaces the progress on this device.</p>', input:{value:'', placeholder:'ABCD2345-…', max:80},
+  buttons:[{label:'Link', cls:'p', fn:v => {
+   const m = (v || '').trim().match(/^([A-Z0-9]{8})-([A-Za-z0-9]{20,64})$/);
+   if (!m) { toast('That doesn\'t look like a sync code.'); return false; }
+   api(`save?id=${m[1]}&token=${m[2]}`).then(r => {
+    if (!r.state) throw new Error('No save found for that code');
+    S = r.state; S.cloud = {id:m[1], token:m[2], last:Date.now()}; S.notify = false; rollover(); save(); commit(); say(opener());
+    toast('Linked. This device now shares your progress.');
+   }).catch(e => toast(e.message));
+  }}, {label:'Cancel'}]});
+}
+function copyText(t, okMsg) {
+ const show = () => dialog({title:'Copy this', area:{value:t, readonly:true}, buttons:[{label:'Done', cls:'p'}]});
+ try { navigator.clipboard.writeText(t).then(() => toast(okMsg), show); } catch (e) { show(); }
+}
+function cloudHTML() {
+ if (!cloudAvail()) return `<p class="dim small">Cloud save, notifications and party mode run on the Vercel version of Ascend. Open it from your Vercel link to turn them on.</p>`;
+ if (!S.cloud) return `<p class="dim small">Back up your progress automatically and sync it to another device. No account needed.</p>
+  <div class="btns"><button class="b p" data-a="cloudon">Turn on cloud save</button><button class="b" data-a="cloudlink">Link existing save</button></div>`;
+ const t = S.cloud.last ? new Date(S.cloud.last).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) : 'not yet';
+ return `<p class="clear" style="margin-top:0">Cloud save on · last synced ${t}</p>
+  <p class="dim small">Your sync code links another device to this progress. Keep it private, like a password.</p>
+  <div class="btns"><button class="b" data-a="copycode">Copy sync code</button><button class="b" data-a="cloudsync">Sync now</button><button class="b" data-a="cloudlink">Link another save</button><button class="b r" data-a="cloudoff">Turn off</button></div>`;
+}
+/* ---- notifications ---- */
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+function b64u8(b) { const p = '='.repeat((4 - b.length % 4) % 4), s = atob((b + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(s, c => c.charCodeAt(0)); }
+async function enableNotify() {
+ if (!cloudAvail()) return toast('Notifications run on the Vercel version of Ascend.');
+ if (isIOS() && !isStandalone()) return dialog({title:'Add to Home Screen first', body:'<p>On iPhone, notifications only work after you add Ascend to your Home Screen and open it from that icon.</p><p class="dim small">Safari → Share → Add to Home Screen.</p>', buttons:[{label:'Got it', cls:'p'}]});
+ if (!pushSupported()) return toast('This browser doesn\'t support notifications.');
+ let perm;
+ try { perm = await Notification.requestPermission(); } catch (e) { perm = 'denied'; }
+ if (perm !== 'granted') return dialog({title:'Notifications are blocked', body:'<p>Allow notifications for Ascend in your phone\'s Settings, then try again.</p>', buttons:[{label:'OK', cls:'p'}]});
+ try {
+  if (!S.cloud) cloudCreate();
+  await syncNow();
+  const reg = await navigator.serviceWorker.ready, {publicKey} = await api('push');
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64u8(publicKey)});
+  await api('push', {body:{id:S.cloud.id, token:S.cloud.token, sub:sub.toJSON()}});
+  S.notify = true; commit(); syncNow(); sfx('chime', [40, 40]); toast('Notifications on.');
+ } catch (e) { toast('Couldn\'t turn on notifications: ' + e.message); }
+}
+async function disableNotify() {
+ S.notify = false; commit();
+ try { const reg = await navigator.serviceWorker.ready, sub = await reg.pushManager.getSubscription(); if (sub) await sub.unsubscribe(); } catch (e) {}
+ try { if (S.cloud) await api('push', {method:'DELETE', body:{id:S.cloud.id, token:S.cloud.token}}); } catch (e) {}
+ toast('Notifications off.');
+}
+// What the server should send, and when. Rebuilt and uploaded on every sync, so finished items drop off.
+function buildSchedule() {
+ if (!S.notify || !S.today) return [];
+ const out = [], now = Date.now(), T = S.today, d = new Date(), at = (h, plus) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + (plus || 0), h).getTime();
+ const who = coach().name.charAt(0) + coach().name.slice(1).toLowerCase(), c = ctx();
+ (T.pops || []).forEach((p, i) => { if (p.status === 'pending' && p.at > now) out.push({at:p.at, tag:`pop-${T.date}-${i}`, title:'⚡ SUDDEN QUEST', body:`${p.task}. You have 30 minutes. +${p.xp} XP`}); });
+ if (S.penalty && !S.penalty.done && at(18) > now) out.push({at:at(18), tag:`pen-${T.date}`, title:`${who}: Penalty Quest`, body:`You still owe ${c.pen} push-ups. Clear them before midnight or your ${S.streak}-day streak resets.`});
+ if (!T.complete && !T.rest && at(20) > now) out.push({at:at(20), tag:`streak-${T.date}`, title:who, body:S.streak ? `Your ${S.streak}-day streak ends at midnight. ${c.leftList} left.` : `Still on the board: ${c.leftList}. Let's finish today.`});
+ if (S.gate && !S.gate.cleared && gateDaysLeft() === 1 && at(19) > now) out.push({at:at(19), tag:`gate-${S.gate.week}`, title:'Weekly Gate closing', body:`The ${S.gate.boss} has ${S.gate.hp} HP left and the Gate closes at midnight.`});
+ out.push({at:at(8, 1), tag:`daily-${dstr(new Date(at(8, 1)))}`, title:'Daily Quest has arrived', body:`${who} is waiting. ${S.streak ? `Keep your ${S.streak}-day streak alive.` : 'Start a new streak today.'}`});
+ return out;
+}
+/* ---- party ---- */
+async function loadParty(force) {
+ if (!S.party || !S.cloud) return;
+ if (!force && Date.now() - partyAt < 45e3) return;
+ partyAt = Date.now();
+ try { partyData = await api(`party?code=${S.party.code}&${authQ()}`); partyErr = ''; }
+ catch (e) { partyErr = e.message; if (/not found|Not in this party/i.test(e.message)) { S.party = null; save(); } }
+ if (tab === 'status' && sview === 'party') render();
+ if (tab === 'quests') render();
+}
+async function partyAction(action, extra) {
+ if (!S.cloud) { cloudCreate(); }
+ try {
+  await syncNow();
+  const r = await api('party', {body:Object.assign({id:S.cloud.id, token:S.cloud.token, action}, extra)});
+  if (action === 'leave') { S.party = null; partyData = null; toast('You left the party.'); }
+  else { S.party = {code:r.code || extra.code, name:r.name || extra.name}; toast(action === 'create' ? 'Party created. Share the code!' : 'Joined the party!'); sfx('chime', [40]); loadParty(true); }
+  commit();
+ } catch (e) { toast(e.message); }
+}
+function partyCreatePrompt() {
+ dialog({title:'Create a party', body:'<p class="dim small">Give it a name. You\'ll get a 6-letter code to share.</p>', input:{value:`${S.name}'s Party`, placeholder:'Party name'},
+  buttons:[{label:'Create', cls:'p', fn:v => { partyAction('create', {name:(v || '').trim() || 'My Party'}); }}, {label:'Cancel'}]});
+}
+function partyJoinPrompt() {
+ dialog({title:'Join a party', body:'<p class="dim small">Enter the 6-letter party code.</p>', input:{value:'', placeholder:'ABC123'},
+  buttons:[{label:'Join', cls:'p', fn:v => { const code = (v || '').trim().toUpperCase(); if (!/^[A-Z2-9]{6}$/.test(code)) { toast('Party codes are 6 letters and numbers.'); return false; } partyAction('join', {code}); }}, {label:'Cancel'}]});
+}
+const partyToday = () => partyData ? partyData.members.filter(m => m.day === dstr() && m.cleared).length : 0;
+function vParty() {
+ if (!cloudAvail()) return `<section class="panel wide"><h2>PARTY</h2><p class="dim small">Party mode runs on the Vercel version of Ascend.</p></section>`;
+ if (!S.party) return `<section class="panel wide"><h2>PARTY</h2><p>Train with family or friends. See who cleared today, compare ranks and streaks, and stack your damage on the Weekly Gate together.</p>
+  <div class="btns"><button class="b p" data-a="pcreate">Create a party</button><button class="b" data-a="pjoin">Join with a code</button></div>
+  <p class="dim small" style="margin-top:10px">This turns on cloud save, so your party can see your progress.</p></section>`;
+ const P = partyData, wk = weekKey();
+ const list = P ? [...P.members].sort((a, b) => b.rank - a.rank || b.level - a.level) : [];
+ const dmg = list.filter(m => m.gateWeek === wk).reduce((a, m) => a + m.gateDmg, 0);
+ return `<section class="panel wide"><div class="qtop"><h2>${esc(S.party.name || 'PARTY')}</h2><span class="dim small">Code <b style="color:var(--c1);letter-spacing:.12em">${S.party.code}</b></span></div>
+  ${P ? `<p class="dim small">${partyToday()} of ${list.length} cleared today · ${dmg} Gate damage this week together</p>
+  <div class="plist">${list.map(m => `<div class="pm ${m.me ? 'me' : ''}"><div class="pav" style="border-color:${AURA[RANKS[m.rank]]}">${m.char ? `<img src="${charSrc('neutral', m.char)}" alt="">` : ''}</div>
+   <div class="pinfo"><b>${esc(m.name)}${m.me ? ' <span class="dim small">(you)</span>' : ''}</b><span class="dim small">${RANKS[m.rank]}-Rank · Lv ${m.level} · ${m.streak}-day streak</span></div>
+   <span class="pst ${m.day === dstr() && m.cleared ? 'ok' : ''}">${m.day === dstr() && m.cleared ? '✓ Cleared' : 'Not yet'}</span></div>`).join('')}</div>` : `<p class="dim small">${partyErr ? esc(partyErr) : 'Loading your party…'}</p>`}
+  <div class="btns"><button class="b p" data-a="pinvite">Copy invite</button><button class="b" data-a="prefresh">Refresh</button><button class="b r" data-a="pleave">Leave</button></div></section>`;
+}
+
 /* ================= daily flow ================= */
 const lateNow = () => new Date().getHours() >= 18 && !S.today.complete;
 function arrival(msgs) {
@@ -1320,6 +1475,20 @@ document.addEventListener('click', e => {
   case 'vnchoice': { const c = CL.choices[+el.dataset.i]; CL.choices = []; if (c) c.fn(); commit(); return; }
   case 'sqdone': suddenDone(); break;
   case 'shield': shieldPrompt(); return;
+  case 'cloudon': cloudCreate(); commit(); syncNow(true); return;
+  case 'cloudlink': linkPrompt(); return;
+  case 'cloudsync': syncNow(true); return;
+  case 'copycode': copyText(`${S.cloud.id}-${S.cloud.token}`, 'Sync code copied. Keep it private.'); return;
+  case 'cloudoff':
+   dialog({title:'Turn off cloud save?', body:'<p>This device stops syncing. Your cloud copy stays saved, so you can link it again with your sync code.</p><p class="dim small">Copy your sync code first if you might want it later.</p>',
+    buttons:[{label:'Turn off', cls:'r', fn:() => { if (S.notify) disableNotify(); S.cloud = null; S.party = null; partyData = null; commit(); }}, {label:'Cancel', cls:'p'}]}); return;
+  case 'tnotify': if (S.notify) disableNotify(); else enableNotify(); return;
+  case 'pcreate': partyCreatePrompt(); return;
+  case 'pjoin': partyJoinPrompt(); return;
+  case 'prefresh': loadParty(true); return;
+  case 'pinvite': copyText(`Join my party on Ascend! Open ${location.origin}${location.pathname} → Status → Party → Join, and enter code ${S.party.code}`, 'Invite copied. Send it to your party!'); return;
+  case 'pleave': dialog({title:'Leave the party?', body:`<p>You can rejoin later with code ${S.party.code}.</p>`, buttons:[{label:'Leave', cls:'r', fn:() => { partyAction('leave', {code:S.party.code}); }}, {label:'Cancel', cls:'p'}]}); return;
+  case 'goparty': tab = 'status'; sview = 'party'; window.scrollTo(0, 0); break;
   case 'ptopen': openTest(); return;
   case 'ptwatch': toggleWatch(); return;
   case 'ptsave': saveTest(); commit(); return;
@@ -1476,7 +1645,7 @@ var splashOn = true;
   bar.style.width = '100%'; msg.textContent = steps[steps.length - 1];
   setTimeout(() => {
    sp.classList.add('out'); $('main').classList.add('enter'); $('.top').classList.add('enter');
-   setTimeout(() => { sp.remove(); splashOn = false; startApp(); }, reduced ? 200 : 650);
+   setTimeout(() => { sp.remove(); splashOn = false; startApp(); cloudPull().then(() => loadParty(true)); }, reduced ? 200 : 650);
   }, reduced ? 100 : 380);
  };
  Promise.race([ready, new Promise(r => setTimeout(r, MAX))]).then(() => setTimeout(finish, Math.max(0, MIN - (Date.now() - t0))));

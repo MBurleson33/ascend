@@ -27,3 +27,24 @@ python3 tools/build_sw.py
 ```
 
 Installed copies show an "Update ready" prompt the next time they open.
+
+## Cloud features (Vercel)
+
+Cloud save, push notifications and party mode run as serverless functions in `api/`, backed by Upstash Redis. GitHub Pages can't run them, so deploy the repo on Vercel and use the Vercel URL.
+
+1. **Import the repo on Vercel** (Add New → Project → `MBurleson33/ascend`). No build settings needed.
+2. **Connect the database:** Storage → connect your existing Upstash Redis database to this project. Vercel adds the connection env vars automatically (`KV_REST_API_URL`/`KV_REST_API_TOKEN` or `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`; both work). All keys are prefixed `ascend:`, so it can share a database with other projects.
+3. **Add env vars** (Settings → Environment Variables):
+   - `CRON_SECRET`: any long random string
+   - `VAPID_SUBJECT`: `mailto:you@example.com` (optional)
+   - VAPID keys are generated automatically on first use and stored in the database. To manage them yourself, set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`.
+4. **Redeploy**, then open the Vercel URL and add it to your Home Screen.
+5. **Turn on frequent notification checks:** Vercel's free cron only runs once a day, so `.github/workflows/notify.yml` pings `/api/tick` every 10 minutes. In GitHub → Settings → Secrets and variables → Actions, add:
+   - Variable `ASCEND_URL` = your Vercel URL (no trailing slash)
+   - Secret `CRON_SECRET` = same value as in Vercel
+
+### Endpoints
+- `GET/POST /api/save`: cloud save, authenticated by an 8-character ID and a random token (stored hashed)
+- `GET/POST/DELETE /api/push`: VAPID public key and push subscriptions
+- `GET /api/tick`: sends due notifications (protected by `CRON_SECRET`)
+- `GET/POST /api/party`: create, join, leave, and view a party (up to 8 players)

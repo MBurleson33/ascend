@@ -1,0 +1,15 @@
+# Wakes the Ascend notification sender every 10 minutes (GitHub may delay runs a few minutes).
+# Setup: repo Settings → Secrets and variables → Actions:
+#   Variable  ASCEND_URL   = your Vercel URL, e.g. https://ascend-yourname.vercel.app
+#   Secret    CRON_SECRET  = the same value you set as CRON_SECRET in Vercel
+name: Ascend notifications
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    if: ${{ vars.ASCEND_URL != '' }}
+    steps:
+      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ vars.ASCEND_URL }}/api/tick"

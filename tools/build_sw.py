@@ -21,6 +21,7 @@ self.addEventListener('fetch', e => {{
     e.respondWith(fetch(r).then(res => {{ const cp = res.clone(); caches.open(V).then(c => c.put('./index.html', cp)); return res; }}).catch(() => caches.match('./index.html')));
     return;
   }}
+  if (u.origin === location.origin && u.pathname.includes('/api/')) return; // server calls always go to the network
   if (u.origin === location.origin) {{
     e.respondWith(caches.match(r, {{ignoreSearch: true}}).then(hit => hit || fetch(r).then(res => {{ if (res.ok) {{ const cp = res.clone(); caches.open(V).then(c => c.put(r, cp)); }} return res; }})));
     return;
@@ -31,6 +32,18 @@ self.addEventListener('fetch', e => {{
       return hit || net;
     }})));
   }}
+}});
+self.addEventListener('push', e => {{
+  let d = {{}};
+  try {{ d = e.data.json(); }} catch (x) {{ d = {{title: 'Ascend', body: e.data ? e.data.text() : ''}}; }}
+  e.waitUntil(self.registration.showNotification(d.title || 'Ascend', {{body: d.body || '', tag: d.tag, icon: 'icons/icon-192.png', badge: 'icons/favicon-64.png', data: {{url: d.url || './'}}}}));
+}});
+self.addEventListener('notificationclick', e => {{
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({{type: 'window', includeUncontrolled: true}}).then(ws => {{
+    for (const w of ws) if ('focus' in w) return w.focus();
+    return self.clients.openWindow((e.notification.data && e.notification.data.url) || './');
+  }}));
 }});
 """
 open('sw.js', 'w').write(sw)
