@@ -1255,7 +1255,10 @@ Object.assign(EXPR, {gateClear:'happy', restDay:'smile', shieldBack:'happy', pow
 
 /* ================= cloud: sync, notifications, party ================= */
 const API = 'api';
-const cloudAvail = () => location.protocol.startsWith('http') && !location.hostname.endsWith('github.io');
+var cloudReady = false;
+const cloudAvail = () => cloudReady;
+// Cloud features exist only where the API is deployed (Vercel). Ask it once at startup.
+const cloudProbe = location.protocol.startsWith('http') ? fetch('api/push', {cache:'no-store'}).then(r => r.ok ? r.json() : null).then(j => { cloudReady = !!(j && j.publicKey); }).catch(() => {}) : Promise.resolve();
 const rnd = (n, abc) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, b => abc[b % abc.length]).join(''); };
 var syncT = null, syncing = false, partyData = null, partyAt = 0, partyErr = '';
 async function api(path, opts) {
@@ -1645,7 +1648,7 @@ var splashOn = true;
   bar.style.width = '100%'; msg.textContent = steps[steps.length - 1];
   setTimeout(() => {
    sp.classList.add('out'); $('main').classList.add('enter'); $('.top').classList.add('enter');
-   setTimeout(() => { sp.remove(); splashOn = false; startApp(); cloudPull().then(() => loadParty(true)); }, reduced ? 200 : 650);
+   setTimeout(() => { sp.remove(); splashOn = false; startApp(); cloudProbe.then(() => { if (cloudReady) { if (tab === 'log' || tab === 'status') render(); cloudPull().then(() => loadParty(true)); } }); }, reduced ? 200 : 650);
   }, reduced ? 100 : 380);
  };
  Promise.race([ready, new Promise(r => setTimeout(r, MAX))]).then(() => setTimeout(finish, Math.max(0, MIN - (Date.now() - t0))));
