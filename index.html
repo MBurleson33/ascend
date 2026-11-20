@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#04060d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ascend">
+<title>Ascend — Level Up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Oxanium:wght@500;700;800&family=Chakra+Petch:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: an anime "System" HUD plus a coach who talks to you like a visual novel.
+   IDEA: holographic heads-up display floating over a night grid.
+   PICTURE: your own drawn character with a rank aura, and the coach's dialogue box.
+   COLOUR and TYPE: void black, hologram cyan + violet, gold for rewards; Orbitron, Oxanium, Chakra Petch.
+   LAYOUT: phone column with bottom tabs; two columns on desktop. */
+:root{color-scheme:dark;--bg:#04060d;--c1:#3ef0ff;--c2:#9b6bff;--ink:#eaf6ff;--dim:#8ea3c6;--gold:#ffcf5a;--red:#ff4f6d;--ok:#4dffb5}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:16px/1.5 "Chakra Petch",system-ui,sans-serif;overflow-x:clip;min-height:100vh;padding-bottom:calc(84px + env(safe-area-inset-bottom));
+ background:radial-gradient(800px 480px at 10% -8%,rgba(155,107,255,.28),transparent 60%),radial-gradient(900px 560px at 105% 0%,rgba(62,240,255,.18),transparent 55%),
+ linear-gradient(rgba(62,240,255,.05) 1px,transparent 1px) 0 0/34px 34px,linear-gradient(90deg,rgba(62,240,255,.05) 1px,transparent 1px) 0 0/34px 34px,var(--bg);background-attachment:fixed}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:40;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 14px 8px;background:rgba(4,6,13,.8);backdrop-filter:blur(12px);border-bottom:1px solid rgba(62,240,255,.18)}
+.brand{display:flex;align-items:center;gap:10px}
+.mini{width:38px;height:38px;border-radius:50%;overflow:hidden;border:1.5px solid var(--c1);box-shadow:0 0 12px rgba(62,240,255,.5);background:#0b1430;flex:none}
+.mini svg{width:100%;height:100%;display:block}
+.logo{font:900 18px/1 Orbitron,sans-serif;letter-spacing:.14em;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.chip{font:700 12px/1 Oxanium,sans-serif;padding:7px 10px;border:1px solid rgba(62,240,255,.45);color:var(--c1);white-space:nowrap;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
+.chip.hot{border-color:rgba(255,207,90,.6);color:var(--gold)}
+main{max-width:1020px;margin:0 auto;padding:16px 14px;display:grid;gap:16px}
+@media(min-width:820px){main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}.wide{grid-column:1/-1}}
+.panel{--cut:16px;--k1:var(--c1);--k2:var(--c2);position:relative;padding:18px;border:1px solid transparent;
+ clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,var(--cut) 100%,0 calc(100% - var(--cut)));
+ background:linear-gradient(225deg,transparent 10.8px,var(--k1) 10.8px,var(--k1) 12.4px,transparent 12.4px),linear-gradient(45deg,transparent 10.8px,var(--k2) 10.8px,var(--k2) 12.4px,transparent 12.4px),
+ linear-gradient(160deg,rgba(14,24,52,.93),rgba(7,11,24,.95)) padding-box,linear-gradient(135deg,var(--k1),rgba(62,240,255,.12) 35%,rgba(155,107,255,.12) 65%,var(--k2)) border-box}
+.panel.red{--k1:var(--red);--k2:#ff9a5a}
+.panel.gold{--k1:var(--gold);--k2:#ff9a5a}
+h2{font:700 15px/1.25 Orbitron,sans-serif;letter-spacing:.06em;margin:0 0 6px;color:var(--ink)}
+.sys{font:700 11px/1.2 Oxanium,sans-serif;letter-spacing:.12em;color:var(--c1);margin:0 0 8px;text-transform:uppercase}
+.sys::before{content:"▸ ";color:var(--c2)}
+.red .sys{color:var(--red)}
+.dim{color:var(--dim)}.small{font-size:13px}
+p{margin:6px 0}
+.bar{height:10px;background:rgba(62,240,255,.1);overflow:hidden;clip-path:polygon(4px 0,100% 0,calc(100% - 4px) 100%,0 100%)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--c2),var(--c1));box-shadow:0 0 12px var(--c1);transition:width .5s}
+.bar.g i{background:linear-gradient(90deg,#1fbf8a,var(--ok))}
+.bar.r i{background:linear-gradient(90deg,#b8263f,var(--red))}
+.b{min-height:44px;padding:0 16px;border:1px solid rgba(62,240,255,.4);background:rgba(62,240,255,.07);font-weight:600;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.b:hover{background:rgba(62,240,255,.15)}
+.b.p{background:linear-gradient(100deg,var(--c2),#3e8cff 55%,var(--c1));border-color:transparent;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.b.g{border-color:rgba(255,207,90,.6);color:var(--gold);background:rgba(255,207,90,.08)}
+.b.r{border-color:rgba(255,79,109,.6);color:var(--red);background:rgba(255,79,109,.08)}
+.b:disabled{opacity:.4;cursor:default}
+.b.full{width:100%}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.qb{display:grid;grid-template-columns:repeat(auto-fit,minmax(54px,1fr))}.qb .b{padding:0 8px}
+.clear{color:var(--ok);font:700 15px Oxanium,sans-serif;margin-top:8px}
+/* coach dialogue */
+.vn{display:grid;grid-template-columns:118px minmax(0,1fr);align-items:end;padding:0 16px 0 0;min-height:160px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.vnport svg{display:block;width:150px;height:165px;margin-left:-14px}
+.vnbody{padding:16px 0 14px 4px;align-self:stretch;display:flex;flex-direction:column}
+.vnname{align-self:flex-start;font:700 12px/1 Orbitron,sans-serif;letter-spacing:.1em;color:#05060d;background:linear-gradient(90deg,var(--c1),var(--c2));padding:6px 16px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.vnrole{font-size:12px;color:var(--dim);margin:4px 0 0}
+#vnText{font-size:16px;line-height:1.45;margin:8px 0 0;flex:1;min-height:70px}
+.vnnext{align-self:flex-end;color:var(--c1);font-size:12px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.dcoach{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(62,240,255,.18);text-align:left}
+.dcoach svg{width:84px;height:92px;display:block}
+.dcoach b{font:700 12px Orbitron,sans-serif;letter-spacing:.08em;color:var(--c1)}
+/* quests */
+.quest{padding:12px 0;border-top:1px solid rgba(62,240,255,.14)}
+.quest:first-of-type{border-top:0}
+.qh{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+.qh b{font-weight:600}
+.qn{font:700 16px Oxanium,sans-serif;white-space:nowrap}
+.qn.done{color:var(--ok)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.dot{width:26px;height:26px;border:1px solid rgba(62,240,255,.45);transform:rotate(45deg) scale(.8)}
+.dot.on{background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 0 10px rgba(62,240,255,.7)}
+.ex{display:flex;align-items:center;gap:12px;min-height:46px;padding:4px 0;border-top:1px solid rgba(62,240,255,.12);cursor:pointer}
+.ex input{width:22px;height:22px;accent-color:#3ef0ff;flex:none}
+.ex.on span{color:var(--dim);text-decoration:line-through}
+.field{display:flex;gap:8px;margin-top:10px}
+.field input{flex:1;min-height:44px;font-size:16px;padding:0 12px;border:1px solid rgba(62,240,255,.4);background:rgba(2,6,16,.85)}
+/* status */
+.hero{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:14px;align-items:center}
+.hero .av svg{width:100%;height:auto;display:block}
+@media(max-width:480px){.hero{grid-template-columns:1fr;text-align:center}.hero .av{max-width:220px;margin:0 auto}.hero .rk{justify-content:center}}
+.pname{font:900 24px/1.1 Orbitron,sans-serif;letter-spacing:.04em;margin:0}
+.ttl{color:var(--gold);font-size:14px;margin:4px 0 0}
+.rk{display:flex;align-items:center;gap:10px;margin:12px 0 6px}
+.rk .lvl{font:800 clamp(44px,12vw,62px)/1 Oxanium,sans-serif;text-shadow:0 0 22px rgba(62,240,255,.7)}
+.rk .lvl small{font-size:14px;color:var(--dim);margin-right:4px}
+.rbadge{font:900 22px/1 Orbitron,sans-serif;padding:8px 12px;color:#05060d;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.radar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center}
+.radar svg{width:100%;height:auto;display:block}
+@media(max-width:480px){.radar{grid-template-columns:1fr}}
+.slist div{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid rgba(62,240,255,.12)}
+.slist b{font:800 20px Oxanium,sans-serif;color:var(--c1)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.cell{text-align:center;padding:8px 4px;background:rgba(62,240,255,.06);clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.cell b{display:block;font:700 22px/1.1 Oxanium,sans-serif}
+.cell span{font-size:12px;color:var(--dim)}
+.tlist{display:grid;gap:8px;margin-top:8px}
+.tt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid rgba(62,240,255,.2);background:none;text-align:left;width:100%;min-height:44px}
+.tt.lock{opacity:.45;cursor:default}
+.tt.eq{border-color:var(--gold);color:var(--gold)}
+.log{list-style:none;margin:8px 0 0;padding:0}
+.log li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid rgba(62,240,255,.12);font-size:14px}
+.log li b{color:var(--c1);white-space:nowrap;font-family:Oxanium,sans-serif}
+/* creator & coach picker */
+.cc{position:fixed;inset:0;z-index:28;overflow:auto;background:rgba(3,5,12,.94);backdrop-filter:blur(6px);padding:calc(14px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom))}
+.cc[hidden]{display:none}
+.ccin{max-width:900px;margin:0 auto}
+.ccgrid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start}
+.ccprev{position:sticky;top:0}
+.ccprev svg{width:100%;height:auto;display:block}
+@media(max-width:640px){.ccgrid{grid-template-columns:1fr}.ccprev{position:static;max-width:230px;margin:0 auto}}
+.opt{margin-bottom:12px}
+.opt .lab{font:700 11px Oxanium,sans-serif;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.sw{display:flex;flex-wrap:wrap;gap:8px}
+.sw button{width:40px;height:40px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px rgba(255,255,255,.2) inset}
+.sw button.on{border-color:var(--c1);box-shadow:0 0 12px var(--c1)}
+.pill button{width:auto;height:auto;border-radius:0;box-shadow:none;min-height:40px;padding:0 14px;border:1px solid rgba(62,240,255,.3);background:rgba(62,240,255,.05);clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
+.pill button.on{background:linear-gradient(100deg,var(--c2),var(--c1));color:#fff;border-color:transparent}
+.coaches{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px;margin-top:12px}
+.coachc{text-align:left;width:100%;cursor:pointer;color:inherit}
+.coachc svg{width:150px;height:165px;display:block;margin:0 auto}
+.coachc .vnname{margin-top:4px}
+.coachc.on{--k1:var(--gold);--k2:var(--gold)}
+/* nav, toasts, dialogs, timer */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(4,6,13,.94);backdrop-filter:blur(12px);border-top:1px solid rgba(62,240,255,.25);padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{background:none;border:0;min-height:60px;font:700 11px Orbitron,sans-serif;letter-spacing:.06em;color:var(--dim);display:grid;place-items:center;gap:2px;position:relative}
+.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tabs button.on{color:var(--c1);text-shadow:0 0 10px var(--c1)}
+.tabs button.on::before{content:"";position:absolute;top:0;left:25%;right:25%;height:2px;background:linear-gradient(90deg,var(--c2),var(--c1));box-shadow:0 0 10px var(--c1)}
+#toasts{position:fixed;top:calc(64px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:35;display:grid;gap:6px;width:min(92vw,420px);pointer-events:none}
+.toast{background:rgba(6,14,32,.96);border-left:3px solid var(--c1);padding:10px 14px;font-size:14px;box-shadow:0 0 18px rgba(62,240,255,.3);animation:tin .25s ease-out}
+.toast::before{content:"SYSTEM ▸ ";color:var(--c1);font:700 12px Oxanium,sans-serif;letter-spacing:.08em}
+@keyframes tin{from{opacity:0;transform:translateX(-12px)}}
+.ov{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:20px;background:rgba(2,4,10,.8);backdrop-filter:blur(4px)}
+.ov[hidden]{display:none}
+.dlg{width:min(100%,430px);max-height:88vh;overflow:auto;animation:pop .3s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{opacity:0;transform:scale(.92)}}
+.dlg h2{font-size:18px}
+.dlg textarea{width:100%;min-height:120px;font-size:13px;border:1px solid rgba(62,240,255,.4);background:rgba(2,6,16,.85);padding:10px;margin-top:8px}
+.lvup{text-align:center}
+.lvup .big{font:900 clamp(34px,10vw,48px)/1 Orbitron,sans-serif;color:var(--gold);text-shadow:0 0 26px rgba(255,207,90,.7);margin:8px 0}
+.lvup .arrow{font:700 22px Oxanium,sans-serif}
+.timer{position:fixed;inset:0;z-index:25;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:24px;text-align:center;background:radial-gradient(700px 500px at 50% 30%,rgba(62,240,255,.16),transparent 70%),var(--bg)}
+.timer[hidden]{display:none}
+.timer .ph{font:900 clamp(26px,8vw,40px)/1.05 Orbitron,sans-serif;letter-spacing:.08em;color:var(--c1);text-shadow:0 0 20px var(--c1)}
+.timer.walk .ph{color:var(--ok);text-shadow:0 0 20px rgba(77,255,181,.6)}
+.timer .clock{font:800 clamp(72px,24vw,128px)/1 Oxanium,sans-serif;font-variant-numeric:tabular-nums}
+.timer .bar{width:min(90vw,420px)}
+.aura{animation:pulse 3.2s ease-in-out infinite;transform-origin:100px 112px}
+@keyframes pulse{50%{opacity:.6;transform:scale(.95)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+ <div class="brand"><div class="mini" id="mini"></div><div class="logo">ASCEND</div></div>
+ <div class="chips" id="chips"></div>
+</header>
+<main id="view"></main>
+<nav class="tabs" aria-label="Sections">
+ <button data-tab="quests"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>QUESTS</button>
+ <button data-tab="train"><svg viewBox="0 0 24 24"><path d="M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12"/></svg>TRAIN</button>
+ <button data-tab="status"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>STATUS</button>
+ <button data-tab="log"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>LOG</button>
+</nav>
+<div id="toasts" aria-live="polite"></div>
+<div class="cc" id="cc" hidden></div>
+<div class="ov" id="ov" hidden></div>
+<div class="timer" id="timer" hidden></div>
+
+<script>
+{
+/* ================= game data ================= */
+const KEY = 'ascend.v1';
+const RANKS = ['E','D','C','B','A','S'];
+const AURA = {E:'#8fa3bd', D:'#4dffb5', C:'#3ef0ff', B:'#a77bff', A:'#ff4f6d', S:'#ffcf5a'};
+const rankOf = l => RANKS[Math.min(5, Math.floor(l / 10))];
+const QT = {E:[10,15,10], D:[20,30,15], C:[30,45,20], B:[50,60,25], A:[75,80,30], S:[100,100,40]};
+const need = l => Math.round(100 * l ** 1.5);
+const STAT_STEP = 50;
+const STATS = [
+ {k:'str', n:'STR', d:'Push-ups, workouts'},
+ {k:'agi', n:'AGI', d:'Runs, cardio'},
+ {k:'vit', n:'VIT', d:'Squats, walks'},
+ {k:'sen', n:'SEN', d:'Hydration'}
+];
+const WORKOUTS = [
+ {name:'Foundation A', ex:['Squats — 3 × 12','Incline push-ups — 3 × 8','Glute bridges — 3 × 12','Plank — 3 × 20 sec']},
+ {name:'Foundation B', ex:['Reverse lunges — 3 × 8 per leg','Knee push-ups — 3 × 10','Superman hold — 3 × 15 sec','Dead bugs — 3 × 8 per side']},
+ {name:'Foundation C', ex:['Wall sit — 3 × 30 sec','Push-ups — 3 × as many as you can','Step-ups — 3 × 10 per leg','Mountain climbers — 3 × 20']}
+];
+const rep = (n, a) => Array.from({length:n}, () => a).flat();
+const RP = [
+ {desc:'Run 1 min, walk 90 sec × 8', seg:rep(8, [['Run',60],['Walk',90]])},
+ {desc:'Run 90 sec, walk 2 min × 6', seg:rep(6, [['Run',90],['Walk',120]])},
+ {desc:'Run 90 sec, walk 90 sec, run 3 min, walk 3 min × 2', seg:rep(2, [['Run',90],['Walk',90],['Run',180],['Walk',180]])},
+ {desc:'Run 3, walk 1½, run 5, walk 2½ × 2', seg:rep(2, [['Run',180],['Walk',90],['Run',300],['Walk',150]])},
+ {desc:'Run 5 min, walk 3 min × 3', seg:rep(3, [['Run',300],['Walk',180]])},
+ {desc:'Run 8 min, walk 3 min × 2, then run 5', seg:[...rep(2, [['Run',480],['Walk',180]]), ['Run',300]]},
+ {desc:'Run 20 minutes without stopping', seg:[['Run',1200]]},
+ {desc:'Run 25 minutes without stopping', seg:[['Run',1500]]}
+].map(w => ({...w, seg:[['Warm-up walk',300], ...w.seg, ['Cool-down walk',300]]}));
+const segMin = seg => Math.round(seg.reduce((a, s) => a + s[1], 0) / 60);
+const TITLES = [
+ {id:'awake', n:'The Awakened', d:'Clear your first Daily Quest', t:s => s.totals.questDays >= 1},
+ {id:'will', n:'Iron Will', d:'Reach a 7-day streak', t:s => s.bestStreak >= 7},
+ {id:'couch', n:'Couch Escapee', d:'Finish 5 runs', t:s => s.totals.runs >= 5},
+ {id:'wander', n:'Wanderer', d:'Walk 300 minutes', t:s => s.totals.walkMin >= 300},
+ {id:'push', n:'Push-Up Initiate', d:'500 total push-ups', t:s => s.totals.pushups >= 500},
+ {id:'forge', n:'Forged', d:'Finish 20 workouts', t:s => s.totals.workouts >= 20},
+ {id:'unbreak', n:'Unbreakable', d:'Reach a 30-day streak', t:s => s.bestStreak >= 30},
+ {id:'road', n:'Road Runner', d:'Finish the 8-week run plan', t:s => s.runPlan.done},
+ {id:'rd', n:'D-Rank Hunter', d:'Reach level 10', t:s => s.level >= 10},
+ {id:'rc', n:'C-Rank Hunter', d:'Reach level 20', t:s => s.level >= 20},
+ {id:'rb', n:'B-Rank Hunter', d:'Reach level 30', t:s => s.level >= 30},
+ {id:'ra', n:'A-Rank Hunter', d:'Reach level 40', t:s => s.level >= 40},
+ {id:'rs', n:'S-Rank Hunter', d:'Reach level 50', t:s => s.level >= 50}
+];
+
+/* ================= character parts ================= */
+const SKINS = ['#ffe3cc','#f7c9a3','#e3a67b','#bd7c52','#8c5736','#5f3b25'];
+const HAIRC = ['#1e1d2c','#4b2f24','#c9d3e6','#e2463d','#ffd23f','#3ea8ff','#9b6bff','#ff6fb5','#2fd6a0','#f4f4f4'];
+const EYEC = ['#4fb3ff','#ffb03a','#33d17a','#b66bff','#e2463d','#7a5232','#3ef0ff'];
+const OUTC = ['#1c1c28','#22324f','#ff6a2b','#d8344a','#1fae84','#7a4fe0','#eeeeee','#3a3f4a'];
+const HAIRS = [['short','Short'],['spiky','Spiky'],['long','Long'],['pony','Ponytail']];
+const OUTFITS = [['hoodie','Hoodie'],['jacket','Jacket'],['tech','Tech suit']];
+const GEAR = [['none','None'],['headband','Headband'],['visor','Visor'],['glasses','Glasses'],['scar','Scar'],['earpiece','Earpiece']];
+const DEF_AV = {skin:1, hair:'short', hairColor:'#1e1d2c', eyes:'#4fb3ff', outfit:'hoodie', outfitColor:'#22324f', gear:'none'};
+
+/* ================= coaches ================= */
+const COACHES = {
+ kaida:{name:'KAIDA', role:'Tough-love senpai', tag:'Fiery and blunt. Zero excuses.',
+  av:{skin:1, hair:'pony', hairColor:'#e2463d', eyes:'#ffb03a', outfit:'jacket', outfitColor:'#1c1c28', gear:'headband'},
+  lines:{
+   greet:["Oi, {name}! Sun's up and so are your quests. Don't make me come over there.","Another day, another chance to surpass yesterday's you. Let's GO!","I believe in you. Which is exactly why I won't go easy on you."],
+   quest:["That's one down! Keep that fire burning!","See? Your body remembers how to move. Next!","Heh. Not bad, rookie."],
+   clear:["All quests cleared! THAT'S what I'm talking about, {name}!","You did it. Tomorrow you're stronger than today. That's the deal.","Hmph... I knew you had it in you. Don't let it go to your head!"],
+   penalty:["You skipped yesterday. I'm not mad. ...Okay, I'm a little mad. Penalty time!","Excuses don't level you up. Push-ups do. Move!"],
+   levelup:["LEVEL UP! Can you feel it? That power is YOURS!","Your limits just moved. Go break the new ones!"],
+   train:["Sweat is just weakness leaving the body! Great work!","Logged. Your future self is cheering right now."],
+   late:["It's getting late, {name}. The quest board doesn't clear itself!","Day's almost over. Ten minutes. That's all I'm asking. ...For now."],
+   idle:["What're you staring at? Go do some squats!","Rest is part of training. Lounging isn't.","When this gets hard, remember why you started."]}},
+ rei:{name:'REI', role:'Calm strategist', tag:'Quiet, precise, and secretly proud of you.',
+  av:{skin:0, hair:'long', hairColor:'#c9d3e6', eyes:'#3ea8ff', outfit:'tech', outfitColor:'#22324f', gear:'glasses'},
+  lines:{
+   greet:["Good morning, {name}. I've reviewed today's quests. They are entirely achievable.","Consistency beats intensity. Shall we begin?","Today's objective is simple: show up. The rest follows."],
+   quest:["Objective complete. Efficiency rising.","Clean work. Proceed to the next target.","Logged. You're ahead of projection."],
+   clear:["All objectives cleared. Your growth curve is... impressive.","Flawless. I'll admit I'm slightly proud of you.","Daily Quest complete. Rest well. Recovery is also training."],
+   penalty:["A missed day is a data point, not a verdict. Clear the penalty and we continue.","We lost momentum yesterday. Let's recover it. Calmly. Immediately."],
+   levelup:["Level threshold exceeded. You are measurably stronger than before.","Interesting. You're evolving faster than I calculated."],
+   train:["Session recorded. Every rep compounds.","Precise. This is how strength is built."],
+   late:["{name}. The day ends soon. Unfinished objectives remain.","Twenty minutes now prevents a penalty tomorrow. The math is clear."],
+   idle:["Progress is quiet until suddenly it isn't.","Hydrate. A dull blade cuts nothing.","I don't believe in luck. I believe in reps."]}},
+ bolt:{name:'BOLT', role:'Hype-man rival', tag:'Maximum energy. Maximum gains.',
+  av:{skin:3, hair:'spiky', hairColor:'#ffd23f', eyes:'#33d17a', outfit:'hoodie', outfitColor:'#ff6a2b', gear:'none'},
+  lines:{
+   greet:["YOOO {name}! New day, new quests, NEW YOU! Let's gooo!","Rise and grind, partner! The quest board is calling your name!","Today's vibe? Absolutely unstoppable. Let's prove it!"],
+   quest:["BOOM! Quest smashed!","Ayyy, look at you go! Next one!","That's the stuff! Combo meter rising!"],
+   clear:["DAILY QUEST CLEARED!! You're a legend, {name}!!","Full clear! Somebody call the guild, we've got a monster here!","Streak extended! The hype is REAL!"],
+   penalty:["Okay okay, yesterday was a miss. Comeback arc starts NOW!","Every hero has a setback episode. This is where you bounce back!"],
+   levelup:["LEVEL UP!! The power-up music is playing in my head right now!","New level unlocked! You're glowing, dude! Like, literally!"],
+   train:["Workout DONE! Gains secured!","You crushed that! I'm getting hyped just watching!"],
+   late:["Clock's ticking, {name}! Let's squeeze in a quick quest!","Final round of the day! One more push and we clear it!"],
+   idle:["Hey! Hey! Wanna do push-ups? I wanna do push-ups!","Your stats are going up and I'm SO here for it!","Don't forget water! Hydration = power!"]}}
+};
+const EXPR = {greet:'smile', quest:'happy', clear:'happy', penalty:'fierce', levelup:'happy', train:'happy', late:'fierce', idle:'smile'};
+
+/* ================= helpers ================= */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+const dstr = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dayNum = s => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = sec => { sec = Math.max(0, Math.ceil(sec)); return `${Math.floor(sec / 60)}:${pad(sec % 60)}`; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function shade(hex, p) {
+ const n = parseInt(hex.slice(1), 16), t = p < 0 ? 0 : 255, f = Math.abs(p) / 100;
+ const ch = s => Math.round(((n >> s) & 255) + (t - ((n >> s) & 255)) * f);
+ return '#' + [16, 8, 0].map(s => ch(s).toString(16).padStart(2, '0')).join('');
+}
+
+/* ================= avatar renderer ================= */
+let uidN = 0;
+const HAIR = {
+ short:{front:'M57 112 C48 66 64 32 100 30 C138 32 154 66 143 112 L137 84 C134 74 129 70 123 67 L124 88 L111 69 L105 90 L95 69 L86 91 L80 70 C72 74 66 81 63 92 Z'},
+ spiky:{front:'M56 112 L45 80 L58 82 L47 50 L70 58 L67 28 L88 44 L98 14 L110 42 L129 22 L130 52 L153 45 L142 76 L155 82 L144 112 L137 84 C135 76 130 70 124 67 L126 89 L112 69 L106 92 L96 69 L87 90 L80 69 C72 73 66 80 63 92 Z'},
+ long:{back:'M54 92 C42 140 46 190 60 218 L140 218 C154 190 158 140 146 92 C140 70 60 70 54 92 Z',
+  front:'M57 124 C47 70 62 30 100 28 C138 30 153 70 143 124 L139 88 C133 72 120 62 104 59 C111 72 115 82 118 92 C108 80 102 70 100 61 C98 70 92 80 82 92 C85 82 89 72 96 59 C81 62 68 72 61 88 Z'},
+ pony:{back:'M124 44 C168 36 186 98 166 160 C162 182 150 196 140 202 C152 170 156 120 132 72 Z',
+  front:'M57 112 C48 66 64 32 100 30 C138 32 154 66 143 112 L137 84 C134 74 129 70 123 67 L121 87 L110 68 L102 88 L94 68 L85 89 L80 70 C72 74 66 81 63 92 Z'}
+};
+function outfitSVG(a) {
+ const oc = a.outfitColor, dk = shade(oc, -28), lt = shade(oc, 18);
+ const base = `<path d="M22 220 C26 186 56 168 100 168 C144 168 174 186 178 220 Z" fill="${oc}"/><path d="M22 220 C26 190 46 176 70 171 C60 190 58 206 60 220 Z" fill="${dk}" opacity=".5"/>`;
+ if (a.outfit === 'jacket') return base + `<path d="M84 168 L100 200 L116 168 Z" fill="#14121c"/><path d="M84 168 L100 200 L74 188 Z" fill="${lt}"/><path d="M116 168 L100 200 L126 188 Z" fill="${lt}"/>
+  <path d="M100 200 L100 220" stroke="${dk}" stroke-width="2"/><path d="M38 204 L64 190" stroke="#3ef0ff" stroke-width="2.5" opacity=".8"/><path d="M162 204 L136 190" stroke="#3ef0ff" stroke-width="2.5" opacity=".8"/>`;
+ if (a.outfit === 'tech') return base + `<path d="M80 156 L80 178 L120 178 L120 156 Z" fill="${dk}"/><path d="M40 210 L70 192 L88 192 M160 210 L130 192 L112 192" stroke="#3ef0ff" stroke-width="2" fill="none"/>
+  <circle cx="100" cy="200" r="6" fill="#3ef0ff"/><circle cx="100" cy="200" r="11" fill="none" stroke="#3ef0ff" stroke-width="1.5" opacity=".5"/>`;
+ return base + `<path d="M66 172 C70 154 130 154 134 172 C124 186 76 186 66 172 Z" fill="${dk}"/><path d="M92 182 L90 206 M108 182 L110 206" stroke="#f2f2f2" stroke-width="2" stroke-linecap="round"/><circle cx="90" cy="207" r="2" fill="#f2f2f2"/><circle cx="110" cy="207" r="2" fill="#f2f2f2"/>`;
+}
+function gearSVG(a, sk) {
+ switch (a.gear) {
+  case 'headband': return `<path d="M59 76 C80 66 120 66 141 76 L141 85 C120 76 80 76 59 85 Z" fill="#d8344a"/><path d="M141 78 L163 88 L158 96 L141 85 Z" fill="#b02a3c"/><circle cx="100" cy="74" r="4" fill="#ffcf5a"/>`;
+  case 'visor': return `<path d="M60 100 C80 93 120 93 140 100 L138 116 C118 111 82 111 62 116 Z" fill="rgba(62,240,255,.35)" stroke="#3ef0ff" stroke-width="1.6"/><path d="M68 104 L132 104" stroke="#fff" stroke-width="1" opacity=".6"/>`;
+  case 'glasses': return `<rect x="69" y="98" width="27" height="20" rx="4" fill="rgba(200,230,255,.12)" stroke="#1b1726" stroke-width="2.2"/><rect x="104" y="98" width="27" height="20" rx="4" fill="rgba(200,230,255,.12)" stroke="#1b1726" stroke-width="2.2"/><path d="M96 106 L104 106" stroke="#1b1726" stroke-width="2.2"/>`;
+  case 'scar': return `<path d="M118 120 L130 132 M121 128 L126 123" stroke="${shade(sk, -38)}" stroke-width="2.2" stroke-linecap="round"/>`;
+  case 'earpiece': return `<circle cx="140" cy="106" r="6" fill="#1b1726" stroke="#3ef0ff" stroke-width="2"/><path d="M140 112 C140 124 132 130 122 132" stroke="#1b1726" stroke-width="2" fill="none"/><circle cx="121" cy="132" r="2" fill="#3ef0ff"/>`;
+ }
+ return '';
+}
+function avatarSVG(a, o = {}) {
+ a = Object.assign({}, DEF_AV, a);
+ const id = 'av' + (++uidN), sk = SKINS[a.skin] || SKINS[1], hc = a.hairColor, ex = o.expr || 'smile';
+ const hd = shade(hc, -30), hl = shade(hc, 40), line = '#1b1726', skd = shade(sk, -14), h = HAIR[a.hair] || HAIR.short;
+ const eye = x => ex === 'happy'
+  ? `<path d="M${x - 10} 111 Q${x} 99 ${x + 10} 111" stroke="${line}" stroke-width="3.6" fill="none" stroke-linecap="round"/>`
+  : `<ellipse cx="${x}" cy="108" rx="10" ry="11.5" fill="#fff"/><ellipse cx="${x}" cy="109.5" rx="7.6" ry="10" fill="url(#${id}i)"/>
+   <ellipse cx="${x}" cy="110.5" rx="3.6" ry="5.2" fill="#0d0b14"/><circle cx="${x - 2.6}" cy="104.5" r="2.8" fill="#fff"/><circle cx="${x + 3}" cy="114" r="1.3" fill="#fff"/>`;
+ const lash = (x, s) => ex === 'happy' ? '' : `<path d="M${x - 12 * s} ${ex === 'fierce' ? 101 : 104} Q${x - 2 * s} ${ex === 'fierce' ? 95 : 93} ${x + 12 * s} ${ex === 'fierce' ? 102 : 100}" stroke="${line}" stroke-width="3.6" fill="none" stroke-linecap="round"/><path d="M${x - 12 * s} ${ex === 'fierce' ? 101 : 104} l${-3 * s} -3" stroke="${line}" stroke-width="2.4" stroke-linecap="round"/>`;
+ const brow = (x, s) => ex === 'fierce' ? `M${x - 10 * s} 84 L${x + 9 * s} 92` : ex === 'happy' ? `M${x - 10 * s} 88 Q${x} 82 ${x + 10 * s} 88` : `M${x - 10 * s} 90 Q${x} 85 ${x + 10 * s} 89`;
+ const mouth = ex === 'happy' ? `<path d="M90 129 Q100 143 110 129 Z" fill="#8a2a3a"/><path d="M95 136 Q100 133 105 136 Q100 140 95 136 Z" fill="#ff8a9a"/>`
+  : ex === 'fierce' ? `<path d="M92 133 Q100 130 108 134" stroke="${shade(sk, -50)}" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M104 133 l2 3" stroke="#fff" stroke-width="1.6"/>`
+  : `<path d="M93 132 Q100 138 107 132" stroke="${shade(sk, -50)}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+ const ac = o.aura ? AURA[o.aura] : null;
+ return `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(o.label || 'Character')}">
+ <defs><linearGradient id="${id}i" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(a.eyes, -55)}"/><stop offset=".55" stop-color="${a.eyes}"/><stop offset="1" stop-color="${shade(a.eyes, 45)}"/></linearGradient>
+ ${ac ? `<radialGradient id="${id}a"><stop offset="0" stop-color="${ac}" stop-opacity=".55"/><stop offset=".6" stop-color="${ac}" stop-opacity=".16"/><stop offset="1" stop-color="${ac}" stop-opacity="0"/></radialGradient>` : ''}</defs>
+ ${ac ? `<g class="aura"><circle cx="100" cy="112" r="100" fill="url(#${id}a)"/><circle cx="100" cy="112" r="88" fill="none" stroke="${ac}" stroke-opacity=".35" stroke-dasharray="4 8"/></g>` : ''}
+ ${h.back ? `<path d="${h.back}" fill="${hd}"/>` : ''}
+ ${outfitSVG(a)}
+ <path d="M88 130 L88 172 Q100 180 112 172 L112 130 Z" fill="${sk}"/><path d="M88 138 Q100 152 112 138 L112 152 Q100 160 88 152 Z" fill="${skd}"/>
+ <ellipse cx="61" cy="106" rx="6" ry="10" fill="${skd}"/><ellipse cx="139" cy="106" rx="6" ry="10" fill="${skd}"/>
+ <path d="M62 92 C62 62 80 52 100 52 C120 52 138 62 138 92 C138 118 126 136 112 146 C106 150 94 150 88 146 C74 136 62 118 62 92 Z" fill="${sk}"/>
+ <ellipse cx="77" cy="124" rx="7" ry="3" fill="#ff7a8a" opacity=".35"/><ellipse cx="123" cy="124" rx="7" ry="3" fill="#ff7a8a" opacity=".35"/>
+ ${eye(82)}${eye(118)}${lash(82, 1)}${lash(118, -1)}
+ <path d="M100 116 L98 122 L101 122" stroke="${shade(sk, -32)}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+ ${mouth}
+ <path d="${h.front}" fill="${hc}"/>
+ <path d="M70 52 Q100 36 130 52" stroke="${hl}" stroke-width="4" fill="none" opacity=".45" stroke-linecap="round"/>
+ ${a.hair === 'pony' ? `<path d="M126 46 L136 40 L138 52 Z" fill="#d8344a"/>` : ''}
+ <path d="${brow(82, 1)}" stroke="${hd}" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="${brow(118, -1)}" stroke="${hd}" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+ ${gearSVG(a, sk)}
+ </svg>`;
+}
+const faceSVG = a => avatarSVG(a, {label:'Your character'}).replace('viewBox="0 0 200 220"', 'viewBox="48 28 104 104"');
+
+/* ================= state ================= */
+const fresh = () => ({v:1, name:'Player', level:1, xp:0, totalXp:0, streak:0, bestStreak:0,
+ cat:{str:0, agi:0, vit:0, sen:0}, totals:{pushups:0, squats:0, cardio:0, runs:0, workouts:0, walkMin:0, questDays:0},
+ titles:[], title:'', penalty:null, today:null, runPlan:{week:0, day:0, done:false}, workoutIdx:0, log:[], avatar:null, coach:null});
+let S = null;
+try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
+if (!S || S.v !== 1) S = fresh();
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const statVal = k => 10 + Math.floor(S.cat[k] / STAT_STEP);
+const coach = () => COACHES[S.coach] || COACHES.kaida;
+
+function makeQuests() {
+ const r = rankOf(S.level), [p, q, c] = QT[r], x = 15 + 5 * RANKS.indexOf(r);
+ return [
+  {id:'push', label:'Push-ups', unit:'', target:p, prog:0, cat:'str', xp:x, done:false, steps:[1,5,10]},
+  {id:'squat', label:'Squats', unit:'', target:q, prog:0, cat:'vit', xp:x, done:false, steps:[1,5,10]},
+  {id:'cardio', label:'Walk or run', unit:' min', target:c, prog:0, cat:'agi', xp:x, done:false, steps:[5,10]}
+ ];
+}
+function newDay(t) {
+ const wi = S.workoutIdx % WORKOUTS.length;
+ S.today = {date:t, quests:makeQuests(), water:0, waterDone:false, complete:false, wkIdx:wi, wk:WORKOUTS[wi].ex.map(() => false), wkDone:false, runDone:false, walkXp:0};
+}
+function rollover() {
+ const t = dstr();
+ if (S.today && S.today.date === t) return null;
+ const msgs = [];
+ if (S.today) {
+  const gap = dayNum(t) - dayNum(S.today.date);
+  if (gap > 0) {
+   if (S.penalty && !S.penalty.done && S.streak > 0) { msgs.push('Penalty Quest failed. Streak reset to 0.'); S.streak = 0; }
+   S.penalty = null;
+   const missed = (gap - 1) + (S.today.complete ? 0 : 1);
+   if (missed >= 2 && S.streak > 0) { msgs.push(`${missed} days missed. Streak reset to 0.`); S.streak = 0; }
+   else if (missed === 1 && S.streak > 0) {
+    S.penalty = {target:QT[rankOf(S.level)][0] * 2, prog:0, done:false};
+    msgs.push(`You missed yesterday's Daily Quest. Clear the Penalty Quest today or your ${S.streak}-day streak resets.`);
+   }
+  }
+ }
+ newDay(t); save();
+ return msgs;
+}
+
+/* ================= coach dialogue ================= */
+const CL = {text:'', expr:'smile', shown:0};
+let typeInt = null;
+const line = ev => pick(coach().lines[ev]).replace(/\{name\}/g, S.name);
+function say(ev, text) {
+ CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0;
+ const p = $('#vnPort'); if (p) p.innerHTML = avatarSVG(coach().av, {expr:CL.expr, label:coach().name});
+ clearInterval(typeInt);
+ typeInt = setInterval(() => {
+  CL.shown = Math.min(CL.text.length, CL.shown + 1);
+  const t = $('#vnText'); if (t) t.textContent = CL.text.slice(0, CL.shown);
+  if (CL.shown >= CL.text.length) clearInterval(typeInt);
+ }, 24);
+}
+const coachBlock = (ev, txt) => { const c = coach(); return `<div class="dcoach">${avatarSVG(c.av, {expr:EXPR[ev], label:c.name})}<div><b>${c.name}</b><p>${esc(txt || line(ev))}</p></div></div>`; };
+
+/* ================= toasts & dialogs ================= */
+function toast(msg) {
+ const el = document.createElement('div'), box = $('#toasts');
+ el.className = 'toast'; el.textContent = msg; box.appendChild(el);
+ while (box.children.length > 3) box.firstChild.remove();
+ setTimeout(() => el.remove(), 3200);
+}
+const mq = []; let mOpen = false;
+function dialog(spec) { mq.push(spec); if (!mOpen) nextDialog(); }
+function nextDialog() {
+ const ov = $('#ov'), spec = mq.shift();
+ if (!spec) { ov.hidden = true; ov.innerHTML = ''; mOpen = false; return; }
+ mOpen = true;
+ ov.innerHTML = `<div class="panel dlg ${spec.cls || ''}" role="dialog" aria-modal="true">
+  ${spec.sys !== false ? `<p class="sys">System</p>` : ''}${spec.title ? `<h2>${spec.title}</h2>` : ''}<div>${spec.body || ''}</div>
+  ${spec.input ? `<div class="field"><input id="dlgIn" maxlength="24" value="${esc(spec.input.value || '')}" placeholder="${esc(spec.input.placeholder || '')}"></div>` : ''}
+  ${spec.area ? `<textarea id="dlgArea" ${spec.area.readonly ? 'readonly' : ''} placeholder="Paste your save code here">${esc(spec.area.value || '')}</textarea>` : ''}
+  <div class="btns">${(spec.buttons || [{label:'OK', cls:'p'}]).map((b, i) => `<button class="b ${b.cls || ''}" data-i="${i}">${b.label}</button>`).join('')}</div></div>`;
+ ov.hidden = false;
+ const field = $('#dlgIn') || $('#dlgArea');
+ if (field && !(spec.area && spec.area.readonly)) setTimeout(() => field.focus(), 50);
+ ov.querySelectorAll('[data-i]').forEach(btn => btn.onclick = () => {
+  const b = (spec.buttons || [{}])[+btn.dataset.i];
+  if (b.fn && b.fn(field ? field.value : undefined) === false) return;
+  nextDialog();
+ });
+}
+
+/* ================= XP, levels, titles ================= */
+function addXp(n, cat, why) {
+ if (n <= 0) return;
+ const oldL = S.level, oldR = rankOf(S.level), oldStat = cat ? statVal(cat) : 0;
+ S.xp += n; S.totalXp += n; if (cat) S.cat[cat] += n;
+ while (S.xp >= need(S.level)) { S.xp -= need(S.level); S.level++; }
+ S.log.unshift({t:Date.now(), why, n}); S.log = S.log.slice(0, 200);
+ toast(`+${n} XP · ${why}`);
+ if (cat && statVal(cat) > oldStat) toast(`${cat.toUpperCase()} increased to ${statVal(cat)}`);
+ if (S.level > oldL) {
+  const nr = rankOf(S.level), txt = line('levelup');
+  say('levelup', txt);
+  dialog({cls:'lvup gold', body:`<div class="big">LEVEL UP</div><div class="arrow">Lv ${oldL} → Lv ${S.level}</div>
+   ${nr !== oldR ? `<p style="margin-top:12px">Rank up: <b style="color:var(--gold)">${oldR} → ${nr}</b>. Your aura changed.<br><span class="dim small">Daily Quests get harder starting tomorrow.</span></p>` : `<p class="dim small" style="margin-top:12px">${need(S.level)} XP to the next level.</p>`}
+   ${coachBlock('levelup', txt)}`, buttons:[{label:'Continue', cls:'p full'}]});
+ }
+ checkTitles();
+}
+function checkTitles() {
+ for (const t of TITLES) if (!S.titles.includes(t.id) && t.t(S)) { S.titles.push(t.id); if (!S.title) S.title = t.id; toast(`Title acquired: ${t.n}`); }
+}
+const commit = () => { save(); render(); };
+
+/* ================= actions ================= */
+function trackTotal(id, d) { if (id === 'push') S.totals.pushups += d; else if (id === 'squat') S.totals.squats += d; else if (id === 'cardio') S.totals.cardio += d; }
+function questAdd(id, amt, quiet) {
+ const q = S.today.quests.find(x => x.id === id);
+ if (!q || q.done) return;
+ const before = q.prog;
+ q.prog = Math.max(0, Math.min(q.target, q.prog + amt));
+ trackTotal(id, q.prog - before);
+ if (q.prog >= q.target) {
+  q.done = true; addXp(q.xp, q.cat, `Daily Quest: ${q.label}`);
+  if (!checkDaily() && !quiet) say('quest');
+ }
+}
+function checkDaily() {
+ const T = S.today;
+ if (T.complete || !T.quests.every(q => q.done)) return false;
+ T.complete = true; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); S.totals.questDays++;
+ const bonus = 50 + Math.min(S.streak * 5, 50), txt = line('clear');
+ addXp(bonus, null, `Daily Quest cleared · ${S.streak}-day streak`);
+ say('clear', txt);
+ dialog({title:'Daily Quest complete', body:`<p>All quests cleared. Streak: <b>${S.streak}</b> day${S.streak === 1 ? '' : 's'}.</p><p class="dim">Reward: +${bonus} XP</p>
+  ${S.penalty && !S.penalty.done ? '<p style="color:var(--red)">The Penalty Quest is still open. Clear it before midnight.</p>' : ''}${coachBlock('clear', txt)}`,
+  buttons:[{label:'Continue', cls:'p full'}]});
+ return true;
+}
+function penaltyAdd(amt) {
+ const P = S.penalty; if (!P || P.done) return;
+ const before = P.prog; P.prog = Math.max(0, Math.min(P.target, P.prog + amt)); S.totals.pushups += P.prog - before;
+ if (P.prog >= P.target) { P.done = true; toast('Penalty Quest cleared. Streak protected.'); say('quest'); }
+}
+function water() {
+ const T = S.today; if (T.water >= 8) return;
+ T.water++;
+ if (T.water >= 8 && !T.waterDone) { T.waterDone = true; addXp(15, 'sen', 'Side Quest: Hydration'); }
+}
+function workoutDone() {
+ const T = S.today; if (T.wkDone || !T.wk.every(Boolean)) return;
+ T.wkDone = true; S.workoutIdx++; S.totals.workouts++;
+ addXp(40, 'str', `Workout: ${WORKOUTS[T.wkIdx].name}`); say('train');
+}
+function runDone() {
+ const T = S.today; if (T.runDone) return;
+ const R = S.runPlan, w = RP[R.week];
+ T.runDone = true; S.totals.runs++;
+ questAdd('cardio', segMin(w.seg), true);
+ const label = `Run: Week ${R.week + 1} Day ${R.day + 1}`;
+ R.day++; if (R.day > 2) { R.day = 0; if (R.week < 7) R.week++; else R.done = true; }
+ addXp(60, 'agi', label);
+ if (!T.complete || CL.expr !== 'happy') say('train');
+}
+function walkLog(min) {
+ const T = S.today; min = Math.round(Number(min));
+ if (!min || min < 1 || min > 600) { toast('Enter minutes between 1 and 600.'); return; }
+ S.totals.walkMin += min; questAdd('cardio', min, true);
+ const xp = Math.min(min, 30 - T.walkXp); T.walkXp += Math.max(0, xp);
+ if (xp > 0) addXp(xp, 'vit', `Walk: ${min} min`); else toast(`Walk logged: ${min} min. Walk XP is maxed for today.`);
+ if (!T.complete) say('train');
+}
+
+/* ================= run timer ================= */
+let TM = null, actx = null, lock = null;
+function cue(walk) {
+ try { if (navigator.vibrate) navigator.vibrate(walk ? [150] : [200, 100, 200]); } catch (e) {}
+ try {
+  if (!actx) return;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.frequency.value = walk ? 520 : 880; o.connect(g); g.connect(actx.destination);
+  g.gain.setValueAtTime(.25, actx.currentTime); g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + .5);
+  o.start(); o.stop(actx.currentTime + .5);
+ } catch (e) {}
+}
+function startRun() {
+ const w = RP[S.runPlan.week];
+ try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) { actx = null; }
+ try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(l => lock = l).catch(() => {}); } catch (e) {}
+ TM = {seg:w.seg, i:0, left:w.seg[0][1], paused:false, last:Date.now(), total:w.seg.reduce((a, s) => a + s[1], 0)};
+ $('#timer').hidden = false; TM.int = setInterval(tick, 250); drawTimer(); cue(true);
+}
+function tick() {
+ const now = Date.now();
+ if (TM.paused) { TM.last = now; return; }
+ TM.left -= (now - TM.last) / 1000; TM.last = now;
+ while (TM.left <= 0) {
+  TM.i++;
+  if (TM.i >= TM.seg.length) { stopTimer(true); return; }
+  TM.left += TM.seg[TM.i][1]; cue(TM.seg[TM.i][0] !== 'Run');
+ }
+ drawTimer();
+}
+function drawTimer() {
+ const s = TM.seg[TM.i], nx = TM.seg[TM.i + 1];
+ const doneSec = TM.seg.slice(0, TM.i).reduce((a, x) => a + x[1], 0) + (s[1] - TM.left);
+ const el = $('#timer');
+ el.className = 'timer' + (s[0] === 'Run' ? '' : ' walk');
+ el.innerHTML = `<p class="sys">Week ${S.runPlan.week + 1} · Day ${S.runPlan.day + 1} · Interval ${TM.i + 1} of ${TM.seg.length}</p>
+  <div class="ph">${s[0].toUpperCase()}</div><div class="clock">${fmt(TM.left)}</div>
+  <p class="dim">${nx ? `Next: ${nx[0]} ${fmt(nx[1])}` : 'Last interval'}</p>
+  <div class="bar"><i style="width:${(doneSec / TM.total * 100).toFixed(1)}%"></i></div>
+  <p class="dim small">${fmt(TM.total - doneSec)} left in session</p>
+  <div class="btns" style="justify-content:center"><button class="b p" data-a="tpause">${TM.paused ? 'Resume' : 'Pause'}</button><button class="b" data-a="tskip">Skip interval</button><button class="b r" data-a="tquit">End</button></div>`;
+}
+function stopTimer(finished) {
+ clearInterval(TM.int); TM = null;
+ try { if (lock) lock.release(); } catch (e) {}
+ lock = null; $('#timer').hidden = true;
+ if (finished) { cue(false); runDone(); commit(); }
+}
+
+/* ================= creator & coach picker ================= */
+let CC = null, ccDone = null;
+function openCreator(done) { CC = Object.assign({}, DEF_AV, S.avatar || {}); ccDone = done || null; $('#cc').hidden = false; drawCreator(); }
+function drawCreator() {
+ const sw = (k, list) => `<div class="sw">${list.map(c => `<button data-a="ccset" data-k="${k}" data-v="${c}" class="${CC[k] === c ? 'on' : ''}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div>`;
+ const pills = (k, list) => `<div class="sw pill">${list.map(([v, n]) => `<button data-a="ccset" data-k="${k}" data-v="${v}" class="${CC[k] === v ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+ $('#cc').innerHTML = `<div class="ccin">
+  <div class="panel"><p class="sys">Character creation</p><h2>Design your Player</h2><p class="dim small">Your aura changes color as you rank up: E grey, D green, C cyan, B violet, A red, S gold.</p>
+  <div class="ccgrid" style="margin-top:12px">
+   <div class="ccprev">${avatarSVG(CC, {aura:rankOf(S.level), label:'Character preview'})}</div>
+   <div>
+    <div class="opt"><div class="lab">Skin</div><div class="sw">${SKINS.map((c, i) => `<button data-a="ccset" data-k="skin" data-v="${i}" class="${CC.skin === i ? 'on' : ''}" style="background:${c}" aria-label="Skin ${i + 1}"></button>`).join('')}</div></div>
+    <div class="opt"><div class="lab">Hairstyle</div>${pills('hair', HAIRS)}</div>
+    <div class="opt"><div class="lab">Hair color</div>${sw('hairColor', HAIRC)}</div>
+    <div class="opt"><div class="lab">Eyes</div>${sw('eyes', EYEC)}</div>
+    <div class="opt"><div class="lab">Outfit</div>${pills('outfit', OUTFITS)}</div>
+    <div class="opt"><div class="lab">Outfit color</div>${sw('outfitColor', OUTC)}</div>
+    <div class="opt"><div class="lab">Gear</div>${pills('gear', GEAR)}</div>
+    <div class="btns"><button class="b" data-a="ccrand">Randomize</button><button class="b p" data-a="ccsave">Confirm character</button>${ccDone ? '' : '<button class="b" data-a="ccclose">Cancel</button>'}</div>
+   </div></div></div></div>`;
+}
+let cpDone = null;
+function openCoach(done) {
+ cpDone = done || null; $('#cc').hidden = false;
+ $('#cc').innerHTML = `<div class="ccin"><div class="panel"><p class="sys">Choose your coach</p><h2>Who's training you?</h2><p class="dim small">Your coach talks to you every day and reacts to what you do. You can switch any time from Status.</p>
+  <div class="coaches">${Object.entries(COACHES).map(([id, c]) => `<button class="panel coachc ${S.coach === id ? 'on' : ''}" data-a="pickcoach" data-id="${id}">
+   ${avatarSVG(c.av, {expr:'smile', label:c.name})}<div class="vnname">${c.name}</div><p class="vnrole">${c.role}</p><p class="small">${c.tag}</p><p class="small dim">“${esc(c.lines.greet[0].replace(/\{name\}/g, S.name))}”</p></button>`).join('')}</div>
+  ${cpDone ? '' : '<div class="btns"><button class="b" data-a="ccclose">Cancel</button></div>'}</div></div>`;
+}
+const closeCC = () => { $('#cc').hidden = true; $('#cc').innerHTML = ''; };
+
+/* ================= rendering ================= */
+const TABS = ['quests','train','status','log'];
+let tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'quests';
+function render() {
+ const r = rankOf(S.level);
+ $('#mini').innerHTML = faceSVG(S.avatar || DEF_AV);
+ $('#chips').innerHTML = `<span class="chip">LV ${S.level} · ${r}-RANK</span><span class="chip ${S.streak ? 'hot' : ''}">STREAK ${S.streak}</span>`;
+ document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+ $('#view').innerHTML = ({quests:vQuests, train:vTrain, status:vStatus, log:vLog})[tab]();
+}
+function vCoach() {
+ const c = coach();
+ return `<section class="panel vn wide" data-a="coachtap" aria-label="Coach dialogue, tap for more">
+  <div class="vnport" id="vnPort">${avatarSVG(c.av, {expr:CL.expr, label:c.name})}</div>
+  <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${esc(CL.text.slice(0, CL.shown))}</p><span class="vnnext">▼ tap</span></div></section>`;
+}
+function vQuests() {
+ const T = S.today, P = S.penalty;
+ const qrow = q => `<div class="quest"><div class="qh"><b>${q.label}</b><span class="qn ${q.done ? 'done' : ''}">${q.prog} / ${q.target}${q.unit}</span></div>
+  <div class="bar ${q.done ? 'g' : ''}"><i style="width:${q.prog / q.target * 100}%"></i></div>
+  ${q.done ? '' : `<div class="btns qb"><button class="b" data-a="qminus" data-id="${q.id}" aria-label="Remove ${q.steps[0]}">−${q.steps[0]}</button>${q.steps.map(s => `<button class="b" data-a="qadd" data-id="${q.id}" data-n="${s}">+${s}</button>`).join('')}<button class="b p" data-a="qfill" data-id="${q.id}">Done</button></div>`}</div>`;
+ return `${vCoach()}
+ ${P && !P.done ? `<section class="panel red wide"><p class="sys">Penalty Quest</p><h2>PUSH-UPS ×${P.target}</h2>
+  <p class="dim small">You missed a day. Clear this before midnight or your ${S.streak}-day streak resets. No XP.</p>
+  <div class="qh" style="margin-top:8px"><span></span><span class="qn">${P.prog} / ${P.target}</span></div><div class="bar r"><i style="width:${P.prog / P.target * 100}%"></i></div>
+  <div class="btns"><button class="b" data-a="padd" data-n="5">+5</button><button class="b" data-a="padd" data-n="10">+10</button><button class="b r" data-a="padd" data-n="${P.target}">Done</button></div></section>` : ''}
+ <section class="panel wide"><p class="sys">Daily Quest has arrived</p><h2>PREPARE TO BECOME STRONGER</h2>
+  <p class="dim small">${rankOf(S.level)}-Rank targets · resets at midnight · runs and walks from Train count toward cardio</p>
+  ${T.quests.map(qrow).join('')}
+  ${T.complete ? `<div class="clear">Daily Quest cleared · +${50 + Math.min(S.streak * 5, 50)} XP</div>` : `<p class="dim small" style="margin-top:10px">Clear all three: +${50 + Math.min((S.streak + 1) * 5, 50)} XP bonus and +1 streak.</p>`}</section>
+ <section class="panel"><p class="sys">Side Quest</p><h2>HYDRATION</h2><p class="dim small">Drink 8 glasses of water. +15 XP to SEN.</p>
+  <div class="dots">${Array.from({length:8}, (_, i) => `<span class="dot ${i < T.water ? 'on' : ''}"></span>`).join('')}</div>
+  ${T.waterDone ? '<div class="clear">Side Quest cleared</div>' : '<button class="b" data-a="water">+1 glass</button>'}</section>
+ <section class="panel"><p class="sys">Bonus XP today</p><h2>EXTRA TRAINING</h2>
+  <p>${T.wkDone ? '✓' : '○'} Workout · +40 XP</p><p>${T.runDone ? '✓' : '○'} Run plan session · +60 XP</p><p>${T.walkXp >= 30 ? '✓' : '○'} Walk · up to +30 XP (${T.walkXp} earned)</p>
+  <button class="b full" data-a="go" data-t="train" style="margin-top:8px">Go to Train</button></section>`;
+}
+function vTrain() {
+ const T = S.today, W = WORKOUTS[T.wkIdx], R = S.runPlan, w = RP[R.week];
+ return `<section class="panel"><p class="sys">Workout · +40 XP · STR</p><h2>${W.name.toUpperCase()}</h2>
+  <p class="dim small">Rotates A → B → C each time you finish one. Rest about 60 seconds between sets.</p>
+  <div style="margin-top:8px">${W.ex.map((e, i) => `<label class="ex ${T.wk[i] ? 'on' : ''}"><input type="checkbox" data-a="wk" data-i="${i}" ${T.wk[i] ? 'checked' : ''} ${T.wkDone ? 'disabled' : ''}><span>${e}</span></label>`).join('')}</div>
+  ${T.wkDone ? '<div class="clear">Workout complete</div>' : `<button class="b p full" data-a="wkdone" ${T.wk.every(Boolean) ? '' : 'disabled'} style="margin-top:10px">Complete workout</button>`}</section>
+ <section class="panel"><p class="sys">Run plan · +60 XP · AGI</p><h2>${R.done ? 'PLAN COMPLETE · REPEAT WEEK 8' : `WEEK ${R.week + 1} · DAY ${R.day + 1}`}</h2>
+  <p>${w.desc}</p><p class="dim small">5-min warm-up walk and 5-min cool-down included · ${segMin(w.seg)} min total · counts toward the cardio quest.</p>
+  <div class="bar" style="margin-top:8px"><i style="width:${((R.week * 3 + R.day) / 24 * 100).toFixed(1)}%"></i></div><p class="dim small">${R.week * 3 + R.day} of 24 sessions</p>
+  ${T.runDone ? '<div class="clear">Today\'s run is done</div>' : `<div class="btns"><button class="b p" data-a="run">Start interval timer</button><button class="b" data-a="runmanual">Log without timer</button></div>`}
+  ${R.done ? '<button class="b g" data-a="runreset" style="margin-top:8px">Restart plan at Week 1</button>' : ''}</section>
+ <section class="panel"><p class="sys">Walk · 1 XP per minute (max 30/day) · VIT</p><h2>LOG A WALK</h2>
+  <form class="field" data-f="walk"><input id="walkMin" type="number" inputmode="numeric" min="1" max="600" placeholder="Minutes walked"><button class="b p">Log</button></form>
+  <p class="dim small">Today: ${T.walkXp} / 30 walk XP</p></section>`;
+}
+function radarSVG() {
+ const vals = STATS.map(s => statVal(s.k)), mx = Math.max(20, ...vals) + 5, cx = 150, cy = 122, R = 76;
+ const pt = (i, r) => { const a = -Math.PI / 2 + i * Math.PI / 2; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; };
+ const poly = f => STATS.map((_, i) => pt(i, typeof f === 'function' ? f(i) : f).map(n => n.toFixed(1)).join(',')).join(' ');
+ const lab = [[cx, cy - R - 14, 'middle'], [cx + R + 12, cy + 5, 'start'], [cx, cy + R + 24, 'middle'], [cx - R - 12, cy + 5, 'end']];
+ return `<svg viewBox="0 0 300 250" role="img" aria-label="Stat radar">
+  ${[1 / 3, 2 / 3, 1].map(f => `<polygon points="${poly(R * f)}" fill="none" stroke="rgba(62,240,255,.22)"/>`).join('')}
+  ${STATS.map((_, i) => { const [x, y] = pt(i, R); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(62,240,255,.18)"/>`; }).join('')}
+  <polygon points="${poly(i => R * vals[i] / mx)}" fill="rgba(62,240,255,.22)" stroke="#3ef0ff" stroke-width="2"/>
+  ${STATS.map((_, i) => { const [x, y] = pt(i, R * vals[i] / mx); return `<circle cx="${x}" cy="${y}" r="4" fill="#9b6bff" stroke="#fff"/>`; }).join('')}
+  ${STATS.map((s, i) => `<text x="${lab[i][0]}" y="${lab[i][1]}" text-anchor="${lab[i][2]}" fill="#eaf6ff" font-family="Oxanium, sans-serif" font-weight="700" font-size="14">${s.n} <tspan fill="#3ef0ff">${vals[i]}</tspan></text>`).join('')}</svg>`;
+}
+function vStatus() {
+ const r = rankOf(S.level), t = TITLES.find(x => x.id === S.title), pct = S.xp / need(S.level) * 100, c = coach();
+ return `<section class="panel wide"><p class="sys">Status window</p>
+  <div class="hero"><div class="av">${avatarSVG(S.avatar || DEF_AV, {aura:r, label:'Your character'})}</div>
+   <div><p class="pname">${esc(S.name)}</p><p class="ttl">${t ? t.n : 'No title yet'}</p>
+    <div class="rk"><span class="lvl"><small>LV</small>${S.level}</span><span class="rbadge" style="background:${AURA[r]}">${r}</span></div>
+    <div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div><p class="dim small">${S.xp} / ${need(S.level)} XP to level ${S.level + 1} · ${S.totalXp} XP total</p>
+    <div class="btns"><button class="b" data-a="editav">Edit character</button><button class="b" data-a="rename">Rename</button><button class="b" data-a="editcoach">Coach: ${c.name}</button></div></div></div></section>
+ <section class="panel"><h2>STATS</h2><div class="radar">${radarSVG()}<div class="slist">${STATS.map(s => `<div><span>${s.n}<br><span class="dim small">${s.d}</span></span><b>${statVal(s.k)}</b></div>`).join('')}</div></div>
+  <p class="dim small">+1 for every ${STAT_STEP} XP earned in that stat.</p></section>
+ <section class="panel"><h2>RECORD</h2><div class="grid3">
+  ${[[S.streak,'Streak'],[S.bestStreak,'Best streak'],[S.totals.questDays,'Quest days'],[S.totals.workouts,'Workouts'],[S.totals.runs,'Runs'],[S.totals.walkMin,'Walk min'],[S.totals.pushups,'Push-ups'],[S.totals.squats,'Squats'],[S.totals.cardio,'Cardio min']].map(([v, l]) => `<div class="cell"><b>${v}</b><span>${l}</span></div>`).join('')}</div></section>
+ <section class="panel wide"><h2>TITLES</h2><p class="dim small">Tap an unlocked title to equip it.</p>
+  <div class="tlist">${TITLES.map(x => { const has = S.titles.includes(x.id); return `<button class="tt ${has ? '' : 'lock'} ${S.title === x.id ? 'eq' : ''}" ${has ? `data-a="equip" data-id="${x.id}"` : 'disabled'}><span><b>${has ? x.n : '???'}</b><br><span class="dim small">${x.d}</span></span><span class="small">${S.title === x.id ? 'Equipped' : has ? 'Equip' : 'Locked'}</span></button>`; }).join('')}</div></section>`;
+}
+function vLog() {
+ return `<section class="panel"><h2>ACTIVITY LOG</h2>
+  ${S.log.length ? `<ul class="log">${S.log.slice(0, 80).map(l => { const d = new Date(l.t); return `<li><span>${esc(l.why)}<br><span class="dim small">${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} · ${d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}</span></span><b>+${l.n}</b></li>`; }).join('')}</ul>` : '<p class="dim">Nothing yet. Clear a quest and it shows up here.</p>'}</section>
+ <section class="panel"><h2>SAVE DATA</h2><p class="dim small">Progress is saved in this browser on this device. Copy your save code now and then, so you can restore it after clearing your browser or moving to a new phone.</p>
+  <div class="btns"><button class="b" data-a="export">Copy save code</button><button class="b" data-a="import">Restore from code</button><button class="b r" data-a="reset">Reset everything</button></div></section>
+ <section class="panel wide"><h2>HOW IT WORKS</h2>
+  <p class="small">Three Daily Quests appear every day. Clear all three for bonus XP and +1 streak. If you miss a day, a Penalty Quest appears. Clear it that day or the streak resets. Missing two or more days resets the streak right away.</p>
+  <p class="small">Levels take <b>100 × level^1.5</b> XP. Every 10 levels you rank up (E → D → C → B → A → S). Your aura changes color and the quests get harder.</p></section>`;
+}
+
+/* ================= daily flow ================= */
+const lateNow = () => new Date().getHours() >= 18 && !S.today.complete;
+function arrival(msgs) {
+ const T = S.today, ev = S.penalty ? 'penalty' : lateNow() ? 'late' : 'greet', txt = line(ev);
+ say(ev, txt);
+ dialog({title:'Daily Quest has arrived', body:`${(msgs || []).map(m => `<p style="color:var(--red)">${esc(m)}</p>`).join('')}
+  <p class="dim small">${rankOf(S.level)}-Rank · Today's goals:</p>${T.quests.map(q => `<p>· ${q.label}: <b>${q.target}${q.unit}</b></p>`).join('')}
+  ${S.penalty ? `<p style="color:var(--red)">· Penalty: <b>${S.penalty.target} push-ups</b></p>` : ''}${coachBlock(ev, txt)}`,
+  buttons:[{label:'Accept', cls:'p full', fn:() => { tab = 'quests'; render(); }}]});
+}
+function setupFlow(after) { openCreator(() => openCoach(after)); }
+function onboard() {
+ dialog({title:'You have been chosen.', body:`<p>You've become a Player. Clear Daily Quests to level up, raise your stats and rank up from E to S.</p><p class="dim small">What should the System call you?</p>`,
+  input:{value:'', placeholder:'Your name'},
+  buttons:[{label:'Accept', cls:'p full', fn:v => { S.name = (v || '').trim().slice(0, 24) || 'Player'; save(); render(); setupFlow(() => arrival([])); }}]});
+}
+
+/* ================= events ================= */
+document.addEventListener('click', e => {
+ const tb = e.target.closest('[data-tab]');
+ if (tb) { tab = tb.dataset.tab; try { history.replaceState(null, '', '#' + tab); } catch (x) {} render(); window.scrollTo(0, 0); return; }
+ const el = e.target.closest('[data-a]');
+ if (!el || el.disabled) return;
+ const a = el.dataset.a, id = el.dataset.id, n = Number(el.dataset.n);
+ const qs = id && S.today.quests.find(q => q.id === id);
+ switch (a) {
+  case 'coachtap':
+   if (CL.shown < CL.text.length) { CL.shown = CL.text.length; clearInterval(typeInt); const t = $('#vnText'); if (t) t.textContent = CL.text; }
+   else say(lateNow() ? pick(['late', 'idle']) : 'idle');
+   return;
+  case 'qadd': questAdd(id, n); break;
+  case 'qminus': questAdd(id, -qs.steps[0]); break;
+  case 'qfill': questAdd(id, qs.target); break;
+  case 'padd': penaltyAdd(n); break;
+  case 'water': water(); break;
+  case 'go': tab = el.dataset.t; break;
+  case 'wk': return;
+  case 'wkdone': workoutDone(); break;
+  case 'run': startRun(); return;
+  case 'runmanual':
+   dialog({title:'Log run without timer?', body:`<p>Mark Week ${S.runPlan.week + 1} Day ${S.runPlan.day + 1} as done.</p>`, buttons:[{label:'Log it', cls:'p', fn:() => { runDone(); commit(); }}, {label:'Cancel'}]});
+   return;
+  case 'runreset':
+   dialog({title:'Restart the run plan?', body:'<p>You go back to Week 1 Day 1. Your title and XP stay.</p>', buttons:[{label:'Restart', cls:'g', fn:() => { S.runPlan = {week:0, day:0, done:false}; commit(); }}, {label:'Cancel'}]});
+   return;
+  case 'tpause': TM.paused = !TM.paused; drawTimer(); return;
+  case 'tskip': TM.left = 0; tick(); return;
+  case 'tquit':
+   TM.paused = true; drawTimer();
+   dialog({title:'End this session?', body:'<p>It won\'t count toward the run plan.</p>', buttons:[{label:'End session', cls:'r', fn:() => stopTimer(false)}, {label:'Keep going', cls:'p', fn:() => { if (TM) { TM.paused = false; drawTimer(); } }}]});
+   return;
+  case 'ccset': { const k = el.dataset.k, v = el.dataset.v; CC[k] = k === 'skin' ? Number(v) : v; drawCreator(); return; }
+  case 'ccrand':
+   CC = {skin:Math.floor(Math.random() * SKINS.length), hair:pick(HAIRS)[0], hairColor:pick(HAIRC), eyes:pick(EYEC), outfit:pick(OUTFITS)[0], outfitColor:pick(OUTC), gear:pick(GEAR)[0]};
+   drawCreator(); return;
+  case 'ccsave': { S.avatar = Object.assign({}, CC); const d = ccDone; ccDone = null; closeCC(); commit(); if (d) d(); else toast('Character updated.'); return; }
+  case 'pickcoach': {
+   S.coach = id; const d = cpDone; cpDone = null; closeCC(); commit();
+   if (d) d(); else { say('greet'); toast(`${coach().name} is now your coach.`); }
+   return;
+  }
+  case 'ccclose': closeCC(); return;
+  case 'editav': openCreator(); return;
+  case 'editcoach': openCoach(); return;
+  case 'rename':
+   dialog({title:'Rename', input:{value:S.name}, buttons:[{label:'Save', cls:'p', fn:v => { S.name = (v || '').trim().slice(0, 24) || S.name; commit(); }}, {label:'Cancel'}]});
+   return;
+  case 'equip': S.title = id; break;
+  case 'export': {
+   const code = JSON.stringify(S);
+   const show = () => dialog({title:'Your save code', body:'<p class="dim small">Select all and copy it somewhere safe, like your notes.</p>', area:{value:code, readonly:true}, buttons:[{label:'Done', cls:'p'}]});
+   try { navigator.clipboard.writeText(code).then(() => toast('Save code copied.'), show); } catch (x) { show(); }
+   return;
+  }
+  case 'import':
+   dialog({title:'Restore from code', body:'<p class="dim small">This replaces your current progress.</p>', area:{value:''},
+    buttons:[{label:'Restore', cls:'p', fn:v => {
+     try { const d = JSON.parse(v); if (!d || d.v !== 1 || !d.today) throw 0; S = d; rollover(); commit(); say('greet'); toast('Progress restored.'); }
+     catch (x) { toast('That code didn\'t work. Check you copied all of it.'); return false; }
+    }}, {label:'Cancel'}]});
+   return;
+  case 'reset':
+   dialog({title:'Reset everything?', body:'<p>Your level, stats, titles, character and log are wiped. This can\'t be undone.</p>',
+    buttons:[{label:'Reset', cls:'r', fn:() => { S = fresh(); rollover(); commit(); onboard(); }}, {label:'Cancel', cls:'p'}]});
+   return;
+ }
+ commit();
+});
+document.addEventListener('change', e => {
+ const el = e.target.closest('[data-a="wk"]'); if (!el) return;
+ S.today.wk[+el.dataset.i] = el.checked; commit();
+});
+document.addEventListener('submit', e => {
+ const f = e.target.closest('[data-f="walk"]'); if (!f) return;
+ e.preventDefault(); walkLog($('#walkMin').value); commit();
+});
+const dayCheck = () => { const m = rollover(); if (m) { render(); arrival(m); } };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) dayCheck(); });
+setInterval(dayCheck, 60000);
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (TABS.includes(h)) { tab = h; render(); } });
+
+/* ================= boot ================= */
+const firstRun = !S.today;
+const msgs = rollover();
+render();
+if (firstRun) onboard();
+else if (!S.avatar || !S.coach) setupFlow(() => arrival(msgs || []));
+else if (msgs) arrival(msgs);
+else say(lateNow() ? 'late' : S.today.complete ? 'clear' : 'greet');
+}
+</script>
+</body>
+</html>
