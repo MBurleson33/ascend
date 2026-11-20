@@ -275,39 +275,72 @@ const DEF_AV = {skin:1, hair:'short', hairColor:'#1e1d2c', eyes:'#4fb3ff', outfi
 const COACHES = {
  kaida:{img:true, name:'KAIDA', role:'Tough-love senpai', tag:'Fiery and blunt. Zero excuses.',
   av:{skin:1, hair:'pony', hairColor:'#e2463d', eyes:'#ffb03a', outfit:'jacket', outfitColor:'#1c1c28', gear:'headband'},
+  first:["So you're my new recruit, {name}. I'm Kaida. I'll be watching every rep.","Here's how it works. Every day you get three quests. Tap the buttons as you do the reps. Honest numbers only.","Clear all three and your streak grows. Skip a day and you'll owe me penalty push-ups. Got it? Good. Start with {next}."],
   lines:{
-   greet:["Oi, {name}! Sun's up and so are your quests. Don't make me come over there.","Another day, another chance to surpass yesterday's you. Let's GO!","I believe in you. Which is exactly why I won't go easy on you."],
-   quest:["That's one down! Keep that fire burning!","See? Your body remembers how to move. Next!","Heh. Not bad, rookie."],
+   greet_m:["Morning, {name}! Today's board: {leftList}. Let's knock it out early.","Up and at 'em! You've got {leftList}. Start with {next}. Go!"],
+   greet_a:["Afternoon check-in. Still on the board: {leftList}. No excuses.","Half the day's gone, {name}. {leftList} left. Let's move."],
+   greet_e:["Evening, {name}. Just {leftList} between you and a {streakNext}-day streak.","Clock's running. {leftList}. Twenty minutes and you're done. Move!"],
+   push:["Push-ups done! That's a chest of steel in the making.","That's the push-ups. Your arms will thank me. Eventually."],
+   squat:["Squats cleared! Legs of a warrior.","Squats done. Feel that burn? That's progress talking."],
+   cardio:["Cardio's in the books! Heart's pumping. Good.","Cardio done! See? Moving beats sitting every time."],
+   next:["Next up: {next}.","Now {next}. Don't you cool down on me."],
+   half:["Halfway through the {q}. Don't you dare stop now!","Half done! The second half is where it counts."],
+   status:["{leftList} left. Clear it and that's a {streakNext}-day streak.","You're {xpLeft} XP from level {nextLevel}. Clearing {leftList} gets you closer."],
    clear:["All quests cleared! THAT'S what I'm talking about, {name}!","You did it. Tomorrow you're stronger than today. That's the deal.","Hmph... I knew you had it in you. Don't let it go to your head!"],
-   penalty:["You skipped yesterday. I'm not mad. ...Okay, I'm a little mad. Penalty time!","Excuses don't level you up. Push-ups do. Move!"],
+   extra:["Board's clear, but I'm not done with you. {extra}","Daily's done! Want more XP? {extra}"],
+   done:["Everything's cleared today, extras too. Rest up. Tomorrow I push harder.","Nothing left to do today. You earned the rest. Don't waste it."],
+   penaltyRemind:["Penalty first: {pen} push-ups. Clear it or that {streak}-day streak is gone at midnight.","You owe me {pen} push-ups. Pay up before midnight."],
+   penaltyClear:["Penalty cleared. Your streak lives. Don't make me do that again."],
    levelup:["LEVEL UP! Can you feel it? That power is YOURS!","Your limits just moved. Go break the new ones!"],
    train:["Sweat is just weakness leaving the body! Great work!","Logged. Your future self is cheering right now."],
-   late:["It's getting late, {name}. The quest board doesn't clear itself!","Day's almost over. Ten minutes. That's all I'm asking. ...For now."],
+   late:["It's getting late, {name}. {leftList} won't clear itself!","Day's almost over. {next}. That's all I'm asking. ...For now."],
    idle:["What're you staring at? Go do some squats!","Rest is part of training. Lounging isn't.","When this gets hard, remember why you started."]}},
  rei:{img:true, name:'REI', role:'Calm strategist', tag:'Quiet, precise, and secretly proud of you.',
   av:{skin:0, hair:'long', hairColor:'#c9d3e6', eyes:'#3ea8ff', outfit:'tech', outfitColor:'#22324f', gear:'glasses'},
+  first:["Hello, {name}. I'm Rei. I'll be overseeing your progress.","The system is simple. Each day you receive three quests. Log your reps with the buttons as you complete them.","Clear all three to extend your streak. A missed day triggers a penalty. Begin with {next}."],
   lines:{
-   greet:["Good morning, {name}. I've reviewed today's quests. They are entirely achievable.","Consistency beats intensity. Shall we begin?","Today's objective is simple: show up. The rest follows."],
-   quest:["Objective complete. Efficiency rising.","Clean work. Proceed to the next target.","Logged. You're ahead of projection."],
+   greet_m:["Good morning, {name}. Today's objectives: {leftList}. Starting early is optimal.","Morning. You have {leftList}. I suggest beginning with {next}."],
+   greet_a:["Good afternoon. Remaining objectives: {leftList}.","Midday status: {leftList} outstanding. Very manageable."],
+   greet_e:["Good evening, {name}. {leftList} remain. Twenty minutes should suffice.","The day is closing. {leftList}. Let's finish cleanly."],
+   push:["Push-ups complete. Upper body stimulus achieved.","Push-ups logged. Efficient."],
+   squat:["Squats complete. Legs are the foundation of everything.","Squats logged. Your largest muscles thank you."],
+   cardio:["Cardio complete. Your heart is measurably stronger for it.","Cardio logged. Excellent pacing."],
+   next:["Next objective: {next}.","Proceed to {next}."],
+   half:["Fifty percent of the {q} complete. Maintain your form.","Halfway. Pace yourself."],
+   status:["Status: {leftList} remaining. Completion yields a {streakNext}-day streak.","You are {xpLeft} XP from level {nextLevel}. Remaining: {leftList}."],
    clear:["All objectives cleared. Your growth curve is... impressive.","Flawless. I'll admit I'm slightly proud of you.","Daily Quest complete. Rest well. Recovery is also training."],
-   penalty:["A missed day is a data point, not a verdict. Clear the penalty and we continue.","We lost momentum yesterday. Let's recover it. Calmly. Immediately."],
+   extra:["Daily objectives cleared. Optional: {extra}","Daily complete. If you have energy left: {extra}"],
+   done:["All objectives cleared, including extras. Recovery is now your task.","Nothing remains today. Sleep is the final rep."],
+   penaltyRemind:["Priority one: the penalty. {pen} push-ups remain. Your {streak}-day streak depends on it.","{pen} penalty push-ups outstanding. Clear them before midnight."],
+   penaltyClear:["Penalty cleared. Streak preserved. Let's not repeat that."],
    levelup:["Level threshold exceeded. You are measurably stronger than before.","Interesting. You're evolving faster than I calculated."],
    train:["Session recorded. Every rep compounds.","Precise. This is how strength is built."],
-   late:["{name}. The day ends soon. Unfinished objectives remain.","Twenty minutes now prevents a penalty tomorrow. The math is clear."],
+   late:["{name}. The day ends soon. {leftList} remain.","Twenty minutes now prevents a penalty tomorrow. Start with {next}."],
    idle:["Progress is quiet until suddenly it isn't.","Hydrate. A dull blade cuts nothing.","I don't believe in luck. I believe in reps."]}},
  bolt:{img:true, name:'BOLT', role:'Hype-man rival', tag:'Maximum energy. Maximum gains.',
   av:{skin:3, hair:'spiky', hairColor:'#ffd23f', eyes:'#33d17a', outfit:'hoodie', outfitColor:'#ff6a2b', gear:'none'},
+  first:["YO {name}! I'm Bolt, your official hype-man! Let's GOOO!","Here's the deal! Every day you get three quests! Tap the buttons as you do the reps!","Clear all three and your streak grows! Miss a day and there's a penalty! First up: {next}! Let's get it!"],
   lines:{
-   greet:["YOOO {name}! New day, new quests, NEW YOU! Let's gooo!","Rise and grind, partner! The quest board is calling your name!","Today's vibe? Absolutely unstoppable. Let's prove it!"],
-   quest:["BOOM! Quest smashed!","Ayyy, look at you go! Next one!","That's the stuff! Combo meter rising!"],
+   greet_m:["GOOD MORNING {name}!! Today's lineup: {leftList}! Let's gooo!","Rise and shine, partner! We've got {leftList}! Start with {next}!"],
+   greet_a:["Afternoon hype check! Still got {leftList}! We got this!","Yo! {leftList} left on the board. Easy work!"],
+   greet_e:["Evening grind time! {leftList} left. Quick power session?","Night's coming but we're not done! {leftList}! Let's close it out!"],
+   push:["PUSH-UPS DONE! Those arms are getting SWOLE!","Push-ups crushed! Look at you go!"],
+   squat:["SQUATS DONE! Leg day legend!","Squats smashed! Your legs are on fire, in a good way!"],
+   cardio:["CARDIO COMPLETE! Zoom zoom!","Cardio crushed! Heart's pumping, vibes are high!"],
+   next:["Next: {next}! Keep the combo going!","Combo continues: {next}!"],
+   half:["HALFWAY on the {q}! Don't stop now!","Half done! The second half is the highlight reel!"],
+   status:["Scoreboard: {leftList} left! Clear it for a {streakNext}-day streak!","{xpLeft} XP to level {nextLevel}! {leftList} gets us there faster!"],
    clear:["DAILY QUEST CLEARED!! You're a legend, {name}!!","Full clear! Somebody call the guild, we've got a monster here!","Streak extended! The hype is REAL!"],
-   penalty:["Okay okay, yesterday was a miss. Comeback arc starts NOW!","Every hero has a setback episode. This is where you bounce back!"],
+   extra:["FULL CLEAR! Bonus round? {extra}","Daily's done but the hype isn't! {extra}"],
+   done:["You did EVERYTHING today! Legend status! Rest up, champ!","Nothing left to clear! Go flex in the mirror! You earned it!"],
+   penaltyRemind:["Comeback arc! {pen} penalty push-ups to save that {streak}-day streak! Let's GO!","Penalty time! {pen} push-ups and the streak lives!"],
+   penaltyClear:["PENALTY CLEARED! Streak SAVED! Comeback complete!"],
    levelup:["LEVEL UP!! The power-up music is playing in my head right now!","New level unlocked! You're glowing, dude! Like, literally!"],
    train:["Workout DONE! Gains secured!","You crushed that! I'm getting hyped just watching!"],
-   late:["Clock's ticking, {name}! Let's squeeze in a quick quest!","Final round of the day! One more push and we clear it!"],
+   late:["Clock's ticking, {name}! {leftList} left! Quick session?","Final round of the day! {next} and we keep rolling!"],
    idle:["Hey! Hey! Wanna do push-ups? I wanna do push-ups!","Your stats are going up and I'm SO here for it!","Don't forget water! Hydration = power!"]}}
 };
-const EXPR = {greet:'smile', quest:'happy', clear:'happy', penalty:'fierce', levelup:'surprised', train:'happy', late:'fierce', idle:'smile'};
+const EXPR = {greet_m:'smile', greet_a:'smile', greet_e:'smile', push:'happy', squat:'happy', cardio:'happy', next:'smile', half:'smile', status:'smile', clear:'happy', extra:'happy', done:'happy', penaltyRemind:'fierce', penaltyClear:'happy', levelup:'surprised', train:'happy', late:'fierce', idle:'smile', first:'smile'};
 
 /* ================= helpers ================= */
 const $ = s => document.querySelector(s);
@@ -436,18 +469,49 @@ function rollover() {
 }
 
 /* ================= coach dialogue ================= */
-const CL = {text:'', expr:'smile', shown:0};
-let typeInt = null;
-const line = ev => pick(coach().lines[ev]).replace(/\{name\}/g, S.name);
+const CL = {text:'', expr:'smile', shown:0, queue:[]};
+let typeInt = null, talkN = 0;
+const QSHORT = {push:'push-ups', squat:'squats', cardio:'cardio'};
+function ctx() {
+ const T = S.today, open = T.quests.filter(q => !q.done);
+ const amt = q => q.id === 'cardio' ? `${q.target - q.prog} minutes of cardio` : `${q.target - q.prog} ${QSHORT[q.id]}`;
+ const items = open.map(amt);
+ const leftList = items.length > 1 ? items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1] : (items[0] || 'nothing');
+ const R = S.runPlan, w = RP[R.week];
+ let extra = '';
+ if (!T.runDone) extra = `Week ${R.week + 1} Day ${R.day + 1} of the run plan is ready. That's ${segMin(w.seg)} minutes for +60 XP.`;
+ else if (!T.wkDone) extra = `${WORKOUTS[T.wkIdx].name} is waiting in Train for +40 XP.`;
+ else if (!T.waterDone) extra = `You're at ${T.water} of 8 glasses of water. Finish them for +15 XP.`;
+ else if (T.walkXp < 30) extra = `A walk still earns up to ${30 - T.walkXp} XP today.`;
+ return {name:S.name, next:open[0] ? amt(open[0]) : '', leftList, xpLeft:need(S.level) - S.xp, nextLevel:S.level + 1, streak:S.streak, streakNext:S.streak + 1, pen:S.penalty ? S.penalty.target - S.penalty.prog : 0, extra};
+}
+const fill = (t, vars) => { const c = Object.assign(ctx(), vars || {}); return t.replace(/\{(\w+)\}/g, (_, k) => c[k] ?? '').replace(/^(\w)/, m => m.toUpperCase()); };
+const line = (ev, vars) => fill(pick(coach().lines[ev]), vars);
+// What the coach should be talking about right now
+function opener() {
+ if (S.penalty && !S.penalty.done) return 'penaltyRemind';
+ if (S.today.complete) return ctx().extra ? 'extra' : 'done';
+ const h = new Date().getHours(); return h < 12 ? 'greet_m' : h < 17 ? 'greet_a' : 'greet_e';
+}
+function talk() {
+ talkN++;
+ if (talkN % 2 === 0) return say(lateNow() && talkN % 4 === 0 ? 'late' : 'idle');
+ const ev = opener(); say(ev.startsWith('greet') ? 'status' : ev);
+}
+function questLine(id) { const c = ctx(); say(id, line(id) + (c.next ? ' ' + line('next') : '')); }
+function trainLine() { const T = S.today, c = ctx(); say('train', line('train') + (T.complete ? (c.extra ? ' ' + c.extra : '') : ' ' + line('next'))); }
+function sayQueue(list, ev) { say(ev, list[0]); CL.queue = list.slice(1); }
 function say(ev, text) {
+ CL.queue = [];
  CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0;
+ const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = '▼ tap';
  const p = $('#vnPort'); if (p) p.innerHTML = coachPic(CL.expr);
  clearInterval(typeInt);
  typeInt = setInterval(() => {
   CL.shown = Math.min(CL.text.length, CL.shown + 1);
   const t = $('#vnText'); if (t) t.textContent = CL.text.slice(0, CL.shown);
-  if (CL.shown >= CL.text.length) clearInterval(typeInt);
- }, 24);
+  if (CL.shown >= CL.text.length) { clearInterval(typeInt); const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = CL.queue.length ? '▼ more' : '▼ tap'; }
+ }, 22);
 }
 const coachBlock = (ev, txt) => { const c = coach(); return `<div class="dcoach">${coachPic(EXPR[ev])}<div><b>${c.name}</b><p>${esc(txt || line(ev))}</p></div></div>`; };
 
@@ -512,8 +576,8 @@ function questAdd(id, amt, quiet) {
  trackTotal(id, q.prog - before);
  if (q.prog >= q.target) {
   q.done = true; addXp(q.xp, q.cat, `Daily Quest: ${q.label}`);
-  if (!checkDaily() && !quiet) say('quest');
- }
+  if (!checkDaily() && !quiet) questLine(id);
+ } else if (!quiet && before < q.target / 2 && q.prog >= q.target / 2) say('half', line('half', {q:QSHORT[id]}));
 }
 function checkDaily() {
  const T = S.today;
@@ -530,7 +594,7 @@ function checkDaily() {
 function penaltyAdd(amt) {
  const P = S.penalty; if (!P || P.done) return;
  const before = P.prog; P.prog = Math.max(0, Math.min(P.target, P.prog + amt)); S.totals.pushups += P.prog - before;
- if (P.prog >= P.target) { P.done = true; toast('Penalty Quest cleared. Streak protected.'); say('quest'); }
+ if (P.prog >= P.target) { P.done = true; toast('Penalty Quest cleared. Streak protected.'); const c = ctx(); say('penaltyClear', line('penaltyClear') + (c.next && !S.today.complete ? ' ' + line('next') : '')); }
 }
 function water() {
  const T = S.today; if (T.water >= 8) return;
@@ -540,25 +604,27 @@ function water() {
 function workoutDone() {
  const T = S.today; if (T.wkDone || !T.wk.every(Boolean)) return;
  T.wkDone = true; S.workoutIdx++; S.totals.workouts++;
- addXp(40, 'str', `Workout: ${WORKOUTS[T.wkIdx].name}`); say('train');
+ addXp(40, 'str', `Workout: ${WORKOUTS[T.wkIdx].name}`); trainLine();
 }
 function runDone() {
  const T = S.today; if (T.runDone) return;
  const R = S.runPlan, w = RP[R.week];
  T.runDone = true; S.totals.runs++;
+ const was = T.complete;
  questAdd('cardio', segMin(w.seg), true);
  const label = `Run: Week ${R.week + 1} Day ${R.day + 1}`;
  R.day++; if (R.day > 2) { R.day = 0; if (R.week < 7) R.week++; else R.done = true; }
  addXp(60, 'agi', label);
- if (!T.complete || CL.expr !== 'happy') say('train');
+ if (was || !T.complete) trainLine();
 }
 function walkLog(min) {
  const T = S.today; min = Math.round(Number(min));
  if (!min || min < 1 || min > 600) { toast('Enter minutes between 1 and 600.'); return; }
+ const was = T.complete;
  S.totals.walkMin += min; questAdd('cardio', min, true);
  const xp = Math.min(min, 30 - T.walkXp); T.walkXp += Math.max(0, xp);
  if (xp > 0) addXp(xp, 'vit', `Walk: ${min} min`); else toast(`Walk logged: ${min} min. Walk XP is maxed for today.`);
- if (!T.complete) say('train');
+ if (was || !T.complete) trainLine();
 }
 
 /* ================= run timer ================= */
@@ -628,7 +694,7 @@ function openCoach(done) {
  cpDone = done || null; $('#cc').hidden = false;
  $('#cc').innerHTML = `<div class="ccin"><div class="panel"><p class="sys">Choose your coach</p><h2>Who's training you?</h2><p class="dim small">Your coach talks to you every day and reacts to what you do. You can switch any time from Status.</p>
   <div class="coaches">${Object.entries(COACHES).map(([id, c]) => `<button class="panel coachc ${S.coach === id ? 'on' : ''}" data-a="pickcoach" data-id="${id}">
-   ${coachPic('smile', id)}<div class="vnname">${c.name}</div><p class="vnrole">${c.role}</p><p class="small">${c.tag}</p><p class="small dim">“${esc(c.lines.greet[0].replace(/\{name\}/g, S.name))}”</p></button>`).join('')}</div>
+   ${coachPic('smile', id)}<div class="vnname">${c.name}</div><p class="vnrole">${c.role}</p><p class="small">${c.tag}</p><p class="small dim">“${esc(c.lines.greet_m[1].replace('{leftList}', 'today\'s quests').replace('{next}', 'push-ups').replace(/\{name\}/g, S.name))}”</p></button>`).join('')}</div>
   ${cpDone ? '' : '<div class="btns"><button class="b" data-a="ccclose">Cancel</button></div>'}</div></div>`;
 }
 const closeCC = () => { $('#cc').hidden = true; $('#cc').innerHTML = ''; };
@@ -647,7 +713,7 @@ function vCoach() {
  const c = coach();
  return `<section class="panel vn wide" data-a="coachtap" aria-label="Coach dialogue, tap for more">
   <div class="vnport" id="vnPort">${coachPic(CL.expr)}</div>
-  <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${esc(CL.text.slice(0, CL.shown))}</p><span class="vnnext">▼ tap</span></div></section>`;
+  <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${esc(CL.text.slice(0, CL.shown))}</p><span class="vnnext">${CL.queue.length && CL.shown >= CL.text.length ? '▼ more' : '▼ tap'}</span></div></section>`;
 }
 function vQuests() {
  const T = S.today, P = S.penalty;
@@ -725,11 +791,13 @@ function vLog() {
 /* ================= daily flow ================= */
 const lateNow = () => new Date().getHours() >= 18 && !S.today.complete;
 function arrival(msgs) {
- const T = S.today, ev = S.penalty ? 'penalty' : lateNow() ? 'late' : 'greet', txt = line(ev);
- say(ev, txt);
+ const T = S.today, ev = opener();
+ let txt;
+ if (!S.introDone) { S.introDone = true; save(); const c = coach(), list = c.first.map(t => fill(t)); txt = list[0]; sayQueue(list, 'first'); }
+ else { txt = line(ev); say(ev, txt); }
  dialog({title:'Daily Quest has arrived', body:`${(msgs || []).map(m => `<p style="color:var(--red)">${esc(m)}</p>`).join('')}
   <p class="dim small">${rankOf(S.level)}-Rank · Today's goals:</p>${T.quests.map(q => `<p>· ${q.label}: <b>${q.target}${q.unit}</b></p>`).join('')}
-  ${S.penalty ? `<p style="color:var(--red)">· Penalty: <b>${S.penalty.target} push-ups</b></p>` : ''}${coachBlock(ev, txt)}`,
+  ${S.penalty ? `<p style="color:var(--red)">· Penalty: <b>${S.penalty.target} push-ups</b></p>` : ''}${coachBlock(S.introDone && txt === CL.text && CL.queue.length ? 'first' : ev, txt)}`,
   buttons:[{label:'Accept', cls:'p full', fn:() => { tab = 'quests'; render(); }}]});
 }
 function setupFlow(after) { openCreator(() => openCoach(after)); }
@@ -750,7 +818,8 @@ document.addEventListener('click', e => {
  switch (a) {
   case 'coachtap':
    if (CL.shown < CL.text.length) { CL.shown = CL.text.length; clearInterval(typeInt); const t = $('#vnText'); if (t) t.textContent = CL.text; }
-   else say(lateNow() ? pick(['late', 'idle']) : 'idle');
+   else if (CL.queue.length) { const rest = CL.queue.slice(1), t = CL.queue[0]; say('first', t); CL.queue = rest; }
+   else talk();
    return;
   case 'qadd': questAdd(id, n); break;
   case 'qminus': questAdd(id, -qs.steps[0]); break;
@@ -776,7 +845,7 @@ document.addEventListener('click', e => {
   case 'pickchar': { S.avatar = {char:id}; const d = ccDone; ccDone = null; closeCC(); commit(); if (d) d(); else toast('Hunter selected.'); return; }
   case 'pickcoach': {
    S.coach = id; preloadCoach(); const d = cpDone; cpDone = null; closeCC(); commit();
-   if (d) d(); else { say('greet'); toast(`${coach().name} is now your coach.`); }
+   if (d) d(); else { say(opener()); toast(`${coach().name} is now your coach.`); }
    return;
   }
   case 'ccclose': closeCC(); return;
@@ -795,7 +864,7 @@ document.addEventListener('click', e => {
   case 'import':
    dialog({title:'Restore from code', body:'<p class="dim small">This replaces your current progress.</p>', area:{value:''},
     buttons:[{label:'Restore', cls:'p', fn:v => {
-     try { const d = JSON.parse(v); if (!d || d.v !== 1 || !d.today) throw 0; S = d; rollover(); commit(); say('greet'); toast('Progress restored.'); }
+     try { const d = JSON.parse(v); if (!d || d.v !== 1 || !d.today) throw 0; S = d; rollover(); commit(); say(opener()); toast('Progress restored.'); }
      catch (x) { toast('That code didn\'t work. Check you copied all of it.'); return false; }
     }}, {label:'Cancel'}]});
    return;
@@ -827,7 +896,7 @@ render();
 if (firstRun) onboard();
 else if (!S.avatar || !S.avatar.char || !S.coach) setupFlow(() => arrival(msgs || []));
 else if (msgs) arrival(msgs);
-else say(lateNow() ? 'late' : S.today.complete ? 'clear' : 'greet');
+else say(opener());
 }
 </script>
 </body>
