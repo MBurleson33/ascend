@@ -80,6 +80,28 @@ p{margin:6px 0}
 .vnch button{min-height:40px;padding:0 14px;font:600 14px 'Chakra Petch',sans-serif;color:#fff;border:1px solid var(--c1);background:rgba(62,240,255,.12);clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
 .vnch button:hover{background:rgba(62,240,255,.25)}
 .sqt{font:800 40px/1 Oxanium,sans-serif;color:var(--gold);text-shadow:0 0 16px rgba(255,207,90,.6);margin:8px 0;font-variant-numeric:tabular-nums}
+.quest[data-a]{cursor:pointer}
+.quest.on{padding:14px 12px;margin:4px -12px;background:rgba(62,240,255,.06);border-top-color:transparent}
+.quest.on+.quest{border-top-color:transparent}
+.quest.qdone b{color:var(--dim)}
+.qtop{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.bonus{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.bn{min-height:64px;border:1px solid rgba(62,240,255,.3);background:rgba(62,240,255,.06);display:grid;place-items:center;align-content:center;gap:4px;padding:6px 2px;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.bn b{font:700 12px Oxanium,sans-serif;letter-spacing:.04em}
+.bn span{font:800 16px Oxanium,sans-serif;color:var(--gold)}
+.bn.on{border-color:rgba(77,255,181,.5)}.bn.on span{color:var(--ok)}
+.alert{display:flex;justify-content:space-between;align-items:center;text-align:left;width:100%;color:inherit;cursor:pointer;padding:14px 18px}
+.alert>span:first-child{display:grid;gap:2px}.alert .sys{margin:0}.alert .arr{font:700 28px Oxanium,sans-serif;color:var(--gold)}
+.sqrow{display:flex;align-items:baseline;gap:12px}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.seg button{min-height:44px;font:700 12px Orbitron,sans-serif;letter-spacing:.06em;border:1px solid rgba(62,240,255,.3);background:rgba(62,240,255,.05);color:var(--dim);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.seg button.on{background:linear-gradient(100deg,var(--c2),var(--c1));color:#fff;border-color:transparent}
+.ttl{background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.nextt{font-size:13px;color:var(--dim);margin:6px 0 0}
+.tt .tp{display:block;height:4px;margin-top:6px;background:rgba(62,240,255,.12)}.tt .tp i{display:block;height:100%;background:var(--c1)}
+.trial{padding:12px 0;border-top:1px solid rgba(62,240,255,.14)}
+.trial.lock{opacity:.55}
+.trial.ok b{color:var(--ok)}
 .sqtask{font:700 20px/1.3 'Chakra Petch',sans-serif;margin:4px 0}
 .vnnext{align-self:flex-end;color:var(--c1);font-size:12px;animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:0}}
@@ -244,9 +266,11 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 const KEY = 'ascend.v1';
 const RANKS = ['E','D','C','B','A','S'];
 const AURA = {E:'#8fa3bd', D:'#4dffb5', C:'#3ef0ff', B:'#a77bff', A:'#ff4f6d', S:'#ffcf5a'};
-const rankOf = l => RANKS[Math.min(5, Math.floor(l / 10))];
+const rankOf = () => RANKS[Math.min(5, (S && S.rankIdx) || 0)];
+const capOf = () => ((S.rankIdx || 0) >= 5 ? Infinity : ((S.rankIdx || 0) + 1) * 10);
 const QT = {E:[10,15,10], D:[20,30,15], C:[30,45,20], B:[50,60,25], A:[75,80,30], S:[100,100,40]};
-const need = l => Math.round(100 * l ** 1.5);
+// Tuned so a steady player reaches the S-Rank cap (Lv 50) in about a year
+const need = l => 60 + 55 * l;
 const STAT_STEP = 50;
 const STATS = [
  {k:'str', n:'STR', d:'Push-ups, workouts'},
@@ -272,21 +296,37 @@ const RP = [
 ].map(w => ({...w, seg:[['Warm-up walk',300], ...w.seg, ['Cool-down walk',300]]}));
 const segMin = seg => Math.round(seg.reduce((a, s) => a + s[1], 0) / 60);
 const TITLES = [
- {id:'awake', n:'The Awakened', d:'Clear your first Daily Quest', t:s => s.totals.questDays >= 1},
- {id:'will', n:'Iron Will', d:'Reach a 7-day streak', t:s => s.bestStreak >= 7},
- {id:'couch', n:'Couch Escapee', d:'Finish 5 runs', t:s => s.totals.runs >= 5},
- {id:'wander', n:'Wanderer', d:'Walk 300 minutes', t:s => s.totals.walkMin >= 300},
- {id:'push', n:'Push-Up Initiate', d:'500 total push-ups', t:s => s.totals.pushups >= 500},
- {id:'forge', n:'Forged', d:'Finish 20 workouts', t:s => s.totals.workouts >= 20},
- {id:'quick', n:'Quick Draw', d:'Clear 10 Sudden Quests', t:s => (s.totals.sudden || 0) >= 10},
- {id:'unbreak', n:'Unbreakable', d:'Reach a 30-day streak', t:s => s.bestStreak >= 30},
- {id:'road', n:'Road Runner', d:'Finish the 8-week run plan', t:s => s.runPlan.done},
- {id:'rd', n:'D-Rank Hunter', d:'Reach level 10', t:s => s.level >= 10},
- {id:'rc', n:'C-Rank Hunter', d:'Reach level 20', t:s => s.level >= 20},
- {id:'rb', n:'B-Rank Hunter', d:'Reach level 30', t:s => s.level >= 30},
- {id:'ra', n:'A-Rank Hunter', d:'Reach level 40', t:s => s.level >= 40},
- {id:'rs', n:'S-Rank Hunter', d:'Reach level 50', t:s => s.level >= 50}
+ {id:'awake', n:'The Awakened', d:'Clear your first Daily Quest', t:s => s.totals.questDays >= 1, p:s => [s.totals.questDays, 1]},
+ {id:'will', n:'Iron Will', d:'Reach a 7-day streak', t:s => s.bestStreak >= 7, p:s => [s.bestStreak, 7]},
+ {id:'couch', n:'Couch Escapee', d:'Finish 5 runs', t:s => s.totals.runs >= 5, p:s => [s.totals.runs, 5]},
+ {id:'wander', n:'Wanderer', d:'Walk 300 minutes', t:s => s.totals.walkMin >= 300, p:s => [s.totals.walkMin, 300]},
+ {id:'push', n:'Push-Up Initiate', d:'500 total push-ups', t:s => s.totals.pushups >= 500, p:s => [s.totals.pushups, 500]},
+ {id:'forge', n:'Forged', d:'Finish 20 workouts', t:s => s.totals.workouts >= 20, p:s => [s.totals.workouts, 20]},
+ {id:'quick', n:'Quick Draw', d:'Clear 10 Sudden Quests', t:s => (s.totals.sudden || 0) >= 10, p:s => [s.totals.sudden || 0, 10]},
+ {id:'unbreak', n:'Unbreakable', d:'Reach a 30-day streak', t:s => s.bestStreak >= 30, p:s => [s.bestStreak, 30]},
+ {id:'road', n:'Road Runner', d:'Finish the 8-week run plan', t:s => s.runPlan.done, p:s => [s.runPlan.done ? 24 : s.runPlan.week * 3 + s.runPlan.day, 24]},
+ {id:'rd', n:'D-Rank Hunter', d:'Pass the D-Rank Exam', t:s => s.rankIdx >= 1, p:s => [Math.min(s.rankIdx, 1), 1]},
+ {id:'rc', n:'C-Rank Hunter', d:'Pass the C-Rank Exam', t:s => s.rankIdx >= 2, p:s => [Math.min(s.rankIdx, 2), 2]},
+ {id:'rb', n:'B-Rank Hunter', d:'Pass the B-Rank Exam', t:s => s.rankIdx >= 3, p:s => [Math.min(s.rankIdx, 3), 3]},
+ {id:'ra', n:'A-Rank Hunter', d:'Pass the A-Rank Exam', t:s => s.rankIdx >= 4, p:s => [Math.min(s.rankIdx, 4), 4]},
+ {id:'rs', n:'S-Rank Hunter', d:'Pass the S-Rank Exam', t:s => s.rankIdx >= 5, p:s => [Math.min(s.rankIdx, 5), 5]}
 ];
+// Rank-Up Exams, keyed by the rank you're testing into
+const EXAMS = {
+ 1:[{t:'Run 5 minutes without stopping', how:'Use the timer. Any pace counts, as long as you keep running.', timer:[['Run',300]]},
+    {t:'15 push-ups in one set', how:'Full push-ups, chest close to the floor.'},
+    {t:'Hold a plank for 30 seconds', how:'Forearms down, body in a straight line.', timer:[['Plank',30]]}],
+ 2:[{t:'Run 1 mile without stopping', how:'Use a GPS running app or 4 laps of a track.'},
+    {t:'25 push-ups in one set', how:'Full push-ups, no resting on the floor.'},
+    {t:'Hold a plank for 1 minute', how:'Forearms down, body in a straight line.', timer:[['Plank',60]]}],
+ 3:[{t:'Run a 5K without stopping', how:'3.1 miles. Use a GPS running app.'},
+    {t:'35 push-ups in one set', how:''}, {t:'50 squats in one set', how:'Thighs to parallel.'},
+    {t:'Hold a plank for 2 minutes', how:'', timer:[['Plank',120]]}],
+ 4:[{t:'Run a 5K in under 30 minutes', how:'Use a GPS running app to check your time.'},
+    {t:'40 push-ups in one set', how:''}, {t:'Hold a plank for 2½ minutes', how:'', timer:[['Plank',150]]}],
+ 5:[{t:'Run a 10K without stopping', how:'6.2 miles. Use a GPS running app.'},
+    {t:'50 push-ups in one set', how:''}, {t:'Hold a plank for 3 minutes', how:'', timer:[['Plank',180]]}]
+};
 
 /* ================= character parts ================= */
 const SKINS = ['#ffe3cc','#f7c9a3','#e3a67b','#bd7c52','#8c5736','#5f3b25'];
@@ -399,6 +439,13 @@ const MORE = {
   suddenMiss:["Aw, missed that one! Next one's ours though!"], suddenSkip:["All good! I'll find you another one later!"]}
 };
 for (const k in MORE) Object.assign(COACHES[k].lines, MORE[k]);
+const EXAM_LINES = {
+ kaida:{examUnlock:["Level cap. This is it, {name}. The {rank}-Rank Exam. Prove you've earned it."], examTrial:["Trial cleared! {examLeft} to go. Don't let up now."], rankup:["{rank}-RANK! I knew it. Now don't you dare slow down."]},
+ rei:{examUnlock:["You've reached the level cap. The {rank}-Rank Exam is now available. Prepare properly."], examTrial:["Trial passed. {examLeft} remaining."], rankup:["Reassessment complete: {rank}-Rank. Your growth is undeniable."]},
+ bolt:{examUnlock:["EXAM TIME!! The {rank}-Rank Exam is UNLOCKED! Tournament arc, LET'S GO!"], examTrial:["TRIAL CLEARED! {examLeft} more and you RANK UP!"], rankup:["{rank}-RANK!!! YOU'RE A MONSTER! I'm literally crying right now!"]}
+};
+for (const k in EXAM_LINES) Object.assign(COACHES[k].lines, EXAM_LINES[k]);
+Object.assign(EXPR, {examUnlock:'fierce', examTrial:'happy', rankup:'surprised'});
 Object.assign(EXPR, {ask:'smile', moodFired:'happy', moodTired:'smile', moodSore:'smile', sudden:'surprised', suddenDone:'happy', suddenMiss:'fierce', suddenSkip:'smile'});
 const SUDDEN = [
  {t:'Stand up and do {n} jumping jacks', n:20, cat:'agi'}, {t:'Hold a plank for {n} seconds', n:30, cat:'str'},
@@ -495,12 +542,19 @@ function avatarSVG(a, o = {}) {
 const faceSVG = a => avatarSVG(a, {label:'Your character'}).replace('viewBox="0 0 200 220"', 'viewBox="48 28 104 104"');
 
 /* ================= state ================= */
-const fresh = () => ({v:1, name:'Player', level:1, xp:0, totalXp:0, streak:0, bestStreak:0,
+const fresh = () => ({v:1, curve:2, rankIdx:0, exam:null, name:'Player', level:1, xp:0, totalXp:0, streak:0, bestStreak:0,
  cat:{str:0, agi:0, vit:0, sen:0}, totals:{pushups:0, squats:0, cardio:0, runs:0, workouts:0, walkMin:0, questDays:0},
  titles:[], title:'', penalty:null, today:null, runPlan:{week:0, day:0, done:false}, workoutIdx:0, log:[], avatar:null, coach:null});
 let S = null;
 try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
 if (!S || S.v !== 1) S = fresh();
+// Migrate saves from the old XP curve: recompute level from total XP under the new curve and exam caps
+if (S.curve !== 2) {
+ S.curve = 2; S.rankIdx = 0; S.exam = null;
+ let xp = S.totalXp || 0, l = 1; while (l < 10 && xp >= need(l)) { xp -= need(l); l++; }
+ S.level = l; S.xp = xp;
+}
+if (S.rankIdx < 5 && S.level >= capOf() && !S.exam) S.exam = {to:S.rankIdx + 1, done:EXAMS[S.rankIdx + 1].map(() => false)};
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 const statVal = k => 10 + Math.floor(S.cat[k] / STAT_STEP);
 const coachId = () => COACHES[S.coach] ? S.coach : 'kaida';
@@ -553,11 +607,13 @@ function ctx() {
  const leftList = items.length > 1 ? items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1] : (items[0] || 'nothing');
  const R = S.runPlan, w = RP[R.week];
  let extra = '';
- if (!T.runDone) extra = `Week ${R.week + 1} Day ${R.day + 1} of the run plan is ready. That's ${segMin(w.seg)} minutes for +60 XP.`;
+ if (S.exam) extra = `Your ${RANKS[S.exam.to]}-Rank Exam is waiting on the Status screen.`;
+ else if (!T.runDone) extra = `Week ${R.week + 1} Day ${R.day + 1} of the run plan is ready. That's ${segMin(w.seg)} minutes for +60 XP.`;
  else if (!T.wkDone) extra = `${WORKOUTS[T.wkIdx].name} is waiting in Train for +40 XP.`;
  else if (!T.waterDone) extra = `You're at ${T.water} of 8 glasses of water. Finish them for +15 XP.`;
  else if (T.walkXp < 30) extra = `A walk still earns up to ${30 - T.walkXp} XP today.`;
- return {name:S.name, next:open[0] ? amt(open[0]) : '', leftList, xpLeft:need(S.level) - S.xp, nextLevel:S.level + 1, streak:S.streak, streakNext:S.streak + 1, pen:S.penalty ? S.penalty.target - S.penalty.prog : 0, extra};
+ const el = S.exam ? S.exam.done.filter(x => !x).length : 0;
+ return {rank:RANKS[S.exam ? S.exam.to : Math.min(5, S.rankIdx + 1)], examLeft:el === 1 ? 'one trial' : `${el} trials`, name:S.name, next:open[0] ? amt(open[0]) : '', leftList, xpLeft:need(S.level) - S.xp, nextLevel:S.level + 1, streak:S.streak, streakNext:S.streak + 1, pen:S.penalty ? S.penalty.target - S.penalty.prog : 0, extra};
 }
 const fill = (t, vars) => { const c = Object.assign(ctx(), vars || {}); return t.replace(/\{(\w+)\}/g, (_, k) => c[k] ?? '').replace(/^(\w)/, m => m.toUpperCase()); };
 const line = (ev, vars) => fill(pick(coach().lines[ev]), vars);
@@ -623,23 +679,55 @@ function nextDialog() {
 /* ================= XP, levels, titles ================= */
 function addXp(n, cat, why) {
  if (n <= 0) return;
- const oldL = S.level, oldR = rankOf(S.level), oldStat = cat ? statVal(cat) : 0;
+ const oldL = S.level, oldStat = cat ? statVal(cat) : 0, cap = capOf();
  S.xp += n; S.totalXp += n; if (cat) S.cat[cat] += n;
- while (S.xp >= need(S.level)) { S.xp -= need(S.level); S.level++; }
+ while (S.level < cap && S.xp >= need(S.level)) { S.xp -= need(S.level); S.level++; }
  S.log.unshift({t:Date.now(), why, n}); S.log = S.log.slice(0, 200);
  toast(`+${n} XP · ${why}`);
  if (cat && statVal(cat) > oldStat) toast(`${cat.toUpperCase()} increased to ${statVal(cat)}`);
  if (S.level > oldL) {
-  const nr = rankOf(S.level), txt = line('levelup');
+  const txt = line('levelup');
   say('levelup', txt);
   dialog({cls:'lvup gold', body:`${playerImg('happy', 'dpimg')}<div class="big">LEVEL UP</div><div class="arrow">Lv ${oldL} → Lv ${S.level}</div>
-   ${nr !== oldR ? `<p style="margin-top:12px">Rank up: <b style="color:var(--gold)">${oldR} → ${nr}</b>. Your aura changed.<br><span class="dim small">Daily Quests get harder starting tomorrow.</span></p>` : `<p class="dim small" style="margin-top:12px">${need(S.level)} XP to the next level.</p>`}
+   ${S.level >= cap ? `<p style="margin-top:12px">Level cap for ${rankOf()}-Rank reached.<br><span class="dim small">Pass the ${RANKS[S.rankIdx + 1]}-Rank Exam to keep leveling. Extra XP is saved.</span></p>` : `<p class="dim small" style="margin-top:12px">${need(S.level)} XP to the next level.</p>`}
    ${coachBlock('levelup', txt)}`, buttons:[{label:'Continue', cls:'p full'}]});
  }
- checkTitles();
+ checkTitles(); checkCap();
+}
+const examTrials = (to, done) => EXAMS[to].map((x, i) => `<p>${done && done[i] ? '✓' : '·'} ${x.t}</p>`).join('');
+function checkCap() {
+ if (S.rankIdx >= 5 || S.exam || S.level < capOf()) return;
+ S.exam = {to:S.rankIdx + 1, done:EXAMS[S.rankIdx + 1].map(() => false)};
+ const txt = line('examUnlock');
+ say('examUnlock', txt);
+ dialog({cls:'gold', title:`${RANKS[S.exam.to]}-RANK EXAM UNLOCKED`, body:`${playerImg('fierce', 'dpimg')}<p>You've hit the level cap for ${rankOf()}-Rank. Pass every trial to rank up. Extra XP is saved and released when you pass.</p>${examTrials(S.exam.to)}${coachBlock('examUnlock', txt)}`,
+  buttons:[{label:'View exam', cls:'p', fn:() => { tab = 'status'; sview = 'hunter'; render(); setTimeout(() => { const x = $('#exam'); if (x) x.scrollIntoView({behavior:'smooth'}); }, 50); }}, {label:'Later'}]});
+}
+function passTrial(i) {
+ const E = S.exam; if (!E || E.done[i]) return;
+ E.done[i] = true;
+ S.log.unshift({t:Date.now(), why:`Exam trial passed: ${EXAMS[E.to][i].t}`, n:0});
+ if (E.done.every(Boolean)) rankUp(); else say('examTrial', line('examTrial'));
+}
+function rankUp() {
+ const from = rankOf(); S.rankIdx = S.exam.to; S.exam = null;
+ const oldL = S.level, cap = capOf(), to = rankOf();
+ while (S.level < cap && S.xp >= need(S.level)) { S.xp -= need(S.level); S.level++; }
+ S.log.unshift({t:Date.now(), why:`Rank up: ${from} → ${to}`, n:0});
+ const txt = line('rankup', {rank:to});
+ say('rankup', txt);
+ dialog({cls:'lvup gold', body:`${playerImg('happy', 'dpimg')}<div class="big">RANK UP</div><div class="arrow">${from} → <span style="color:${AURA[to]}">${to}</span></div>
+  <p style="margin-top:12px">Your aura changed.${S.level > oldL ? ` Saved XP released: Lv ${oldL} → Lv ${S.level}.` : ''}</p><p class="dim small">${to === 'S' ? 'You passed every exam. You are an S-Rank Hunter.' : 'Daily Quests get harder starting tomorrow.'}</p>${coachBlock('rankup', txt)}`,
+  buttons:[{label:'Continue', cls:'p full'}]});
+ checkTitles(); checkCap();
 }
 function checkTitles() {
- for (const t of TITLES) if (!S.titles.includes(t.id) && t.t(S)) { S.titles.push(t.id); if (!S.title) S.title = t.id; toast(`Title acquired: ${t.n}`); }
+ for (const t of TITLES) if (!S.titles.includes(t.id) && t.t(S)) {
+  S.titles.push(t.id); const auto = !S.title; if (auto) S.title = t.id;
+  setTimeout(() => dialog({sys:false, cls:'gold lvup', body:`<p class="sys" style="color:var(--gold)">Title acquired</p><div class="big" style="font-size:clamp(26px,8vw,36px)">${t.n}</div><p class="dim">${t.d}</p>
+   <p class="dim small">${auto ? 'Equipped. It shows under your name on the Status screen.' : `Equip it to show it under your name. You have ${S.titles.length} of ${TITLES.length} titles.`}</p>`,
+   buttons:auto ? [{label:'Nice', cls:'p full'}] : [{label:'Equip now', cls:'p', fn:() => { S.title = t.id; commit(); }}, {label:'Keep current'}]}), 0);
+ }
 }
 const commit = () => { save(); render(); };
 
@@ -716,11 +804,11 @@ function cue(walk) {
   o.start(); o.stop(actx.currentTime + .5);
  } catch (e) {}
 }
-function startRun() {
- const w = RP[S.runPlan.week];
+function startRun() { const R = S.runPlan; startTimer(RP[R.week].seg, `Week ${R.week + 1} · Day ${R.day + 1}`, runDone); }
+function startTimer(seg, title, onDone, noSkip) {
  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) { actx = null; }
  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(l => lock = l).catch(() => {}); } catch (e) {}
- TM = {seg:w.seg, i:0, left:w.seg[0][1], paused:false, last:Date.now(), total:w.seg.reduce((a, s) => a + s[1], 0)};
+ TM = {seg, i:0, left:seg[0][1], paused:false, last:Date.now(), total:seg.reduce((a, s) => a + s[1], 0), title, onDone, noSkip};
  $('#timer').hidden = false; TM.int = setInterval(tick, 250); drawTimer(); cue(true);
 }
 function tick() {
@@ -739,18 +827,19 @@ function drawTimer() {
  const doneSec = TM.seg.slice(0, TM.i).reduce((a, x) => a + x[1], 0) + (s[1] - TM.left);
  const el = $('#timer');
  el.className = 'timer' + (s[0] === 'Run' ? '' : ' walk');
- el.innerHTML = `<p class="sys">Week ${S.runPlan.week + 1} · Day ${S.runPlan.day + 1} · Interval ${TM.i + 1} of ${TM.seg.length}</p>
+ el.innerHTML = `<p class="sys">${TM.title}${TM.seg.length > 1 ? ` · Interval ${TM.i + 1} of ${TM.seg.length}` : ''}</p>
   <div class="ph">${s[0].toUpperCase()}</div><div class="clock">${fmt(TM.left)}</div>
   <p class="dim">${nx ? `Next: ${nx[0]} ${fmt(nx[1])}` : 'Last interval'}</p>
   <div class="bar"><i style="width:${(doneSec / TM.total * 100).toFixed(1)}%"></i></div>
   <p class="dim small">${fmt(TM.total - doneSec)} left in session</p>
-  <div class="btns" style="justify-content:center"><button class="b p" data-a="tpause">${TM.paused ? 'Resume' : 'Pause'}</button><button class="b" data-a="tskip">Skip interval</button><button class="b r" data-a="tquit">End</button></div>`;
+  <div class="btns" style="justify-content:center"><button class="b p" data-a="tpause">${TM.paused ? 'Resume' : 'Pause'}</button>${TM.noSkip ? '' : '<button class="b" data-a="tskip">Skip interval</button>'}<button class="b r" data-a="tquit">End</button></div>`;
 }
 function stopTimer(finished) {
+ const done = TM.onDone;
  clearInterval(TM.int); TM = null;
  try { if (lock) lock.release(); } catch (e) {}
  lock = null; $('#timer').hidden = true;
- if (finished) { cue(false); runDone(); commit(); }
+ if (finished) { cue(false); done(); commit(); }
 }
 
 /* ================= creator & coach picker ================= */
@@ -792,31 +881,33 @@ function vCoach() {
   <div class="vnport" id="vnPort">${coachPic(CL.expr)}</div>
   <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${esc(CL.text.slice(0, CL.shown))}</p><div class="vnch" id="vnCh">${CL.shown >= CL.text.length ? choicesHTML() : ''}</div><span class="vnnext">${CL.choices.length ? '' : CL.queue.length && CL.shown >= CL.text.length ? '▼ more' : '▼ tap'}</span></div></section>`;
 }
+let focusQ = null, sview = 'hunter';
 function vQuests() {
- const T = S.today, P = S.penalty;
- const qrow = q => `<div class="quest"><div class="qh"><b>${q.label}</b><span class="qn ${q.done ? 'done' : ''}">${q.prog} / ${q.target}${q.unit}</span></div>
+ const T = S.today, P = S.penalty, A = activePop();
+ const f = T.quests.find(q => q.id === focusQ && !q.done) || T.quests.find(q => !q.done);
+ const qrow = q => { const on = f && q.id === f.id;
+  return `<div class="quest ${on ? 'on' : ''} ${q.done ? 'qdone' : ''}" ${!q.done && !on ? `data-a="focusq" data-id="${q.id}"` : ''}>
+  <div class="qh"><b>${q.done ? '✓ ' : ''}${q.label}</b><span class="qn ${q.done ? 'done' : ''}">${q.prog} / ${q.target}${q.unit}</span></div>
   <div class="bar ${q.done ? 'g' : ''}"><i style="width:${q.prog / q.target * 100}%"></i></div>
-  ${q.done ? '' : `<div class="btns qb"><button class="b" data-a="qminus" data-id="${q.id}" aria-label="Remove ${q.steps[0]}">−${q.steps[0]}</button>${q.steps.map(s => `<button class="b" data-a="qadd" data-id="${q.id}" data-n="${s}">+${s}</button>`).join('')}<button class="b p" data-a="qfill" data-id="${q.id}">Done</button></div>`}</div>`;
- const A = activePop();
+  ${on ? `<div class="btns qb"><button class="b" data-a="qminus" data-id="${q.id}" aria-label="Remove ${q.steps[0]}">−${q.steps[0]}</button>${q.steps.map(s => `<button class="b" data-a="qadd" data-id="${q.id}" data-n="${s}">+${s}</button>`).join('')}<button class="b p" data-a="qfill" data-id="${q.id}">Done</button></div>` : ''}</div>`; };
+ const bonus = [
+  {k:'Run', on:T.runDone, sub:'+60', a:'go'}, {k:'Workout', on:T.wkDone, sub:'+40', a:'go'},
+  {k:'Walk', on:T.walkXp >= 30, sub:`+${30 - T.walkXp}`, a:'go'}, {k:'Water', on:T.waterDone, sub:`${T.water}/8`, a:'water'}];
+ const sq = (T.pops || []).filter(p => p.status === 'done').length;
  return `${vCoach()}
  ${A ? `<section class="panel gold wide"><p class="sys" style="color:var(--gold)">Sudden Quest</p><p class="sqtask">${esc(A.task)}</p>
-  <p class="dim small">Reward +${A.xp} XP · ${A.cat.toUpperCase()} · time left</p><div class="sqt" id="sqTime">${fmt((A.exp - Date.now()) / 1000)}</div>
+  <div class="sqrow"><div class="sqt" id="sqTime">${fmt((A.exp - Date.now()) / 1000)}</div><span class="dim small">+${A.xp} XP · ${A.cat.toUpperCase()}</span></div>
   <div class="btns"><button class="b p" data-a="sqdone">Done</button><button class="b" data-a="sqskip">Skip</button></div></section>` : ''}
- ${P && !P.done ? `<section class="panel red wide"><p class="sys">Penalty Quest</p>${playerImg('fierce', 'penimg')}<h2>PUSH-UPS ×${P.target}</h2>
-  <p class="dim small">You missed a day. Clear this before midnight or your ${S.streak}-day streak resets. No XP.</p>
+ ${P && !P.done ? `<section class="panel red wide"><p class="sys">Penalty Quest</p><h2>PUSH-UPS ×${P.target}</h2>
+  <p class="dim small">Clear before midnight or your ${S.streak}-day streak resets.</p>
   <div class="qh" style="margin-top:8px"><span></span><span class="qn">${P.prog} / ${P.target}</span></div><div class="bar r"><i style="width:${P.prog / P.target * 100}%"></i></div>
-  <div class="btns"><button class="b" data-a="padd" data-n="5">+5</button><button class="b" data-a="padd" data-n="10">+10</button><button class="b r" data-a="padd" data-n="${P.target}">Done</button></div></section>` : ''}
- <section class="panel wide"><p class="sys">Daily Quest has arrived</p><h2>PREPARE TO BECOME STRONGER</h2>
-  <p class="dim small">${rankOf(S.level)}-Rank targets · resets at midnight · runs and walks from Train count toward cardio</p>
+  <div class="btns qb"><button class="b" data-a="padd" data-n="5">+5</button><button class="b" data-a="padd" data-n="10">+10</button><button class="b r" data-a="padd" data-n="${P.target}">Done</button></div></section>` : ''}
+ ${S.exam ? `<button class="panel gold wide alert" data-a="go" data-t="status"><span><span class="sys" style="color:var(--gold)">Rank-Up Exam</span><b>${rankOf()} → ${RANKS[S.exam.to]} · ${S.exam.done.filter(Boolean).length}/${S.exam.done.length} trials passed</b></span><span class="arr">›</span></button>` : ''}
+ <section class="panel wide"><div class="qtop"><h2>DAILY QUEST</h2><span class="dim small">${rankOf()}-Rank</span></div>
   ${T.quests.map(qrow).join('')}
-  ${T.complete ? `<div class="clear">Daily Quest cleared · +${50 + Math.min(S.streak * 5, 50)} XP</div>` : `<p class="dim small" style="margin-top:10px">Clear all three: +${50 + Math.min((S.streak + 1) * 5, 50)} XP bonus and +1 streak.</p>`}</section>
- <section class="panel"><p class="sys">Side Quest</p><h2>HYDRATION</h2><p class="dim small">Drink 8 glasses of water. +15 XP to SEN.</p>
-  <div class="dots">${Array.from({length:8}, (_, i) => `<span class="dot ${i < T.water ? 'on' : ''}"></span>`).join('')}</div>
-  ${T.waterDone ? '<div class="clear">Side Quest cleared</div>' : '<button class="b" data-a="water">+1 glass</button>'}</section>
- <section class="panel"><p class="sys">Bonus XP today</p><h2>EXTRA TRAINING</h2>
-  <p>${T.wkDone ? '✓' : '○'} Workout · +40 XP</p><p>${T.runDone ? '✓' : '○'} Run plan session · +60 XP</p><p>${T.walkXp >= 30 ? '✓' : '○'} Walk · up to +30 XP (${T.walkXp} earned)</p>
-  <p class="dim small" style="margin-top:8px">Sudden Quests: ${(T.pops || []).filter(p => p.status === 'done').length} of 3 cleared. They pop up between 9 AM and 9 PM while Ascend is open.</p>
-  <button class="b full" data-a="go" data-t="train" style="margin-top:8px">Go to Train</button></section>`;
+  ${T.complete ? `<div class="clear">Cleared · +${50 + Math.min(S.streak * 5, 50)} XP</div>` : `<p class="dim small" style="margin-top:10px">Clear all three: +${50 + Math.min((S.streak + 1) * 5, 50)} XP and +1 streak</p>`}</section>
+ <section class="panel wide"><div class="qtop"><p class="sys" style="margin:0">Bonus XP</p><span class="dim small">Sudden Quests ${sq}/3</span></div>
+  <div class="bonus">${bonus.map(b => `<button class="bn ${b.on ? 'on' : ''}" ${b.on && b.k === 'Water' ? 'disabled' : `data-a="${b.a}" data-t="train"`}><b>${b.k}</b><span>${b.on ? '✓' : b.sub}</span></button>`).join('')}</div></section>`;
 }
 function vTrain() {
  const T = S.today, W = WORKOUTS[T.wkIdx], R = S.runPlan, w = RP[R.week];
@@ -845,30 +936,58 @@ function radarSVG() {
   ${STATS.map((_, i) => { const [x, y] = pt(i, R * vals[i] / mx); return `<circle cx="${x}" cy="${y}" r="4" fill="#9b6bff" stroke="#fff"/>`; }).join('')}
   ${STATS.map((s, i) => `<text x="${lab[i][0]}" y="${lab[i][1]}" text-anchor="${lab[i][2]}" fill="#eaf6ff" font-family="Oxanium, sans-serif" font-weight="700" font-size="14">${s.n} <tspan fill="#3ef0ff">${vals[i]}</tspan></text>`).join('')}</svg>`;
 }
+function examHTML() {
+ const next = S.rankIdx + 1;
+ if (next > 5) return `<section class="panel gold wide" id="exam"><p class="sys" style="color:var(--gold)">Rank</p><h2>S-RANK HUNTER</h2><p>You've passed every Rank-Up Exam. Levels no longer have a cap. Keep your streak alive.</p></section>`;
+ const E = S.exam, to = RANKS[next];
+ const rows = EXAMS[next].map((x, i) => { const ok = E && E.done[i];
+  return `<div class="trial ${ok ? 'ok' : ''} ${E ? '' : 'lock'}"><b>${ok ? '✓ ' : ''}${x.t}</b>${x.how ? `<br><span class="dim small">${x.how}</span>` : ''}
+   ${E && !ok ? `<div class="btns">${x.timer ? `<button class="b p" data-a="trialtimer" data-i="${i}">Start timer</button>` : `<button class="b p" data-a="trialpass" data-i="${i}">Mark passed</button>`}</div>` : ''}</div>`; }).join('');
+ return `<section class="panel ${E ? 'gold' : ''} wide" id="exam"><p class="sys" ${E ? 'style="color:var(--gold)"' : ''}>${E ? 'Rank-Up Exam unlocked' : 'Next Rank-Up Exam'}</p><h2>${rankOf()} → ${to} RANK EXAM</h2>
+  <p class="dim small">${E ? `${E.done.filter(Boolean).length} of ${E.done.length} trials passed. Take as many days as you need. Be honest, the System is watching.` : `Unlocks at level ${capOf()}. Start training for it now.`}</p>${rows}</section>`;
+}
+function nextTitle() {
+ return TITLES.filter(t => !S.titles.includes(t.id) && t.p).map(t => { const [c, g] = t.p(S); return {t, c:Math.min(c, g), g, f:Math.min(c, g) / g}; }).sort((a, b) => b.f - a.f)[0];
+}
+function vTitles() {
+ const rows = TITLES.map(t => { const has = S.titles.includes(t.id), [c, g] = t.p ? t.p(S) : [0, 1]; return {t, has, c:Math.min(c, g), g, f:has ? 2 : Math.min(c, g) / g}; }).sort((a, b) => b.f - a.f);
+ return `<section class="panel wide"><div class="qtop"><h2>TITLES</h2><span class="dim small">${S.titles.length} of ${TITLES.length} unlocked</span></div><p class="dim small">Tap an unlocked title to wear it under your name.</p>
+  <div class="tlist">${rows.map(({t, has, c, g}) => `<button class="tt ${has ? '' : 'lock'} ${S.title === t.id ? 'eq' : ''}" ${has ? `data-a="equip" data-id="${t.id}"` : 'disabled'}>
+   <span style="flex:1"><b>${t.n}</b><br><span class="dim small">${t.d}${has || g <= 1 || t.id.startsWith('r') ? '' : ` · ${c}/${g}`}</span>${has ? '' : `<span class="tp"><i style="width:${(c / g * 100).toFixed(0)}%"></i></span>`}</span>
+   <span class="small">${S.title === t.id ? 'Equipped' : has ? 'Equip' : 'Locked'}</span></button>`).join('')}</div></section>`;
+}
 function vStatus() {
- const r = rankOf(S.level), t = TITLES.find(x => x.id === S.title), pct = S.xp / need(S.level) * 100, c = coach();
- return `<section class="panel wide"><p class="sys">Status window</p>
+ const seg = `<div class="seg wide">${[['hunter', 'Hunter'], ['stats', 'Stats'], ['titles', `Titles ${S.titles.length}/${TITLES.length}`]].map(([k, n]) => `<button class="${sview === k ? 'on' : ''}" data-a="sview" data-v="${k}">${n}</button>`).join('')}</div>`;
+ if (sview === 'titles') return seg + vTitles();
+ if (sview === 'stats') return seg + vStats();
+ return seg + vHunter();
+}
+function vHunter() {
+ const r = rankOf(), t = TITLES.find(x => x.id === S.title), capped = S.level >= capOf(), pct = capped ? 100 : S.xp / need(S.level) * 100, c = coach(), nt = nextTitle();
+ return `<section class="panel wide">
   <div class="hero"><div class="av">${playerImg(S.penalty && !S.penalty.done ? 'fierce' : S.today.complete ? 'happy' : 'neutral')}</div>
-   <div><p class="pname">${esc(S.name)}</p><p class="ttl">${t ? t.n : 'No title yet'}</p>
+   <div><p class="pname">${esc(S.name)}</p><button class="ttl" data-a="sview" data-v="titles">${t ? t.n : 'No title yet'} ›</button>
     <div class="rk"><span class="lvl"><small>LV</small>${S.level}</span><span class="rbadge" style="background:${AURA[r]}">${r}</span></div>
-    <div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div><p class="dim small">${S.xp} / ${need(S.level)} XP to level ${S.level + 1} · ${S.totalXp} XP total</p>
-    <div class="btns"><button class="b" data-a="editav">Change Hunter</button><button class="b" data-a="rename">Rename</button><button class="b" data-a="editcoach">Coach: ${c.name}</button></div></div></div></section>
- <section class="panel"><h2>STATS</h2><div class="radar">${radarSVG()}<div class="slist">${STATS.map(s => `<div><span>${s.n}<br><span class="dim small">${s.d}</span></span><b>${statVal(s.k)}</b></div>`).join('')}</div></div>
+    <div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div><p class="dim small">${capped ? `Level cap · ${S.xp} XP saved for after your exam` : `${S.xp} / ${need(S.level)} XP to level ${S.level + 1}`}</p>
+    ${nt ? `<p class="nextt">Next title: <b style="color:var(--ink)">${nt.t.n}</b>${nt.g > 1 && !nt.t.id.startsWith('r') ? ` · ${nt.c}/${nt.g}` : ''}</p>` : ''}
+    <div class="btns"><button class="b" data-a="editav">Change Hunter</button><button class="b" data-a="editcoach">Coach: ${c.name}</button><button class="b" data-a="rename">Rename</button></div></div></div></section>
+ ${examHTML()}`;
+}
+function vStats() {
+ return `<section class="panel"><h2>STATS</h2><div class="radar">${radarSVG()}<div class="slist">${STATS.map(s => `<div><span>${s.n}<br><span class="dim small">${s.d}</span></span><b>${statVal(s.k)}</b></div>`).join('')}</div></div>
   <p class="dim small">+1 for every ${STAT_STEP} XP earned in that stat.</p></section>
  <section class="panel"><h2>RECORD</h2><div class="grid3">
-  ${[[S.streak,'Streak'],[S.bestStreak,'Best streak'],[S.totals.questDays,'Quest days'],[S.totals.workouts,'Workouts'],[S.totals.runs,'Runs'],[S.totals.walkMin,'Walk min'],[S.totals.pushups,'Push-ups'],[S.totals.squats,'Squats'],[S.totals.cardio,'Cardio min']].map(([v, l]) => `<div class="cell"><b>${v}</b><span>${l}</span></div>`).join('')}</div></section>
- <section class="panel wide"><h2>TITLES</h2><p class="dim small">Tap an unlocked title to equip it.</p>
-  <div class="tlist">${TITLES.map(x => { const has = S.titles.includes(x.id); return `<button class="tt ${has ? '' : 'lock'} ${S.title === x.id ? 'eq' : ''}" ${has ? `data-a="equip" data-id="${x.id}"` : 'disabled'}><span><b>${has ? x.n : '???'}</b><br><span class="dim small">${x.d}</span></span><span class="small">${S.title === x.id ? 'Equipped' : has ? 'Equip' : 'Locked'}</span></button>`; }).join('')}</div></section>`;
+  ${[[S.streak,'Streak'],[S.bestStreak,'Best streak'],[S.totals.questDays,'Quest days'],[S.totals.workouts,'Workouts'],[S.totals.runs,'Runs'],[S.totals.walkMin,'Walk min'],[S.totals.pushups,'Push-ups'],[S.totals.squats,'Squats'],[S.totals.sudden || 0,'Sudden']].map(([v, l]) => `<div class="cell"><b>${v}</b><span>${l}</span></div>`).join('')}</div></section>`;
 }
 function vLog() {
  return `<section class="panel"><h2>ACTIVITY LOG</h2>
-  ${S.log.length ? `<ul class="log">${S.log.slice(0, 80).map(l => { const d = new Date(l.t); return `<li><span>${esc(l.why)}<br><span class="dim small">${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} · ${d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}</span></span><b>+${l.n}</b></li>`; }).join('')}</ul>` : '<p class="dim">Nothing yet. Clear a quest and it shows up here.</p>'}</section>
+  ${S.log.length ? `<ul class="log">${S.log.slice(0, 80).map(l => { const d = new Date(l.t); return `<li><span>${esc(l.why)}<br><span class="dim small">${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} · ${d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}</span></span><b>${l.n ? '+' + l.n : '★'}</b></li>`; }).join('')}</ul>` : '<p class="dim">Nothing yet. Clear a quest and it shows up here.</p>'}</section>
  <section class="panel"><h2>INSTALL APP</h2>${installHTML()}</section>
  <section class="panel"><h2>SAVE DATA</h2><p class="dim small">Progress is saved in this browser on this device. Copy your save code now and then, so you can restore it after clearing your browser or moving to a new phone.</p>
   <div class="btns"><button class="b" data-a="export">Copy save code</button><button class="b" data-a="import">Restore from code</button><button class="b r" data-a="reset">Reset everything</button></div></section>
  <section class="panel wide"><h2>HOW IT WORKS</h2>
   <p class="small">Three Daily Quests appear every day. Clear all three for bonus XP and +1 streak. If you miss a day, a Penalty Quest appears. Clear it that day or the streak resets. Missing two or more days resets the streak right away.</p>
-  <p class="small">Levels take <b>100 × level^1.5</b> XP. Every 10 levels you rank up (E → D → C → B → A → S). Your aura changes color and the quests get harder.</p></section>`;
+  <p class="small">Each level takes a little more XP than the last. Every 10 levels you hit a level cap and unlock a <b>Rank-Up Exam</b>: real fitness trials like running without stopping, max push-ups and plank holds. Pass them all to rank up (E → D → C → B → A → S). Extra XP is saved while you're capped. Your aura changes color and the quests get harder with each rank.</p></section>`;
 }
 
 /* ================= daily flow ================= */
@@ -945,6 +1064,12 @@ document.addEventListener('click', e => {
    return;
   case 'vnchoice': { const c = CL.choices[+el.dataset.i]; CL.choices = []; if (c) c.fn(); commit(); return; }
   case 'sqdone': suddenDone(); break;
+  case 'focusq': focusQ = id; break;
+  case 'sview': sview = el.dataset.v; window.scrollTo(0, 0); break;
+  case 'trialtimer': { const i = +el.dataset.i; startTimer(EXAMS[S.exam.to][i].timer, `${RANKS[S.exam.to]}-Rank Exam`, () => passTrial(i), true); return; }
+  case 'trialpass': { const i = +el.dataset.i, x = EXAMS[S.exam.to][i];
+   dialog({title:'Trial complete?', body:`<p><b>${x.t}</b></p><p class="dim small">Only mark it if you did it for real, in one go. The System is watching.</p>`,
+    buttons:[{label:'Yes, passed', cls:'p', fn:() => { passTrial(i); commit(); }}, {label:'Not yet'}]}); return; }
   case 'sqskip': suddenSkip(); break;
    return;
   case 'qadd': questAdd(id, n); break;
@@ -952,7 +1077,7 @@ document.addEventListener('click', e => {
   case 'qfill': questAdd(id, qs.target); break;
   case 'padd': penaltyAdd(n); break;
   case 'water': water(); break;
-  case 'go': tab = el.dataset.t; break;
+  case 'go': tab = el.dataset.t; if (tab === 'status') sview = 'hunter'; window.scrollTo(0, 0); break;
   case 'wk': return;
   case 'wkdone': workoutDone(); break;
   case 'run': startRun(); return;
@@ -966,7 +1091,7 @@ document.addEventListener('click', e => {
   case 'tskip': TM.left = 0; tick(); return;
   case 'tquit':
    TM.paused = true; drawTimer();
-   dialog({title:'End this session?', body:'<p>It won\'t count toward the run plan.</p>', buttons:[{label:'End session', cls:'r', fn:() => stopTimer(false)}, {label:'Keep going', cls:'p', fn:() => { if (TM) { TM.paused = false; drawTimer(); } }}]});
+   dialog({title:'End this session?', body:'<p>It won\'t count.</p>', buttons:[{label:'End session', cls:'r', fn:() => stopTimer(false)}, {label:'Keep going', cls:'p', fn:() => { if (TM) { TM.paused = false; drawTimer(); } }}]});
    return;
   case 'pickchar': { S.avatar = {char:id}; const d = ccDone; ccDone = null; closeCC(); commit(); if (d) d(); else toast('Hunter selected.'); return; }
   case 'pickcoach': {
