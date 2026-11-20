@@ -161,6 +161,16 @@ p{margin:6px 0}
 .timer.walk .ph{color:var(--ok);text-shadow:0 0 20px rgba(77,255,181,.6)}
 .timer .clock{font:800 clamp(72px,24vw,128px)/1 Oxanium,sans-serif;font-variant-numeric:tabular-nums}
 .timer .bar{width:min(90vw,420px)}
+.pimg{position:relative;aspect-ratio:1}
+.pimg::before{content:"";position:absolute;inset:4%;border-radius:50%;background:radial-gradient(circle,var(--aura) 0%,color-mix(in srgb,var(--aura) 22%,transparent) 45%,transparent 70%);opacity:.7;animation:pulse 3.2s ease-in-out infinite}
+.pimg img{position:relative;width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 0 10px rgba(62,240,255,.25))}
+.mini img{width:100%;height:100%;object-fit:cover;transform:scale(1.9);transform-origin:50% 36%}
+.chars{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:12px;margin-top:12px}
+.charc{padding:10px;text-align:center;color:inherit;cursor:pointer}
+.charc.on{--k1:var(--gold);--k2:var(--gold)}
+.charc p{margin:4px 0 0;font-size:13px}
+.dpimg{width:150px;margin:0 auto}
+.penimg{width:84px;float:right;margin:-6px -6px 0 8px}
 .aura{animation:pulse 3.2s ease-in-out infinite;transform-origin:100px 112px}
 @keyframes pulse{50%{opacity:.6;transform:scale(.95)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -240,6 +250,12 @@ const OUTC = ['#1c1c28','#22324f','#ff6a2b','#d8344a','#1fae84','#7a4fe0','#eeee
 const HAIRS = [['short','Short'],['spiky','Spiky'],['long','Long'],['pony','Ponytail']];
 const OUTFITS = [['hoodie','Hoodie'],['jacket','Jacket'],['tech','Tech suit']];
 const GEAR = [['none','None'],['headband','Headband'],['visor','Visor'],['glasses','Glasses'],['scar','Scar'],['earpiece','Earpiece']];
+const PLAYERS = [
+ {id:'player01', desc:'Black hair · navy hoodie'},
+ {id:'player02', desc:'Wavy ponytail · tech jacket'}
+];
+const charSrc = (expr, c) => `assets/characters/${c || (S.avatar && S.avatar.char) || PLAYERS[0].id}_${expr}.webp`;
+const playerImg = (expr, cls = '') => `<div class="pimg ${cls}" style="--aura:${AURA[rankOf(S.level)]}"><img src="${charSrc(expr)}" alt="Your Hunter"></div>`;
 const DEF_AV = {skin:1, hair:'short', hairColor:'#1e1d2c', eyes:'#4fb3ff', outfit:'hoodie', outfitColor:'#22324f', gear:'none'};
 
 /* ================= coaches ================= */
@@ -459,7 +475,7 @@ function addXp(n, cat, why) {
  if (S.level > oldL) {
   const nr = rankOf(S.level), txt = line('levelup');
   say('levelup', txt);
-  dialog({cls:'lvup gold', body:`<div class="big">LEVEL UP</div><div class="arrow">Lv ${oldL} → Lv ${S.level}</div>
+  dialog({cls:'lvup gold', body:`${playerImg('happy', 'dpimg')}<div class="big">LEVEL UP</div><div class="arrow">Lv ${oldL} → Lv ${S.level}</div>
    ${nr !== oldR ? `<p style="margin-top:12px">Rank up: <b style="color:var(--gold)">${oldR} → ${nr}</b>. Your aura changed.<br><span class="dim small">Daily Quests get harder starting tomorrow.</span></p>` : `<p class="dim small" style="margin-top:12px">${need(S.level)} XP to the next level.</p>`}
    ${coachBlock('levelup', txt)}`, buttons:[{label:'Continue', cls:'p full'}]});
  }
@@ -490,7 +506,7 @@ function checkDaily() {
  const bonus = 50 + Math.min(S.streak * 5, 50), txt = line('clear');
  addXp(bonus, null, `Daily Quest cleared · ${S.streak}-day streak`);
  say('clear', txt);
- dialog({title:'Daily Quest complete', body:`<p>All quests cleared. Streak: <b>${S.streak}</b> day${S.streak === 1 ? '' : 's'}.</p><p class="dim">Reward: +${bonus} XP</p>
+ dialog({title:'Daily Quest complete', body:`${playerImg('happy', 'dpimg')}<p>All quests cleared. Streak: <b>${S.streak}</b> day${S.streak === 1 ? '' : 's'}.</p><p class="dim">Reward: +${bonus} XP</p>
   ${S.penalty && !S.penalty.done ? '<p style="color:var(--red)">The Penalty Quest is still open. Clear it before midnight.</p>' : ''}${coachBlock('clear', txt)}`,
   buttons:[{label:'Continue', cls:'p full'}]});
  return true;
@@ -579,25 +595,17 @@ function stopTimer(finished) {
 }
 
 /* ================= creator & coach picker ================= */
-let CC = null, ccDone = null;
-function openCreator(done) { CC = Object.assign({}, DEF_AV, S.avatar || {}); ccDone = done || null; $('#cc').hidden = false; drawCreator(); }
-function drawCreator() {
- const sw = (k, list) => `<div class="sw">${list.map(c => `<button data-a="ccset" data-k="${k}" data-v="${c}" class="${CC[k] === c ? 'on' : ''}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div>`;
- const pills = (k, list) => `<div class="sw pill">${list.map(([v, n]) => `<button data-a="ccset" data-k="${k}" data-v="${v}" class="${CC[k] === v ? 'on' : ''}">${n}</button>`).join('')}</div>`;
- $('#cc').innerHTML = `<div class="ccin">
-  <div class="panel"><p class="sys">Character creation</p><h2>Design your Player</h2><p class="dim small">Your aura changes color as you rank up: E grey, D green, C cyan, B violet, A red, S gold.</p>
-  <div class="ccgrid" style="margin-top:12px">
-   <div class="ccprev">${avatarSVG(CC, {aura:rankOf(S.level), label:'Character preview'})}</div>
-   <div>
-    <div class="opt"><div class="lab">Skin</div><div class="sw">${SKINS.map((c, i) => `<button data-a="ccset" data-k="skin" data-v="${i}" class="${CC.skin === i ? 'on' : ''}" style="background:${c}" aria-label="Skin ${i + 1}"></button>`).join('')}</div></div>
-    <div class="opt"><div class="lab">Hairstyle</div>${pills('hair', HAIRS)}</div>
-    <div class="opt"><div class="lab">Hair color</div>${sw('hairColor', HAIRC)}</div>
-    <div class="opt"><div class="lab">Eyes</div>${sw('eyes', EYEC)}</div>
-    <div class="opt"><div class="lab">Outfit</div>${pills('outfit', OUTFITS)}</div>
-    <div class="opt"><div class="lab">Outfit color</div>${sw('outfitColor', OUTC)}</div>
-    <div class="opt"><div class="lab">Gear</div>${pills('gear', GEAR)}</div>
-    <div class="btns"><button class="b" data-a="ccrand">Randomize</button><button class="b p" data-a="ccsave">Confirm character</button>${ccDone ? '' : '<button class="b" data-a="ccclose">Cancel</button>'}</div>
-   </div></div></div></div>`;
+let ccDone = null;
+function openCreator(done) {
+ ccDone = done || null; $('#cc').hidden = false;
+ const cur = S.avatar && S.avatar.char;
+ $('#cc').innerHTML = `<div class="ccin"><div class="panel"><p class="sys">Character select</p><h2>Choose your Hunter</h2>
+  <p class="dim small">This is you. Your Hunter's expression changes with what happens, and the aura behind them changes color as you rank up: E grey, D green, C cyan, B violet, A red, S gold.</p>
+  <div class="chars">${PLAYERS.map((p, i) => `<button class="panel charc ${cur === p.id ? 'on' : ''}" data-a="pickchar" data-id="${p.id}">
+   <div class="pimg" style="--aura:${AURA[rankOf(S.level)]}"><img src="${charSrc('neutral', p.id)}" alt="Hunter ${i + 1}"></div>
+   <div class="vnname" style="display:table;margin:6px auto 0">HUNTER ${pad(i + 1)}</div><p class="dim">${p.desc}</p></button>`).join('')}</div>
+  <p class="dim small" style="margin-top:12px">More Hunters coming soon.</p>
+  ${ccDone ? '' : '<div class="btns"><button class="b" data-a="ccclose">Cancel</button></div>'}</div></div>`;
 }
 let cpDone = null;
 function openCoach(done) {
@@ -614,7 +622,7 @@ const TABS = ['quests','train','status','log'];
 let tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'quests';
 function render() {
  const r = rankOf(S.level);
- $('#mini').innerHTML = faceSVG(S.avatar || DEF_AV);
+ $('#mini').innerHTML = `<img src="${charSrc('neutral')}" alt="">`;
  $('#chips').innerHTML = `<span class="chip">LV ${S.level} · ${r}-RANK</span><span class="chip ${S.streak ? 'hot' : ''}">STREAK ${S.streak}</span>`;
  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
  $('#view').innerHTML = ({quests:vQuests, train:vTrain, status:vStatus, log:vLog})[tab]();
@@ -631,7 +639,7 @@ function vQuests() {
   <div class="bar ${q.done ? 'g' : ''}"><i style="width:${q.prog / q.target * 100}%"></i></div>
   ${q.done ? '' : `<div class="btns qb"><button class="b" data-a="qminus" data-id="${q.id}" aria-label="Remove ${q.steps[0]}">−${q.steps[0]}</button>${q.steps.map(s => `<button class="b" data-a="qadd" data-id="${q.id}" data-n="${s}">+${s}</button>`).join('')}<button class="b p" data-a="qfill" data-id="${q.id}">Done</button></div>`}</div>`;
  return `${vCoach()}
- ${P && !P.done ? `<section class="panel red wide"><p class="sys">Penalty Quest</p><h2>PUSH-UPS ×${P.target}</h2>
+ ${P && !P.done ? `<section class="panel red wide"><p class="sys">Penalty Quest</p>${playerImg('fierce', 'penimg')}<h2>PUSH-UPS ×${P.target}</h2>
   <p class="dim small">You missed a day. Clear this before midnight or your ${S.streak}-day streak resets. No XP.</p>
   <div class="qh" style="margin-top:8px"><span></span><span class="qn">${P.prog} / ${P.target}</span></div><div class="bar r"><i style="width:${P.prog / P.target * 100}%"></i></div>
   <div class="btns"><button class="b" data-a="padd" data-n="5">+5</button><button class="b" data-a="padd" data-n="10">+10</button><button class="b r" data-a="padd" data-n="${P.target}">Done</button></div></section>` : ''}
@@ -676,11 +684,11 @@ function radarSVG() {
 function vStatus() {
  const r = rankOf(S.level), t = TITLES.find(x => x.id === S.title), pct = S.xp / need(S.level) * 100, c = coach();
  return `<section class="panel wide"><p class="sys">Status window</p>
-  <div class="hero"><div class="av">${avatarSVG(S.avatar || DEF_AV, {aura:r, label:'Your character'})}</div>
+  <div class="hero"><div class="av">${playerImg(S.penalty && !S.penalty.done ? 'fierce' : S.today.complete ? 'happy' : 'neutral')}</div>
    <div><p class="pname">${esc(S.name)}</p><p class="ttl">${t ? t.n : 'No title yet'}</p>
     <div class="rk"><span class="lvl"><small>LV</small>${S.level}</span><span class="rbadge" style="background:${AURA[r]}">${r}</span></div>
     <div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div><p class="dim small">${S.xp} / ${need(S.level)} XP to level ${S.level + 1} · ${S.totalXp} XP total</p>
-    <div class="btns"><button class="b" data-a="editav">Edit character</button><button class="b" data-a="rename">Rename</button><button class="b" data-a="editcoach">Coach: ${c.name}</button></div></div></div></section>
+    <div class="btns"><button class="b" data-a="editav">Change Hunter</button><button class="b" data-a="rename">Rename</button><button class="b" data-a="editcoach">Coach: ${c.name}</button></div></div></div></section>
  <section class="panel"><h2>STATS</h2><div class="radar">${radarSVG()}<div class="slist">${STATS.map(s => `<div><span>${s.n}<br><span class="dim small">${s.d}</span></span><b>${statVal(s.k)}</b></div>`).join('')}</div></div>
   <p class="dim small">+1 for every ${STAT_STEP} XP earned in that stat.</p></section>
  <section class="panel"><h2>RECORD</h2><div class="grid3">
@@ -749,11 +757,7 @@ document.addEventListener('click', e => {
    TM.paused = true; drawTimer();
    dialog({title:'End this session?', body:'<p>It won\'t count toward the run plan.</p>', buttons:[{label:'End session', cls:'r', fn:() => stopTimer(false)}, {label:'Keep going', cls:'p', fn:() => { if (TM) { TM.paused = false; drawTimer(); } }}]});
    return;
-  case 'ccset': { const k = el.dataset.k, v = el.dataset.v; CC[k] = k === 'skin' ? Number(v) : v; drawCreator(); return; }
-  case 'ccrand':
-   CC = {skin:Math.floor(Math.random() * SKINS.length), hair:pick(HAIRS)[0], hairColor:pick(HAIRC), eyes:pick(EYEC), outfit:pick(OUTFITS)[0], outfitColor:pick(OUTC), gear:pick(GEAR)[0]};
-   drawCreator(); return;
-  case 'ccsave': { S.avatar = Object.assign({}, CC); const d = ccDone; ccDone = null; closeCC(); commit(); if (d) d(); else toast('Character updated.'); return; }
+  case 'pickchar': { S.avatar = {char:id}; const d = ccDone; ccDone = null; closeCC(); commit(); if (d) d(); else toast('Hunter selected.'); return; }
   case 'pickcoach': {
    S.coach = id; const d = cpDone; cpDone = null; closeCC(); commit();
    if (d) d(); else { say('greet'); toast(`${coach().name} is now your coach.`); }
@@ -804,7 +808,7 @@ const firstRun = !S.today;
 const msgs = rollover();
 render();
 if (firstRun) onboard();
-else if (!S.avatar || !S.coach) setupFlow(() => arrival(msgs || []));
+else if (!S.avatar || !S.avatar.char || !S.coach) setupFlow(() => arrival(msgs || []));
 else if (msgs) arrival(msgs);
 else say(lateNow() ? 'late' : S.today.complete ? 'clear' : 'greet');
 }
