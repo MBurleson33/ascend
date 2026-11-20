@@ -258,9 +258,11 @@ const PLAYERS = [
  {id:'player02', desc:'Wavy ponytail · tech jacket'},
  {id:'player03', desc:'Low fade · compression shirt'},
  {id:'player04', desc:'Silver bob · white armor'},
+ {id:'player05', desc:'Spiky red hair · headband'},
  {id:'player06', desc:'Curly bun · teal zip-up'},
  {id:'player07', desc:'Stubble · olive jacket'},
  {id:'player08', desc:'Ponytail · visor · purple hoodie'},
+ {id:'player09', desc:'Wavy blonde · scar · white hoodie'},
  {id:'player10', desc:'Pink twin tails · tech suit'},
  {id:'player11', desc:'Shaved head · hunter armor'},
  {id:'player12', desc:'Teal undercut · techwear'}
@@ -293,7 +295,7 @@ const COACHES = {
    train:["Session recorded. Every rep compounds.","Precise. This is how strength is built."],
    late:["{name}. The day ends soon. Unfinished objectives remain.","Twenty minutes now prevents a penalty tomorrow. The math is clear."],
    idle:["Progress is quiet until suddenly it isn't.","Hydrate. A dull blade cuts nothing.","I don't believe in luck. I believe in reps."]}},
- bolt:{name:'BOLT', role:'Hype-man rival', tag:'Maximum energy. Maximum gains.',
+ bolt:{img:true, name:'BOLT', role:'Hype-man rival', tag:'Maximum energy. Maximum gains.',
   av:{skin:3, hair:'spiky', hairColor:'#ffd23f', eyes:'#33d17a', outfit:'hoodie', outfitColor:'#ff6a2b', gear:'none'},
   lines:{
    greet:["YOOO {name}! New day, new quests, NEW YOU! Let's gooo!","Rise and grind, partner! The quest board is calling your name!","Today's vibe? Absolutely unstoppable. Let's prove it!"],
@@ -618,7 +620,7 @@ function openCreator(done) {
   <div class="chars">${PLAYERS.map((p, i) => `<button class="panel charc ${cur === p.id ? 'on' : ''}" data-a="pickchar" data-id="${p.id}">
    <div class="pimg" style="--aura:${AURA[rankOf(S.level)]}"><img src="${charSrc('neutral', p.id)}" alt="Hunter ${i + 1}"></div>
    <div class="vnname" style="display:table;margin:6px auto 0">HUNTER ${pad(i + 1)}</div><p class="dim">${p.desc}</p></button>`).join('')}</div>
-  <p class="dim small" style="margin-top:12px">More Hunters coming soon.</p>
+  <p class="dim small" style="margin-top:12px">12 Hunters available. You can switch any time from Status.</p>
   ${ccDone ? '' : '<div class="btns"><button class="b" data-a="ccclose">Cancel</button></div>'}</div></div>`;
 }
 let cpDone = null;
