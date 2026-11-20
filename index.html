@@ -8,6 +8,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ascend">
 <title>Ascend — Level Up</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Turn working out into an RPG. Clear Daily Quests, level up and rank from E to S.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Oxanium:wght@500;700;800&family=Chakra+Petch:wght@400;500;600&display=swap" rel="stylesheet">
@@ -826,6 +831,7 @@ function vStatus() {
 function vLog() {
  return `<section class="panel"><h2>ACTIVITY LOG</h2>
   ${S.log.length ? `<ul class="log">${S.log.slice(0, 80).map(l => { const d = new Date(l.t); return `<li><span>${esc(l.why)}<br><span class="dim small">${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} · ${d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}</span></span><b>+${l.n}</b></li>`; }).join('')}</ul>` : '<p class="dim">Nothing yet. Clear a quest and it shows up here.</p>'}</section>
+ <section class="panel"><h2>INSTALL APP</h2>${installHTML()}</section>
  <section class="panel"><h2>SAVE DATA</h2><p class="dim small">Progress is saved in this browser on this device. Copy your save code now and then, so you can restore it after clearing your browser or moving to a new phone.</p>
   <div class="btns"><button class="b" data-a="export">Copy save code</button><button class="b" data-a="import">Restore from code</button><button class="b r" data-a="reset">Reset everything</button></div></section>
  <section class="panel wide"><h2>HOW IT WORKS</h2>
@@ -976,6 +982,41 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) dayC
 setInterval(dayCheck, 60000);
 setInterval(suddenTick, 1000);
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (TABS.includes(h)) { tab = h; render(); } });
+
+/* ================= web app: install, offline, updates ================= */
+let installEvt = null;
+const isStandalone = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function installHTML() {
+ if (isStandalone()) return '<p class="clear">Installed. Ascend is running as an app.</p><p class="dim small">Works offline. Your progress stays on this device.</p>';
+ if (installEvt) return '<p class="dim small">Put Ascend on your home screen. It opens full-screen and works offline.</p><button class="b p" data-a="install">Install Ascend</button>';
+ if (isIOS()) return '<p class="dim small">On iPhone: open this page in <b>Safari</b>, tap the <b>Share</b> button, then <b>Add to Home Screen</b>. It opens full-screen and works offline.</p>';
+ return '<p class="dim small">Open your browser menu and choose <b>Install app</b> or <b>Add to Home screen</b>. It opens full-screen and works offline.</p>';
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (tab === 'log') render(); });
+window.addEventListener('appinstalled', () => { installEvt = null; toast('Ascend installed. Find it on your home screen.'); if (tab === 'log') render(); });
+document.addEventListener('click', e => {
+ if (!e.target.closest('[data-a="install"]') || !installEvt) return;
+ const ev = installEvt; installEvt = null;
+ try { ev.prompt(); ev.userChoice.then(() => { if (tab === 'log') render(); }); } catch (x) {}
+});
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+try {
+ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  let reloading = false, wantReload = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (wantReload && !reloading) { reloading = true; location.reload(); } });
+  navigator.serviceWorker.register('sw.js').then(reg => {
+   const offer = w => dialog({title:'Update ready', body:'<p>A new version of Ascend is ready. Your progress is kept.</p>',
+    buttons:[{label:'Update now', cls:'p', fn:() => { wantReload = true; w.postMessage('SKIP_WAITING'); }}, {label:'Later'}]});
+   if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+   reg.addEventListener('updatefound', () => {
+    const w = reg.installing;
+    w && w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) offer(w); });
+   });
+   document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+  }).catch(() => {});
+ }
+} catch (e) {}
 
 /* ================= boot ================= */
 preloadCoach();

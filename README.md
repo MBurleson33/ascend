@@ -18,4 +18,12 @@ Character art goes in `assets/` as transparent images. Source PNGs from ChatGPT 
 - `assets/coaches/coach_kaida_smile.webp`, `_happy`, `_fierce`, `_surprised` (same for `rei` and `bolt`)
 
 ## Run
-Open `index.html`, or host it on GitHub Pages or Vercel.
+Open `index.html`, or host it on GitHub Pages or Vercel. It's an installable PWA: manifest, icons and an offline service worker.
+
+After changing `index.html` or any asset, regenerate the service worker so phones pick up the update:
+
+```
+python3 tools/build_sw.py
+```
+
+Installed copies show an "Update ready" prompt the next time they open.
