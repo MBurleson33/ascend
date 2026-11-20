@@ -66,6 +66,7 @@ p{margin:6px 0}
 /* coach dialogue */
 .vn{display:grid;grid-template-columns:118px minmax(0,1fr);align-items:end;padding:0 16px 0 0;min-height:160px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .vnport svg{display:block;width:150px;height:165px;margin-left:-14px}
+.vnport img{display:block;width:150px;height:150px;margin-left:-16px;filter:drop-shadow(0 0 12px rgba(62,240,255,.25))}
 .vnbody{padding:16px 0 14px 4px;align-self:stretch;display:flex;flex-direction:column}
 .vnname{align-self:flex-start;font:700 12px/1 Orbitron,sans-serif;letter-spacing:.1em;color:#05060d;background:linear-gradient(90deg,var(--c1),var(--c2));padding:6px 16px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
 .vnrole{font-size:12px;color:var(--dim);margin:4px 0 0}
@@ -74,6 +75,7 @@ p{margin:6px 0}
 @keyframes blink{50%{opacity:0}}
 .dcoach{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(62,240,255,.18);text-align:left}
 .dcoach svg{width:84px;height:92px;display:block}
+.dcoach img{width:84px;height:84px;display:block}
 .dcoach b{font:700 12px Orbitron,sans-serif;letter-spacing:.08em;color:var(--c1)}
 /* quests */
 .quest{padding:12px 0;border-top:1px solid rgba(62,240,255,.14)}
@@ -134,6 +136,7 @@ p{margin:6px 0}
 .coaches{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px;margin-top:12px}
 .coachc{text-align:left;width:100%;cursor:pointer;color:inherit}
 .coachc svg{width:150px;height:165px;display:block;margin:0 auto}
+.coachc img{width:170px;height:170px;display:block;margin:0 auto}
 .coachc .vnname{margin-top:4px}
 .coachc.on{--k1:var(--gold);--k2:var(--gold)}
 /* nav, toasts, dialogs, timer */
@@ -252,7 +255,15 @@ const OUTFITS = [['hoodie','Hoodie'],['jacket','Jacket'],['tech','Tech suit']];
 const GEAR = [['none','None'],['headband','Headband'],['visor','Visor'],['glasses','Glasses'],['scar','Scar'],['earpiece','Earpiece']];
 const PLAYERS = [
  {id:'player01', desc:'Black hair · navy hoodie'},
- {id:'player02', desc:'Wavy ponytail · tech jacket'}
+ {id:'player02', desc:'Wavy ponytail · tech jacket'},
+ {id:'player03', desc:'Low fade · compression shirt'},
+ {id:'player04', desc:'Silver bob · white armor'},
+ {id:'player06', desc:'Curly bun · teal zip-up'},
+ {id:'player07', desc:'Stubble · olive jacket'},
+ {id:'player08', desc:'Ponytail · visor · purple hoodie'},
+ {id:'player10', desc:'Pink twin tails · tech suit'},
+ {id:'player11', desc:'Shaved head · hunter armor'},
+ {id:'player12', desc:'Teal undercut · techwear'}
 ];
 const charSrc = (expr, c) => `assets/characters/${c || (S.avatar && S.avatar.char) || PLAYERS[0].id}_${expr}.webp`;
 const playerImg = (expr, cls = '') => `<div class="pimg ${cls}" style="--aura:${AURA[rankOf(S.level)]}"><img src="${charSrc(expr)}" alt="Your Hunter"></div>`;
@@ -260,7 +271,7 @@ const DEF_AV = {skin:1, hair:'short', hairColor:'#1e1d2c', eyes:'#4fb3ff', outfi
 
 /* ================= coaches ================= */
 const COACHES = {
- kaida:{name:'KAIDA', role:'Tough-love senpai', tag:'Fiery and blunt. Zero excuses.',
+ kaida:{img:true, name:'KAIDA', role:'Tough-love senpai', tag:'Fiery and blunt. Zero excuses.',
   av:{skin:1, hair:'pony', hairColor:'#e2463d', eyes:'#ffb03a', outfit:'jacket', outfitColor:'#1c1c28', gear:'headband'},
   lines:{
    greet:["Oi, {name}! Sun's up and so are your quests. Don't make me come over there.","Another day, another chance to surpass yesterday's you. Let's GO!","I believe in you. Which is exactly why I won't go easy on you."],
@@ -271,7 +282,7 @@ const COACHES = {
    train:["Sweat is just weakness leaving the body! Great work!","Logged. Your future self is cheering right now."],
    late:["It's getting late, {name}. The quest board doesn't clear itself!","Day's almost over. Ten minutes. That's all I'm asking. ...For now."],
    idle:["What're you staring at? Go do some squats!","Rest is part of training. Lounging isn't.","When this gets hard, remember why you started."]}},
- rei:{name:'REI', role:'Calm strategist', tag:'Quiet, precise, and secretly proud of you.',
+ rei:{img:true, name:'REI', role:'Calm strategist', tag:'Quiet, precise, and secretly proud of you.',
   av:{skin:0, hair:'long', hairColor:'#c9d3e6', eyes:'#3ea8ff', outfit:'tech', outfitColor:'#22324f', gear:'glasses'},
   lines:{
    greet:["Good morning, {name}. I've reviewed today's quests. They are entirely achievable.","Consistency beats intensity. Shall we begin?","Today's objective is simple: show up. The rest follows."],
@@ -294,7 +305,7 @@ const COACHES = {
    late:["Clock's ticking, {name}! Let's squeeze in a quick quest!","Final round of the day! One more push and we clear it!"],
    idle:["Hey! Hey! Wanna do push-ups? I wanna do push-ups!","Your stats are going up and I'm SO here for it!","Don't forget water! Hydration = power!"]}}
 };
-const EXPR = {greet:'smile', quest:'happy', clear:'happy', penalty:'fierce', levelup:'happy', train:'happy', late:'fierce', idle:'smile'};
+const EXPR = {greet:'smile', quest:'happy', clear:'happy', penalty:'fierce', levelup:'surprised', train:'happy', late:'fierce', idle:'smile'};
 
 /* ================= helpers ================= */
 const $ = s => document.querySelector(s);
@@ -384,7 +395,10 @@ try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
 if (!S || S.v !== 1) S = fresh();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 const statVal = k => 10 + Math.floor(S.cat[k] / STAT_STEP);
-const coach = () => COACHES[S.coach] || COACHES.kaida;
+const coachId = () => COACHES[S.coach] ? S.coach : 'kaida';
+const coach = () => COACHES[coachId()];
+const coachPic = (expr, id = coachId()) => { const c = COACHES[id]; return c.img ? `<img src="assets/coaches/coach_${id}_${expr}.webp" alt="${c.name}">` : avatarSVG(c.av, {expr:expr === 'surprised' ? 'smile' : expr, label:c.name}); };
+const preloadCoach = () => { const c = coach(); if (c.img) ['smile','happy','fierce','surprised'].forEach(e => { new Image().src = `assets/coaches/coach_${coachId()}_${e}.webp`; }); };
 
 function makeQuests() {
  const r = rankOf(S.level), [p, q, c] = QT[r], x = 15 + 5 * RANKS.indexOf(r);
@@ -425,7 +439,7 @@ let typeInt = null;
 const line = ev => pick(coach().lines[ev]).replace(/\{name\}/g, S.name);
 function say(ev, text) {
  CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0;
- const p = $('#vnPort'); if (p) p.innerHTML = avatarSVG(coach().av, {expr:CL.expr, label:coach().name});
+ const p = $('#vnPort'); if (p) p.innerHTML = coachPic(CL.expr);
  clearInterval(typeInt);
  typeInt = setInterval(() => {
   CL.shown = Math.min(CL.text.length, CL.shown + 1);
@@ -433,7 +447,7 @@ function say(ev, text) {
   if (CL.shown >= CL.text.length) clearInterval(typeInt);
  }, 24);
 }
-const coachBlock = (ev, txt) => { const c = coach(); return `<div class="dcoach">${avatarSVG(c.av, {expr:EXPR[ev], label:c.name})}<div><b>${c.name}</b><p>${esc(txt || line(ev))}</p></div></div>`; };
+const coachBlock = (ev, txt) => { const c = coach(); return `<div class="dcoach">${coachPic(EXPR[ev])}<div><b>${c.name}</b><p>${esc(txt || line(ev))}</p></div></div>`; };
 
 /* ================= toasts & dialogs ================= */
 function toast(msg) {
@@ -612,7 +626,7 @@ function openCoach(done) {
  cpDone = done || null; $('#cc').hidden = false;
  $('#cc').innerHTML = `<div class="ccin"><div class="panel"><p class="sys">Choose your coach</p><h2>Who's training you?</h2><p class="dim small">Your coach talks to you every day and reacts to what you do. You can switch any time from Status.</p>
   <div class="coaches">${Object.entries(COACHES).map(([id, c]) => `<button class="panel coachc ${S.coach === id ? 'on' : ''}" data-a="pickcoach" data-id="${id}">
-   ${avatarSVG(c.av, {expr:'smile', label:c.name})}<div class="vnname">${c.name}</div><p class="vnrole">${c.role}</p><p class="small">${c.tag}</p><p class="small dim">“${esc(c.lines.greet[0].replace(/\{name\}/g, S.name))}”</p></button>`).join('')}</div>
+   ${coachPic('smile', id)}<div class="vnname">${c.name}</div><p class="vnrole">${c.role}</p><p class="small">${c.tag}</p><p class="small dim">“${esc(c.lines.greet[0].replace(/\{name\}/g, S.name))}”</p></button>`).join('')}</div>
   ${cpDone ? '' : '<div class="btns"><button class="b" data-a="ccclose">Cancel</button></div>'}</div></div>`;
 }
 const closeCC = () => { $('#cc').hidden = true; $('#cc').innerHTML = ''; };
@@ -630,7 +644,7 @@ function render() {
 function vCoach() {
  const c = coach();
  return `<section class="panel vn wide" data-a="coachtap" aria-label="Coach dialogue, tap for more">
-  <div class="vnport" id="vnPort">${avatarSVG(c.av, {expr:CL.expr, label:c.name})}</div>
+  <div class="vnport" id="vnPort">${coachPic(CL.expr)}</div>
   <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${esc(CL.text.slice(0, CL.shown))}</p><span class="vnnext">▼ tap</span></div></section>`;
 }
 function vQuests() {
@@ -759,7 +773,7 @@ document.addEventListener('click', e => {
    return;
   case 'pickchar': { S.avatar = {char:id}; const d = ccDone; ccDone = null; closeCC(); commit(); if (d) d(); else toast('Hunter selected.'); return; }
   case 'pickcoach': {
-   S.coach = id; const d = cpDone; cpDone = null; closeCC(); commit();
+   S.coach = id; preloadCoach(); const d = cpDone; cpDone = null; closeCC(); commit();
    if (d) d(); else { say('greet'); toast(`${coach().name} is now your coach.`); }
    return;
   }
@@ -804,6 +818,7 @@ setInterval(dayCheck, 60000);
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (TABS.includes(h)) { tab = h; render(); } });
 
 /* ================= boot ================= */
+preloadCoach();
 const firstRun = !S.today;
 const msgs = rollover();
 render();
