@@ -69,13 +69,15 @@ p{margin:6px 0}
 .qb{display:grid;grid-template-columns:repeat(auto-fit,minmax(54px,1fr))}.qb .b{padding:0 8px}
 .clear{color:var(--ok);font:700 15px Oxanium,sans-serif;margin-top:8px}
 /* coach dialogue */
-.vn{display:grid;grid-template-columns:118px minmax(0,1fr);align-items:end;padding:0 16px 0 0;min-height:160px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.vn{display:grid;grid-template-columns:132px minmax(0,1fr);align-items:end;padding:0 16px 0 0;min-height:200px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .vnport svg{display:block;width:150px;height:165px;margin-left:-14px}
-.vnport img{display:block;width:150px;height:150px;margin-left:-16px;filter:drop-shadow(0 0 12px rgba(62,240,255,.25))}
-.vnbody{padding:16px 0 14px 4px;align-self:stretch;display:flex;flex-direction:column}
+.vnport{align-self:start;margin-top:26px;overflow:hidden}
+.vnport img{display:block;width:150px;height:150px;margin-left:-12px;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 15%,#000 82%,transparent 100%);mask-image:linear-gradient(to bottom,transparent 0,#000 15%,#000 82%,transparent 100%)}
+.ghost{visibility:hidden}
+.vnbody{padding:16px 0 14px 8px;position:relative;align-self:stretch;display:flex;flex-direction:column}
 .vnname{align-self:flex-start;font:700 12px/1 Orbitron,sans-serif;letter-spacing:.1em;color:#05060d;background:linear-gradient(90deg,var(--c1),var(--c2));padding:6px 16px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
 .vnrole{font-size:12px;color:var(--dim);margin:4px 0 0}
-#vnText{font-size:16px;line-height:1.45;margin:8px 0 0;flex:1;min-height:70px}
+#vnText{font-size:16px;line-height:1.45;margin:8px 0 0;flex:1;min-height:93px}
 .vnch{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .vnch button{min-height:40px;padding:0 14px;font:600 14px 'Chakra Petch',sans-serif;color:#fff;border:1px solid var(--c1);background:rgba(62,240,255,.12);clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
 .vnch button:hover{background:rgba(62,240,255,.25)}
@@ -598,6 +600,8 @@ function rollover() {
 
 /* ================= coach dialogue ================= */
 const CL = {text:'', expr:'smile', shown:0, queue:[], choices:[]};
+// Typed text plus the rest kept invisible, so the box is full size from the first letter and never jumps
+const typed = () => esc(CL.text.slice(0, CL.shown)) + (CL.shown < CL.text.length ? `<span class="ghost">${esc(CL.text.slice(CL.shown))}</span>` : '');
 let typeInt = null, talkN = 0;
 const QSHORT = {push:'push-ups', squat:'squats', cardio:'cardio'};
 function ctx() {
@@ -637,12 +641,13 @@ function say(ev, text, choices) {
  CL.queue = []; CL.choices = choices || [];
  const ch = $('#vnCh'); if (ch) ch.innerHTML = '';
  CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0;
+ { const t0 = $('#vnText'); if (t0) t0.innerHTML = typed(); }
  const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = '▼ tap';
  const p = $('#vnPort'); if (p) p.innerHTML = coachPic(CL.expr);
  clearInterval(typeInt);
  typeInt = setInterval(() => {
   CL.shown = Math.min(CL.text.length, CL.shown + 1);
-  const t = $('#vnText'); if (t) t.textContent = CL.text.slice(0, CL.shown);
+  const t = $('#vnText'); if (t) t.innerHTML = typed();
   if (CL.shown >= CL.text.length) { clearInterval(typeInt); const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = CL.choices.length ? '' : CL.queue.length ? '▼ more' : '▼ tap'; showChoices(); }
  }, 22);
 }
@@ -879,7 +884,7 @@ function vCoach() {
  const c = coach();
  return `<section class="panel vn wide" data-a="coachtap" aria-label="Coach dialogue, tap for more">
   <div class="vnport" id="vnPort">${coachPic(CL.expr)}</div>
-  <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${esc(CL.text.slice(0, CL.shown))}</p><div class="vnch" id="vnCh">${CL.shown >= CL.text.length ? choicesHTML() : ''}</div><span class="vnnext">${CL.choices.length ? '' : CL.queue.length && CL.shown >= CL.text.length ? '▼ more' : '▼ tap'}</span></div></section>`;
+  <div class="vnbody"><span class="vnname">${c.name}</span><p class="vnrole">${c.role}</p><p id="vnText">${typed()}</p><div class="vnch" id="vnCh">${CL.shown >= CL.text.length ? choicesHTML() : ''}</div><span class="vnnext">${CL.choices.length ? '' : CL.queue.length && CL.shown >= CL.text.length ? '▼ more' : '▼ tap'}</span></div></section>`;
 }
 let focusQ = null, sview = 'hunter';
 function vQuests() {
@@ -1057,7 +1062,7 @@ document.addEventListener('click', e => {
  const qs = id && S.today.quests.find(q => q.id === id);
  switch (a) {
   case 'coachtap':
-   if (CL.shown < CL.text.length) { CL.shown = CL.text.length; clearInterval(typeInt); const t = $('#vnText'); if (t) t.textContent = CL.text; const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = CL.choices.length ? '' : CL.queue.length ? '▼ more' : '▼ tap'; showChoices(); }
+   if (CL.shown < CL.text.length) { CL.shown = CL.text.length; clearInterval(typeInt); const t = $('#vnText'); if (t) t.innerHTML = typed(); const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = CL.choices.length ? '' : CL.queue.length ? '▼ more' : '▼ tap'; showChoices(); }
    else if (CL.choices.length) return;
    else if (CL.queue.length) { const rest = CL.queue.slice(1), it = CL.queue[0]; say(it.ev, it.text, it.choices); CL.queue = rest; }
    else talk();
