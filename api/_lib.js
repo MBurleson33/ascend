@@ -55,3 +55,6 @@ export async function vapid() {
 export const wrap = fn => async (req, res) => {
   try { await fn(req, res); } catch (e) { send(res, e.status || 500, { error: e.message || 'Server error' }); }
 };
+
+// Apple's push service rejects VAPID subjects it can't verify, so default to this site's own https URL
+export const subject = req => process.env.VAPID_SUBJECT || `https://${req.headers['x-forwarded-host'] || req.headers.host || 'ascend.app'}`;

@@ -108,6 +108,9 @@ p{margin:6px 0}
 .pav img{width:100%;height:100%;object-fit:cover;transform:scale(1.8);transform-origin:50% 36%}
 .pinfo{display:grid;flex:1;min-width:0}.pinfo b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pst{font:700 12px Oxanium,sans-serif;color:var(--dim);white-space:nowrap}.pst.ok{color:var(--ok)}
+.opt{font:700 10px Oxanium,sans-serif;letter-spacing:.08em;color:var(--gold);border:1px solid rgba(255,207,90,.5);padding:2px 6px;margin-left:6px;vertical-align:middle}
+.evt{margin:6px 0 8px;padding:8px 10px;font-size:13px;color:var(--dim);background:rgba(255,207,90,.07);border-left:3px solid var(--gold)}
+.evt b{color:var(--gold);font-family:Oxanium,sans-serif;letter-spacing:.04em;margin-right:4px}
 .trial{padding:12px 0;border-top:1px solid rgba(62,240,255,.14)}
 .trial.lock{opacity:.55}
 .trial.ok b{color:var(--ok)}
@@ -319,9 +322,71 @@ const STATS = [
 ];
 const WORKOUTS = [
  {name:'Foundation A', ex:['Squats — 3 × 12','Incline push-ups — 3 × 8','Glute bridges — 3 × 12','Plank — 3 × 20 sec']},
+ {name:'Core Crusher', ex:['Plank — 3 × 30 sec','Bicycle crunches — 3 × 16','Leg raises — 3 × 10','Side plank — 2 × 20 sec per side']},
  {name:'Foundation B', ex:['Reverse lunges — 3 × 8 per leg','Knee push-ups — 3 × 10','Superman hold — 3 × 15 sec','Dead bugs — 3 × 8 per side']},
- {name:'Foundation C', ex:['Wall sit — 3 × 30 sec','Push-ups — 3 × as many as you can','Step-ups — 3 × 10 per leg','Mountain climbers — 3 × 20']}
+ {name:'Leg Day', ex:['Backpack squats — 3 × 12','Reverse lunges — 3 × 10 per leg','Glute bridges — 3 × 15','Calf raises — 3 × 20']},
+ {name:'Foundation C', ex:['Wall sit — 3 × 30 sec','Push-ups — 3 × as many as you can','Step-ups — 3 × 10 per leg','Mountain climbers — 3 × 20']},
+ {name:'Upper Body Builder', ex:['Push-ups — 3 × as many as you can','Pike push-ups — 3 × 6','Chair dips — 3 × 10','Plank shoulder taps — 3 × 16']},
+ {name:'Mobility Flow', ex:["World's greatest stretch — 5 per side",'Cat-cow — 10 slow reps','Hip flexor stretch — 45 sec per side',"Child's pose — 60 sec"]}
 ];
+// Exercise library. base = E-Rank target. unit: rep | sec | min
+const EX = {
+ push:{label:'Push-ups', noun:'push-ups', base:10, unit:'rep', cat:'str'},
+ pike:{label:'Pike push-ups', noun:'pike push-ups', base:6, unit:'rep', cat:'str'},
+ dips:{label:'Chair dips', noun:'chair dips', base:10, unit:'rep', cat:'str'},
+ taps:{label:'Plank shoulder taps', noun:'shoulder taps', base:16, unit:'rep', cat:'str'},
+ squat:{label:'Squats', noun:'squats', base:15, unit:'rep', cat:'vit'},
+ lunge:{label:'Lunges (each leg)', noun:'lunges per leg', base:8, unit:'rep', cat:'vit'},
+ bridge:{label:'Glute bridges', noun:'glute bridges', base:15, unit:'rep', cat:'vit'},
+ calf:{label:'Calf raises', noun:'calf raises', base:25, unit:'rep', cat:'agi'},
+ wallsit:{label:'Wall sit', noun:'seconds of wall sit', base:30, unit:'sec', cat:'vit'},
+ situp:{label:'Sit-ups', noun:'sit-ups', base:12, unit:'rep', cat:'str'},
+ plank:{label:'Plank', noun:'seconds of plank', base:30, unit:'sec', cat:'str'},
+ climb:{label:'Mountain climbers', noun:'mountain climbers', base:20, unit:'rep', cat:'agi'},
+ bike:{label:'Bicycle crunches', noun:'bicycle crunches', base:20, unit:'rep', cat:'str'},
+ legraise:{label:'Leg raises', noun:'leg raises', base:10, unit:'rep', cat:'str'},
+ cardio:{label:'Walk or run', noun:'minutes of cardio', base:10, unit:'min', cat:'agi'},
+ jacks:{label:'Jumping jacks', noun:'jumping jacks', base:40, unit:'rep', cat:'agi'},
+ burpee:{label:'Burpees', noun:'burpees', base:8, unit:'rep', cat:'agi'},
+ knees:{label:'High knees', noun:'seconds of high knees', base:30, unit:'sec', cat:'agi'},
+ stretch:{label:'Stretch', noun:'minutes of stretching', base:5, unit:'min', cat:'sen'}
+};
+const GROUPS = {upper:['push', 'pike', 'dips', 'taps'], lower:['squat', 'lunge', 'bridge', 'calf', 'wallsit'], core:['situp', 'plank', 'climb', 'bike', 'legraise'], blast:['jacks', 'burpee', 'knees', 'climb']};
+// One theme per weekday (index = getDay(), 0 = Sunday). Each slot: [group or 'fixed', exercise id, size factor]
+const THEMES = [
+ {name:'Recovery Day', plan:[['fixed', 'cardio', 1.3], ['fixed', 'stretch', 1], ['core', null, .6]]},
+ {name:'Strength Day', plan:[['upper'], ['lower'], ['fixed', 'cardio', 1]]},
+ {name:'Core Day', plan:[['core'], ['core'], ['fixed', 'cardio', 1]]},
+ {name:'Cardio Day', plan:[['fixed', 'cardio', 1.5], ['blast'], ['lower']]},
+ {name:'Leg Day', plan:[['lower'], ['lower'], ['fixed', 'cardio', 1]]},
+ {name:'Full Body Day', plan:[['upper'], ['core'], ['blast']]},
+ {name:'Endurance Day', plan:[['fixed', 'cardio', 1.6], ['upper', null, 1.2], ['lower', null, 1.2]]}
+];
+const RANK_MULT = [1, 1.6, 2.2, 3, 4, 5];
+const EVENTS = [
+ {id:'early', name:'Early Bird', desc:'Clear the Daily Quest before noon for +25 XP.'},
+ {id:'dmg', name:'Double Damage', desc:'Everything you log deals double damage to the Weekly Gate today.'},
+ {id:'bonus', name:'Bonus Round', desc:'A 4th quest is on the board today for +30 XP. Optional.'},
+ {id:'over', name:'Overtime', desc:'Your Daily Quest clear bonus is 50% bigger today.'},
+ {id:'mystery', name:'Mystery Quest', desc:'Clear the Daily Quest to reveal a secret quest worth +40 XP.'}
+];
+// Seeded random so a day's quests stay the same if you reopen the app
+function seeded(str) { let h = 1779033703 ^ str.length; for (const c of str) { h = Math.imul(h ^ c.charCodeAt(0), 3432918353); h = h << 13 | h >>> 19; } return () => { h = Math.imul(h ^ h >>> 16, 2246822507); h = Math.imul(h ^ h >>> 13, 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; }; }
+function makeQuest(id, f, xp, optional) {
+ const e = EX[id], raw = e.base * RANK_MULT[S.rankIdx || 0] * (f || 1);
+ const target = e.unit === 'sec' ? Math.max(10, Math.round(raw / 5) * 5) : Math.max(3, Math.round(raw));
+ return {id, label:e.label, unit:e.unit === 'sec' ? ' sec' : e.unit === 'min' ? ' min' : '', target, prog:0, cat:e.cat, xp, done:false, optional:!!optional,
+  steps:e.unit === 'sec' ? [10, 30] : e.unit === 'min' ? [5, 10] : [1, 5, 10]};
+}
+function pickFrom(group, used, rand, avoid) { let opts = GROUPS[group].filter(k => !used.has(k)); const fresh = avoid ? opts.filter(k => !avoid.has(k)) : opts; if (fresh.length) opts = fresh; return opts[Math.floor(rand() * opts.length)]; }
+function makeDay(t, noLookback) {
+ const [y, m, d] = t.split('-').map(Number), avoid = noLookback ? null : new Set(makeDay(dstr(new Date(y, m - 1, d - 1)), true).quests.map(q => q.id)), th = THEMES[new Date(y, m - 1, d).getDay()], rand = seeded('ascend' + t), used = new Set(), xp = 15 + 5 * (S.rankIdx || 0);
+ const quests = th.plan.map(([g, id, f]) => { if (g !== 'fixed') id = pickFrom(g, used, rand, avoid); used.add(id); return makeQuest(id, f, xp); });
+ const event = rand() < .6 ? EVENTS[Math.floor(rand() * EVENTS.length)] : null;
+ if (event && event.id === 'bonus') { const g = ['upper', 'lower', 'core', 'blast'][Math.floor(rand() * 4)]; quests.push(makeQuest(pickFrom(g, used, rand), .8, 30, true)); }
+ return {theme:th.name, event:event ? {...event} : null, quests};
+}
+const exNoun = q => EX[q.id] ? EX[q.id].noun : q.label.toLowerCase();
 const rep = (n, a) => Array.from({length:n}, () => a).flat();
 const RP = [
  {desc:'Run 1 min, walk 90 sec × 8', seg:rep(8, [['Run',60],['Walk',90]])},
@@ -606,17 +671,10 @@ const coach = () => COACHES[coachId()];
 const coachPic = (expr, id = coachId()) => { const c = COACHES[id]; return c.img ? `<img src="assets/coaches/coach_${id}_${expr}.webp" alt="${c.name}">` : avatarSVG(c.av, {expr:expr === 'surprised' ? 'smile' : expr, label:c.name}); };
 const preloadCoach = () => { const c = coach(); if (c.img) ['smile','happy','fierce','surprised'].forEach(e => { new Image().src = `assets/coaches/coach_${coachId()}_${e}.webp`; }); };
 
-function makeQuests() {
- const r = rankOf(S.level), [p, q, c] = QT[r], x = 15 + 5 * RANKS.indexOf(r);
- return [
-  {id:'push', label:'Push-ups', unit:'', target:p, prog:0, cat:'str', xp:x, done:false, steps:[1,5,10]},
-  {id:'squat', label:'Squats', unit:'', target:q, prog:0, cat:'vit', xp:x, done:false, steps:[1,5,10]},
-  {id:'cardio', label:'Walk or run', unit:' min', target:c, prog:0, cat:'agi', xp:x, done:false, steps:[5,10]}
- ];
-}
 function newDay(t) {
  const wi = S.workoutIdx % WORKOUTS.length;
- S.today = {date:t, quests:makeQuests(), water:0, waterDone:false, complete:false, wkIdx:wi, wk:WORKOUTS[wi].ex.map(() => false), wkDone:false, runDone:false, walkXp:0, checkin:false};
+ const day = makeDay(t);
+ S.today = {date:t, quests:day.quests, theme:day.theme, event:day.event, water:0, waterDone:false, complete:false, wkIdx:wi, wk:WORKOUTS[wi].ex.map(() => false), wkDone:false, runDone:false, walkXp:0, checkin:false};
  S.today.pops = makePops();
 }
 function rollover() {
@@ -650,8 +708,8 @@ const typed = () => esc(CL.text.slice(0, CL.shown)) + (CL.shown < CL.text.length
 let typeInt = null, talkN = 0;
 const QSHORT = {push:'push-ups', squat:'squats', cardio:'cardio'};
 function ctx() {
- const T = S.today, open = T.quests.filter(q => !q.done);
- const amt = q => q.id === 'cardio' ? `${q.target - q.prog} minutes of cardio` : `${q.target - q.prog} ${QSHORT[q.id]}`;
+ const T = S.today, open = T.quests.filter(q => !q.done && !q.optional);
+ const amt = q => `${q.target - q.prog} ${exNoun(q)}`;
  const items = open.map(amt);
  const leftList = items.length > 1 ? items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1] : (items[0] || 'nothing');
  const R = S.runPlan, w = RP[R.week];
@@ -667,7 +725,12 @@ function ctx() {
  return {rank:RANKS[S.exam ? S.exam.to : Math.min(5, S.rankIdx + 1)], examLeft:el === 1 ? 'one trial' : `${el} trials`, name:S.name, next:open[0] ? amt(open[0]) : '', leftList, xpLeft:need(S.level) - S.xp, nextLevel:S.level + 1, streak:S.streak, streakNext:S.streak + 1, pen:S.penalty ? S.penalty.target - S.penalty.prog : 0, extra};
 }
 const fill = (t, vars) => { const c = Object.assign(ctx(), vars || {}); return t.replace(/\{(\w+)\}/g, (_, k) => c[k] ?? '').replace(/^(\w)/, m => m.toUpperCase()); };
-const line = (ev, vars) => fill(pick(coach().lines[ev]), vars);
+const lastLine = {};
+function line(ev, vars) {
+ const all = coach().lines[ev] || coach().lines.idle, opts = all.length > 1 ? all.filter(t => t !== lastLine[ev]) : all, t = pick(opts);
+ lastLine[ev] = t; return fill(t, vars);
+}
+const greetLine = ev => line(ev) + (ev.startsWith('greet') && S.today.theme ? ' ' + line('themeIntro', {theme:S.today.theme}) : '');
 // What the coach should be talking about right now
 function opener() {
  if (S.penalty && !S.penalty.done) return 'penaltyRemind';
@@ -679,7 +742,7 @@ function talk() {
  if (talkN % 2 === 0) return say(lateNow() && talkN % 4 === 0 ? 'late' : 'idle');
  const ev = opener(); say(ev.startsWith('greet') ? 'status' : ev);
 }
-function questLine(id) { const c = ctx(); say(id, line(id) + (c.next ? ' ' + line('next') : '')); }
+function questLine(id) { const c = ctx(), q = S.today.quests.find(x => x.id === id), own = coach().lines[id] && Math.random() < .5; say('push', (own ? line(id) : line('questDone', {q:q ? q.label.toLowerCase() : id})) + (c.next ? ' ' + line('next') : '')); }
 function trainLine() { const T = S.today, c = ctx(); say('train', line('train') + (T.complete ? (c.extra ? ' ' + c.extra : '') : ' ' + line('next'))); }
 function sayQueue(list, ev) { const items = list.map(x => typeof x === 'string' ? {ev, text:x} : x); say(items[0].ev, items[0].text, items[0].choices); CL.queue = items.slice(1); }
 const choicesHTML = () => CL.choices.map((c, i) => `<button data-a="vnchoice" data-i="${i}">${esc(c.label)}</button>`).join('');
@@ -789,30 +852,33 @@ function checkTitles() {
 const commit = () => { save(); render(); };
 
 /* ================= actions ================= */
-function trackTotal(id, d) { if (id === 'push') S.totals.pushups += d; else if (id === 'squat') S.totals.squats += d; else if (id === 'cardio') S.totals.cardio += d; }
+function trackTotal(id, d) { if (id === 'push') S.totals.pushups += d; else if (id === 'squat') S.totals.squats += d; else if (id === 'cardio') S.totals.cardio += d; else { S.totals.reps = S.totals.reps || {}; S.totals.reps[id] = (S.totals.reps[id] || 0) + d; } }
 function questAdd(id, amt, quiet) {
- const q = S.today.quests.find(x => x.id === id);
+ const q = S.today.quests.find(x => x.id === id && !x.done) || S.today.quests.find(x => x.id === id);
  if (!q || q.done) return;
  const before = q.prog;
  q.prog = Math.max(0, Math.min(q.target, q.prog + amt));
  trackTotal(id, q.prog - before);
- if (!quiet) hit((q.prog - before) * (id === 'cardio' ? 3 : 1));
+ if (!quiet) hit((q.prog - before) * (q.unit === ' min' ? 3 : q.unit === ' sec' ? 1 / 3 : 1));
  if (q.prog >= q.target) {
   if (!quiet) { burst(lastPt.x, lastPt.y, '#4dffb5', 24); sfx('success', [25, 30, 25]); }
   q.done = true; addXp(q.xp, q.cat, `Daily Quest: ${q.label}`);
   if (!checkDaily() && !quiet) questLine(id);
- } else if (!quiet && before < q.target / 2 && q.prog >= q.target / 2) say('half', line('half', {q:QSHORT[id]}));
+ } else if (!quiet && before < q.target / 2 && q.prog >= q.target / 2) say('half', line('half', {q:q.label.toLowerCase()}));
 }
 function checkDaily() {
  const T = S.today;
- if (T.complete || !T.quests.every(q => q.done)) return false;
+ if (T.complete || !T.quests.filter(q => !q.optional).every(q => q.done)) return false;
  T.complete = true; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak); S.totals.questDays++;
  let shieldMsg = '';
  if (T.rest) { T.rest = false; S.shields++; shieldMsg = '<p class="dim small">You trained on your rest day, so your shield was refunded.</p>'; }
  if (S.streak % 7 === 0 && S.shields < 3) { S.shields++; shieldMsg += `<p style="color:var(--c1)">${S.streak}-day streak: you earned a rest shield (${S.shields}/3).</p>`; }
  setTimeout(() => { sfx('chime', [50, 50, 120]); const [x, y] = mid(); burst(x, y, '#4dffb5', 50, 1.3); burst(x, y, '#ffcf5a', 30, 1); }, 200);
- const bonus = 50 + Math.min(S.streak * 5, 50), txt = line('clear');
+ let bonus = 50 + Math.min(S.streak * 5, 50); if (T.event && T.event.id === 'over') bonus = Math.round(bonus * 1.5);
+ const txt = line('clear');
  addXp(bonus, null, `Daily Quest cleared · ${S.streak}-day streak`);
+ if (T.event && T.event.id === 'early' && new Date().getHours() < 12) { addXp(25, null, 'Early Bird bonus'); shieldMsg += '<p style="color:var(--gold)">Early Bird: +25 XP for clearing before noon.</p>'; }
+ if (T.event && T.event.id === 'mystery' && !T.quests.some(q => q.optional)) { const g = ['upper', 'lower', 'core', 'blast'][Math.floor(Math.random() * 4)], used = new Set(T.quests.map(q => q.id)); T.quests.push(makeQuest(pickFrom(g, used, Math.random), 1, 40, true)); shieldMsg += '<p style="color:var(--gold)">Mystery Quest revealed! Check your board for a bonus quest worth +40 XP.</p>'; }
  say('clear', txt);
  dialog({title:'Daily Quest complete', body:`${playerImg('happy', 'dpimg')}<p>All quests cleared. Streak: <b>${S.streak}</b> day${S.streak === 1 ? '' : 's'}.</p><p class="dim">Reward: +${bonus} XP</p>
   ${shieldMsg}${S.penalty && !S.penalty.done ? '<p style="color:var(--red)">The Penalty Quest is still open. Clear it before midnight.</p>' : ''}${coachBlock('clear', txt)}`,
@@ -948,10 +1014,10 @@ function vCoach() {
 let focusQ = null, sview = 'hunter';
 function vQuests() {
  const T = S.today, P = S.penalty, A = activePop();
- const f = T.quests.find(q => q.id === focusQ && !q.done) || T.quests.find(q => !q.done);
+ const f = T.quests.find(q => q.id === focusQ && !q.done) || T.quests.find(q => !q.done && !q.optional) || T.quests.find(q => !q.done);
  const qrow = q => { const on = f && q.id === f.id;
   return `<div class="quest ${on ? 'on' : ''} ${q.done ? 'qdone' : ''}" ${!q.done && !on ? `data-a="focusq" data-id="${q.id}"` : ''}>
-  <div class="qh"><b>${q.done ? '✓ ' : ''}${q.label}</b><span class="qn ${q.done ? 'done' : ''}">${q.prog} / ${q.target}${q.unit}</span></div>
+  <div class="qh"><b>${q.done ? '✓ ' : ''}${q.label}${q.optional ? ` <span class="opt">BONUS +${q.xp}</span>` : ''}</b><span class="qn ${q.done ? 'done' : ''}">${q.prog} / ${q.target}${q.unit}</span></div>
   <div class="bar ${q.done ? 'g' : ''}"><i style="width:${q.prog / q.target * 100}%"></i></div>
   ${on ? `<div class="btns qb"><button class="b" data-a="qminus" data-id="${q.id}" aria-label="Remove ${q.steps[0]}">−${q.steps[0]}</button>${q.steps.map(s => `<button class="b" data-a="qadd" data-id="${q.id}" data-n="${s}">+${s}</button>`).join('')}<button class="b p" data-a="qfill" data-id="${q.id}">Done</button></div>` : ''}</div>`; };
  const bonus = [
@@ -969,7 +1035,8 @@ function vQuests() {
  ${testDue() && S.totals.questDays >= 1 && !S.exam ? `<button class="panel wide alert" data-a="ptopen"><span><span class="sys">Monthly Power Test</span><b>See how strong you are today</b></span><span class="arr" style="color:var(--c1)">›</span></button>` : ''}
  ${S.party && partyData ? `<button class="panel wide alert" data-a="goparty"><span><span class="sys">Party · ${esc(S.party.name || '')}</span><b>${partyToday()} of ${partyData.members.length} cleared today</b></span><span class="arr" style="color:var(--c1)">›</span></button>` : ''}
  ${S.exam ? `<button class="panel gold wide alert" data-a="go" data-t="status"><span><span class="sys" style="color:var(--gold)">Rank-Up Exam</span><b>${rankOf()} → ${RANKS[S.exam.to]} · ${S.exam.done.filter(Boolean).length}/${S.exam.done.length} trials passed</b></span><span class="arr">›</span></button>` : ''}
- <section class="panel wide"><div class="qtop"><h2>DAILY QUEST</h2><span class="dim small">${rankOf()}-Rank</span></div>
+ <section class="panel wide"><div class="qtop"><h2>DAILY QUEST</h2><span class="dim small">${T.theme ? new Date().toLocaleDateString(undefined, {weekday:'long'}) + ' · ' + T.theme : rankOf() + '-Rank'}</span></div>
+  ${T.event ? `<p class="evt"><b>⚡ ${T.event.name}</b> ${T.event.desc}</p>` : ''}
   ${T.quests.map(qrow).join('')}
   ${T.complete ? `<div class="clear">Cleared · +${50 + Math.min(S.streak * 5, 50)} XP</div>` : T.rest ? `<p class="clear" style="color:var(--c1)">Rest day · streak protected. Clear the quests anyway to get your shield back.</p>` : `<p class="dim small" style="margin-top:10px">Clear all three: +${50 + Math.min((S.streak + 1) * 5, 50)} XP and +1 streak</p>${S.shields > 0 && S.streak > 0 ? `<button class="linkish" data-a="shield">Need a rest day? Use a shield (${S.shields} left)</button>` : ''}`}</section>
  ${gateHTML()}
@@ -1055,13 +1122,14 @@ function vLog() {
  <section class="panel"><h2>CLOUD SAVE</h2>${cloudHTML()}</section>
  <section class="panel"><h2>SETTINGS</h2>
   <button class="toggle ${S.notify ? 'on' : ''}" data-a="tnotify"><span>Notifications <span class="dim small">(Sudden Quests, streak reminders)</span></span><span class="sw2"></span></button>
+  ${cloudAvail() ? '<button class="linkish" data-a="checknotify" style="padding-bottom:6px">Check notifications &amp; send a test</button>' : ''}
   <button class="toggle ${S.sound !== false ? 'on' : ''}" data-a="tsound"><span>Sound effects</span><span class="sw2"></span></button>
   <button class="toggle ${S.haptics !== false ? 'on' : ''}" data-a="thaptic"><span>Vibration <span class="dim small">(Android)</span></span><span class="sw2"></span></button></section>
  <section class="panel"><h2>INSTALL APP</h2>${installHTML()}</section>
  <section class="panel"><h2>SAVE DATA</h2><p class="dim small">Progress is saved in this browser on this device. Copy your save code now and then, so you can restore it after clearing your browser or moving to a new phone.</p>
   <div class="btns"><button class="b" data-a="export">Copy save code</button><button class="b" data-a="import">Restore from code</button><button class="b r" data-a="reset">Reset everything</button></div></section>
  <section class="panel wide"><h2>HOW IT WORKS</h2>
-  <p class="small">Three Daily Quests appear every day. Clear all three for bonus XP and +1 streak. Every 7-day streak earns a rest shield (max 3). A shield covers a rest day, and covers a missed day automatically. If you miss a day with no shield, a Penalty Quest appears. Clear it that day or the streak resets.</p>
+  <p class="small">Every day has a theme (Strength, Core, Cardio, Legs, Full Body, Endurance, Recovery) with exercises picked from a library of about 20, and most days bring a random System Event like Early Bird, Double Damage or a Mystery Quest. Three Daily Quests appear every day. Clear all three for bonus XP and +1 streak. Every 7-day streak earns a rest shield (max 3). A shield covers a rest day, and covers a missed day automatically. If you miss a day with no shield, a Penalty Quest appears. Clear it that day or the streak resets.</p>
   <p class="small">Each week a <b>Weekly Gate</b> opens with a boss. Every rep and minute you log deals damage. Defeat it by Sunday for bonus XP. Once a month, take the <b>Power Test</b> to chart how much stronger you're getting.</p>
   <p class="small">Each level takes a little more XP than the last. Every 10 levels you hit a level cap and unlock a <b>Rank-Up Exam</b>: real fitness trials like running without stopping, max push-ups and plank holds. Pass them all to rank up (E → D → C → B → A → S). Extra XP is saved while you're capped. Your aura changes color and the quests get harder with each rank.</p></section>`;
 }
@@ -1124,7 +1192,7 @@ function makeGate(wk) { let h = 7; for (const c of wk) h = (h * 31 + c.charCodeA
 function gateCheck() { const wk = weekKey(); if (S.gate && S.gate.week === wk) return null; const old = S.gate; S.gate = makeGate(wk); return old && !old.cleared ? old : 'new'; }
 const gateDaysLeft = () => 7 - (new Date().getDay() + 6) % 7;
 function hit(dmg) {
- const G = S.gate; dmg = Math.round(dmg); if (!G || G.cleared || dmg <= 0) return;
+ const G = S.gate; if (S.today && S.today.event && S.today.event.id === 'dmg') dmg *= 2; dmg = Math.round(dmg); if (!G || G.cleared || dmg <= 0) return;
  G.hp = Math.max(0, G.hp - dmg);
  floater(`−${dmg} HP`, '#ff6b81', lastPt.x + 34, lastPt.y + 18);
  if (Date.now() - lastHitSfx > 350) { lastHitSfx = Date.now(); setTimeout(() => sfx('hit'), 120); }
@@ -1251,6 +1319,19 @@ const EXTRA_LINES = {
   powerTest:["POWER LEVEL RECORDED! Next month we smash these numbers!"], powerUp:["{gain}!!! YOU'RE GETTING SO STRONG!"]}
 };
 for (const k in EXTRA_LINES) Object.assign(COACHES[k].lines, EXTRA_LINES[k]);
+const VARIETY_LINES = {
+ kaida:{themeIntro:["It's {theme}. Let's make it count.", "{theme} today. No coasting.", "Welcome to {theme}. I planned this one personally."],
+  questDone:["{q}: done. See? You're tougher than you think.", "That's the {q} handled. Next!", "{q} cleared. I didn't even have to yell. Much.", "Ha! {q} down. Keep moving."],
+  idle:["You know what beats motivation? Habit. Go build one.", "If it were easy, everyone would be S-Rank.", "I've seen you sit for hours. You can move for ten minutes.", "Stop scrolling. Start squatting."]},
+ rei:{themeIntro:["Today's focus: {theme}.", "It's {theme}. I've balanced it against yesterday.", "{theme}. Variety prevents plateaus."],
+  questDone:["{q} complete. Proceed.", "{q} logged. Your form is improving.", "{q}: objective met.", "Efficient work on the {q}."],
+  idle:["Small inputs, compounded daily, produce large outputs.", "Rest between sets. Not between days.", "The plan adapts. So do you.", "Motivation is unreliable. Systems are not."]},
+ bolt:{themeIntro:["IT'S {theme}!! Let's GOOO!", "{theme}, baby! My favorite! ...They're all my favorite!", "Today is {theme}! New day, new moves!"],
+  questDone:["{q}: CRUSHED!", "BOOM! {q} done!", "You just smoked those {q}!", "{q} cleared! Combo x2!"],
+  idle:["I did 100 jumping jacks this morning. Okay, it was 12. But with HEART.", "Every rep is a tiny victory dance!", "Your future self just sent a thank-you note!", "Hype level: maximum. Your turn!"]}
+};
+for (const k in VARIETY_LINES) for (const [ev, list] of Object.entries(VARIETY_LINES[k])) COACHES[k].lines[ev] = ev === 'idle' ? [...COACHES[k].lines.idle, ...list] : list;
+Object.assign(EXPR, {themeIntro:'smile', questDone:'happy'});
 Object.assign(EXPR, {gateClear:'happy', restDay:'smile', shieldBack:'happy', powerTest:'smile', powerUp:'surprised', story:'smile'});
 
 /* ================= cloud: sync, notifications, party ================= */
@@ -1337,6 +1418,43 @@ async function enableNotify() {
   S.notify = true; commit(); syncNow(); sfx('chime', [40, 40]); toast('Notifications on.');
  } catch (e) { toast('Couldn\'t turn on notifications: ' + e.message); }
 }
+// Re-sends this device's subscription on every launch (iPhone subscriptions can quietly expire or change)
+async function refreshPush() {
+ if (!S.notify || !S.cloud || !cloudAvail() || !pushSupported() || Notification.permission !== 'granted') return;
+ try {
+  const reg = await navigator.serviceWorker.ready, {publicKey} = await api('push');
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64u8(publicKey)});
+  await api('push', {body:{id:S.cloud.id, token:S.cloud.token, sub:sub.toJSON()}});
+ } catch (e) {}
+}
+// Walks every link in the chain and shows exactly which one is broken
+async function checkNotify() {
+ const rows = [], ok = (pass, label, fix) => rows.push(`<p>${pass ? '<b style="color:var(--ok)">✓</b>' : '<b style="color:var(--red)">✗</b>'} ${label}${!pass && fix ? `<br><span class="dim small">${fix}</span>` : ''}</p>`);
+ const show = () => dialog({title:'Notification check', body:rows.join(''), buttons:[{label:'Close', cls:'p'}]});
+ ok(cloudAvail(), 'Server is reachable', 'Open Ascend from your Vercel link, not GitHub Pages.');
+ if (!cloudAvail()) return show();
+ const ios = isIOS();
+ if (ios) ok(isStandalone(), 'Opened from the Home Screen app', 'On iPhone, notifications only work in the Home Screen app. Safari → Share → Add to Home Screen, then open that icon.');
+ ok(pushSupported(), 'This browser supports notifications', 'Update iOS to 16.4 or later.');
+ if (!pushSupported() || (ios && !isStandalone())) return show();
+ ok(Notification.permission === 'granted', 'Permission granted', Notification.permission === 'denied' ? 'Notifications are blocked. iPhone: Settings → Notifications → Ascend → Allow. Then come back and turn them on again.' : 'Turn on Notifications above and tap Allow.');
+ if (Notification.permission !== 'granted') return show();
+ ok(!!S.cloud, 'Cloud save is on', 'Turn on cloud save in the Log tab.');
+ if (!S.cloud) return show();
+ toast('Checking…');
+ try {
+  await refreshPush();
+  const info = await api('push');
+  const r = await api('push', {body:{id:S.cloud.id, token:S.cloud.token, test:true}});
+  ok(r.ok, 'Server delivered a test notification', r.step === 'subscription' ? 'Turn Notifications off and on again in Settings.' : `The push service refused it${r.status ? ' (' + r.status + ')' : ''}. ${r.detail ? esc(r.detail) : ''} Turn Notifications off and on again; if it still fails, send me this message.`);
+  const mins = info.lastTick ? Math.round((info.now - info.lastTick) / 60000) : null;
+  ok(mins !== null && mins < 30, mins === null ? 'Scheduler has never run' : `Scheduler last ran ${mins} min ago`,
+   'Scheduled notifications (Sudden Quests, streak reminders) need the GitHub Action. In GitHub → repo Settings → Secrets and variables → Actions, add variable ASCEND_URL (your Vercel link) and secret CRON_SECRET (same value as in Vercel). Then Actions → Ascend notifications → Run workflow to test.');
+  if (r.ok) rows.push('<p class="dim small">A test notification is on its way. If it doesn\'t appear within a minute, check Focus mode and Settings → Notifications → Ascend.</p>');
+ } catch (e) { ok(false, 'Server check', esc(e.message)); }
+ show();
+}
 async function disableNotify() {
  S.notify = false; commit();
  try { const reg = await navigator.serviceWorker.ready, sub = await reg.pushManager.getSubscription(); if (sub) await sub.unsubscribe(); } catch (e) {}
@@ -1407,9 +1525,10 @@ function arrival(msgs) {
  setTimeout(() => sfx('chime', [40, 40, 40]), 150);
  let txt;
  if (!S.introDone) { S.introDone = true; T.checkin = true; save(); const c = coach(), list = c.first.map(t => fill(t)); txt = list[0]; sayQueue(list, 'first'); }
- else { txt = line(ev); sayQueue([{ev, text:txt}, ...(T.checkin ? [] : [checkinItem()])]); }
+ else { txt = greetLine(ev); sayQueue([{ev, text:txt}, ...(T.checkin ? [] : [checkinItem()])]); }
  dialog({title:'Daily Quest has arrived', body:`${(msgs || []).map(m => `<p style="color:var(--red)">${esc(m)}</p>`).join('')}
-  <p class="dim small">${rankOf(S.level)}-Rank · Today's goals:</p>${T.quests.map(q => `<p>· ${q.label}: <b>${q.target}${q.unit}</b></p>`).join('')}
+  <p class="dim small">${T.theme || rankOf() + '-Rank'} · Today's goals:</p>${T.quests.map(q => `<p>· ${q.label}: <b>${q.target}${q.unit}</b>${q.optional ? ' <span class="opt">BONUS</span>' : ''}</p>`).join('')}
+  ${T.event ? `<p class="evt"><b>⚡ ${T.event.name}</b> ${T.event.desc}</p>` : ''}
   ${S.penalty ? `<p style="color:var(--red)">· Penalty: <b>${S.penalty.target} push-ups</b></p>` : ''}
   ${S.gate && !S.gate.cleared ? `<p class="dim small" style="margin-top:8px">Weekly Gate: <b style="color:#ffd5db">${S.gate.boss}</b> · ${S.gate.hp}/${S.gate.max} HP</p>` : ''}${coachBlock(S.introDone && txt === CL.text && CL.queue.length ? 'first' : ev, txt)}`,
   buttons:[{label:'Accept', cls:'p full', fn:() => { quietUntil = Date.now() + 90e3; tab = 'quests'; render(); }}]});
@@ -1486,6 +1605,7 @@ document.addEventListener('click', e => {
    dialog({title:'Turn off cloud save?', body:'<p>This device stops syncing. Your cloud copy stays saved, so you can link it again with your sync code.</p><p class="dim small">Copy your sync code first if you might want it later.</p>',
     buttons:[{label:'Turn off', cls:'r', fn:() => { if (S.notify) disableNotify(); S.cloud = null; S.party = null; partyData = null; commit(); }}, {label:'Cancel', cls:'p'}]}); return;
   case 'tnotify': if (S.notify) disableNotify(); else enableNotify(); return;
+  case 'checknotify': checkNotify(); return;
   case 'pcreate': partyCreatePrompt(); return;
   case 'pjoin': partyJoinPrompt(); return;
   case 'prefresh': loadParty(true); return;
@@ -1619,7 +1739,7 @@ function startApp() {
  if (firstRun) onboard();
  else if (!S.avatar || !S.avatar.char || !S.coach) setupFlow(() => arrival(msgs || []));
  else if (msgs) arrival(msgs);
- else say(opener());
+ else { const ev = opener(); say(ev, greetLine(ev)); }
 }
 /* ---- splash: boot animation while art preloads ---- */
 var splashOn = true;
@@ -1648,7 +1768,7 @@ var splashOn = true;
   bar.style.width = '100%'; msg.textContent = steps[steps.length - 1];
   setTimeout(() => {
    sp.classList.add('out'); $('main').classList.add('enter'); $('.top').classList.add('enter');
-   setTimeout(() => { sp.remove(); splashOn = false; startApp(); cloudProbe.then(() => { if (cloudReady) { if (tab === 'log' || tab === 'status') render(); cloudPull().then(() => loadParty(true)); } }); }, reduced ? 200 : 650);
+   setTimeout(() => { sp.remove(); splashOn = false; startApp(); cloudProbe.then(() => { if (cloudReady) { if (tab === 'log' || tab === 'status') render(); cloudPull().then(() => { loadParty(true); refreshPush(); }); } }); }, reduced ? 200 : 650);
   }, reduced ? 100 : 380);
  };
  Promise.race([ready, new Promise(r => setTimeout(r, MAX))]).then(() => setTimeout(finish, Math.max(0, MIN - (Date.now() - t0))));
