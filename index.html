@@ -470,6 +470,9 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .pc-stats div{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);padding:7px 2px;text-align:center}
 .pc-stats span{display:block;font:700 10px Oxanium,sans-serif;letter-spacing:.14em;color:var(--dim)}.pc-stats b{font:800 20px Oxanium,sans-serif}
 .pc-foot{position:relative;display:flex;justify-content:space-between;font:700 11px Oxanium,sans-serif;letter-spacing:.1em;color:var(--dim)}.pc-foot b{color:var(--ink)}
+.mot-ico{width:84px;margin:0 auto 6px}.mot-ico svg{width:100%;fill:none;stroke:var(--c1);stroke-width:2.2;stroke-linecap:round;filter:drop-shadow(0 0 6px var(--c1))}
+.mot-ico rect{transform-origin:32px 30px;animation:motrock 2.4s ease-in-out infinite}.mot-ico .mot-a{opacity:.7;animation:aurapulse 2.4s ease-in-out infinite}
+@keyframes motrock{25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
 /* cosmetics: backgrounds */
 .pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
@@ -1352,6 +1355,7 @@ function vStatus() {
  if (sview === 'party') { loadParty(); return seg + vParty(); }
  if (sview === 'stats') return seg + vStats();
  if (sview === 'locker') return seg + vLocker();
+ if (!S.motionAsk && needsMotionAsk()) setTimeout(() => motionStep(), 350);
  return seg + vHunter();
 }
 function vHunter() {
@@ -2068,7 +2072,7 @@ function startTilt() {
  } catch (e) {}
 }
 if (!(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function')) startTilt();
-document.addEventListener('click', e => { if (!tiltOn && ($('#pcard') || (e.target.closest && e.target.closest('[data-tab="status"]')) || localStorage.getItem('ascend.motion') === '1')) startTilt(); }, {capture:true});
+document.addEventListener('click', () => { if (!tiltOn && localStorage.getItem('ascend.motion') === '1') startTilt(); }, {capture:true});
 document.addEventListener('pointermove', e => { if (tiltOn && e.pointerType === 'touch') return; const c = e.target.closest && e.target.closest('#pcard'); if (!c) return; const r = c.getBoundingClientRect(); tTgt.x = clamp1((e.clientX - r.left) / r.width * 2 - 1); tTgt.y = clamp1((e.clientY - r.top) / r.height * 2 - 1); tiltKick(); });
 document.addEventListener('pointerleave', () => { if (!tiltOn) { tTgt.x = tTgt.y = 0; tiltKick(); } }, true);
 function profileCard(locker) {
@@ -2224,11 +2228,19 @@ function suddenDone() {
  const c = ctx(); say('suddenDone', line('suddenDone') + (!S.today.complete && c.next ? ' ' + line('next') : ''));
 }
 function suddenSkip() { const a = activePop(); if (!a) return; a.status = 'declined'; quietUntil = Date.now() + 20 * 60e3; say('suddenSkip'); }
+const needsMotionAsk = () => !tiltOn && !!(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function');
+function motionStep(next) {
+ if (!needsMotionAsk()) { if (next) next(); return; }
+ S.motionAsk = true; save();
+ dialog({title:'Sensor link', body:`<div class="mot-ico" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="22" y="10" width="20" height="40" rx="4"/><path d="M29 44h6"/><path class="mot-a" d="M12 26a22 22 0 0 0 0 12M52 26a22 22 0 0 1 0 12"/></svg></div>
+  <p>Link your phone's motion sensor so your Player card moves in 3D when you tilt it.</p><p class="dim small">Your phone will ask for permission next. Motion data stays on your device.</p>`,
+  buttons:[{label:'Link sensor', cls:'p', fn:() => { startTilt(); if (next) setTimeout(next, 400); }}, {label:'Skip', fn:() => { if (next) setTimeout(next, 100); }}]});
+}
 function setupFlow(after) { openCreator(() => openCoach(after)); }
 function onboard() {
  dialog({title:'You have been chosen.', body:`<p>You've become a Player. Clear Daily Quests to level up, raise your stats and rank up from E to S.</p><p class="dim small">What should the System call you?</p>`,
   input:{value:'', placeholder:'Your name'},
-  buttons:[{label:'Accept', cls:'p full', fn:v => { S.name = (v || '').trim().slice(0, 24) || 'Player'; save(); render(); setupFlow(() => arrival([])); }}]});
+  buttons:[{label:'Accept', cls:'p full', fn:v => { S.name = (v || '').trim().slice(0, 24) || 'Player'; save(); render(); setupFlow(() => motionStep(() => arrival([]))); }}]});
 }
 
 /* ================= events ================= */
