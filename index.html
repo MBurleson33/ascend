@@ -2233,7 +2233,7 @@ function motionStep(next) {
  if (!needsMotionAsk()) { if (next) next(); return; }
  S.motionAsk = true; save();
  dialog({title:'Sensor link', body:`<div class="mot-ico" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="22" y="10" width="20" height="40" rx="4"/><path d="M29 44h6"/><path class="mot-a" d="M12 26a22 22 0 0 0 0 12M52 26a22 22 0 0 1 0 12"/></svg></div>
-  <p>Link your phone's motion sensor so your Player card moves in 3D when you tilt it.</p><p class="dim small">Your phone will ask for permission next. Motion data stays on your device.</p>`,
+  <p>Ascend uses your phone's motion sensor for 3D effects. Link it to turn them on.</p><p class="dim small">Your phone will ask for permission next. Motion data stays on your device.</p>`,
   buttons:[{label:'Link sensor', cls:'p', fn:() => { startTilt(); if (next) setTimeout(next, 400); }}, {label:'Skip', fn:() => { if (next) setTimeout(next, 100); }}]});
 }
 function setupFlow(after) { openCreator(() => openCoach(after)); }
