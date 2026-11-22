@@ -474,9 +474,10 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .mot-ico rect{transform-origin:32px 30px;animation:motrock 2.4s ease-in-out infinite}.mot-ico .mot-a{opacity:.7;animation:aurapulse 2.4s ease-in-out infinite}
 @keyframes motrock{25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
 .mo #bgfx{translate:calc(var(--x) * -14px) calc(var(--y) * -14px);scale:1.06}
-.mo .rift-card .boss{translate:calc(var(--x) * 6px) calc(var(--y) * 5px)}
-.mo .embw::before,.mo .rift-big::before{translate:calc(var(--x) * -7px) calc(var(--y) * -6px)}
-.mo .rift-card .gname{translate:calc(var(--x) * -2px) 0}
+.mo .rift-big::before{translate:calc(var(--x) * -7px) calc(var(--y) * -6px)}
+.mo .rift-card{transform:perspective(900px) rotateX(calc(var(--y) * -3deg)) rotateY(calc(var(--x) * 3deg))}
+.rift-sheen{position:absolute;inset:0;pointer-events:none;z-index:3;mix-blend-mode:screen;opacity:calc(var(--tilt,0) * .7);transition:opacity .3s;
+ background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.07) 47%,rgba(var(--bcr,255,255,255),.16) 50%,rgba(255,255,255,.07) 53%,transparent 62%);background-size:260% 260%;background-position:var(--mx) var(--my)}
 .mo .lv-hunter{translate:calc(var(--x) * 16px) calc(var(--y) * 10px)}
 .mo .lv-word{translate:calc(var(--x) * -7px) calc(var(--y) * -4px)}
 .mo .lv-num{translate:calc(var(--x) * -3px) 0}
@@ -1502,7 +1503,7 @@ function gateHTML() {
  return `<section class="panel wide rift-card" style="${bossVars(G)}"><div class="qtop"><p class="sys" style="margin:0">Weekly Rift</p><span class="dim small">${d === 1 ? 'Last day' : d + ' days left'}</span></div>
   <div class="rift"><div class="embw">${bossArt(G, fx ? 'hurt' : '', fx ? crackCount(fx.from / 100 * G.max, G.max) : 99)}</div><div style="min-width:0">
   <div class="gname">${G.boss}</div><div class="bar r gbar">${fx ? `<b class="ghost" style="--from:${fx.from.toFixed(1)}%;--to:${pct.toFixed(1)}%"></b>` : ''}<i style="width:${pct.toFixed(1)}%"></i></div>
-  <p class="dim small">${G.hp} / ${G.max} HP · every rep and minute you log deals damage</p></div></div></section>`;
+  <p class="dim small">${G.hp} / ${G.max} HP · every rep and minute you log deals damage</p></div></div><i class="rift-sheen"></i></section>`;
 }
 
 /* ================= rest shields ================= */
