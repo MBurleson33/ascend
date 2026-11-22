@@ -544,6 +544,17 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .rt-mid p{margin:3px 0 0;font-size:13px;line-height:1.35}.rt-mid .rt-sub{font:600 11px Oxanium,sans-serif;letter-spacing:.06em;color:var(--dim)}
 .rt-mid .bar{margin-top:6px;height:6px}
 .rt-tag{font:800 11px Oxanium,sans-serif;letter-spacing:.12em;color:var(--ra)}
+.alert-art{position:relative;min-height:calc(min(100vw,560px) / 2.4);padding:13% 10% 11%;background:center/100% 100% no-repeat;display:flex;flex-direction:column;justify-content:center;isolation:isolate}
+.alert-sudden{background-image:url(assets/alert_sudden.webp);animation:alertpulse 2s ease-in-out infinite;--ag:255,207,90}
+.alert-penalty{background-image:url(assets/alert_penalty.webp);animation:alertpulse 2.6s ease-in-out infinite,alertglitch 5s steps(1) infinite;--ag:255,79,109}
+.alert-art::after{content:"";position:absolute;inset:12% 6%;z-index:-1;background:rgba(4,6,13,.62);border-radius:6px;box-shadow:0 0 30px 20px rgba(4,6,13,.4);pointer-events:none}
+.alert-art .sys{margin-top:0;color:rgb(var(--ag))!important;text-shadow:0 0 10px rgba(var(--ag),.8),0 1px 4px #000}
+.alert-penalty .sys{color:#ff7d93!important}
+.alert-art .sqtask,.alert-art p{text-shadow:0 1px 6px rgba(0,0,0,.9)}
+.alert-art .btns{margin-top:8px}
+@keyframes alertpulse{50%{filter:drop-shadow(0 0 14px rgba(var(--ag),.55)) brightness(1.08)}}
+@keyframes alertglitch{0%,100%{transform:none}91%{transform:translateX(-2px)}92%{transform:translateX(3px) skewX(-1deg)}93%{transform:none}}
+.mo .alert-art{translate:calc(var(--x) * 3px) calc(var(--y) * 2px)}
 /* cosmetics: backgrounds */
 .pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
@@ -1349,10 +1360,10 @@ let focusQ = null, sview = 'hunter';
 function vQuests() {
  const T = S.today, P = S.penalty, A = activePop(), req = T.quests.filter(q => !q.optional), doneN = req.filter(q => q.done).length;
  const f = T.quests.find(q => q.id === focusQ && !q.done) || T.quests.find(q => !q.done && !q.optional) || T.quests.find(q => !q.done);
- const urgent = (A ? `<section class="panel gold wide"><p class="sys" style="color:var(--gold)">Sudden Quest</p><p class="sqtask">${esc(A.task)}</p>
+ const urgent = (A ? `<section class="wide alert-art alert-sudden"><p class="sys" style="color:var(--gold)">Sudden Quest</p><p class="sqtask">${esc(A.task)}</p>
    <div class="sqrow"><div class="sqt" id="sqTime">${fmt((A.exp - Date.now()) / 1000)}</div><span class="dim small">+${A.xp} XP</span></div>
    <div class="btns"><button class="b p" data-a="sqdone">Done</button><button class="b" data-a="sqskip">Skip</button></div></section>` : '')
-  + (P && !P.done ? `<section class="panel red wide"><div class="qtop"><p class="sys" style="margin:0">Penalty Quest</p><span class="qn">${P.prog} / ${P.target}</span></div>
+  + (P && !P.done ? `<section class="wide alert-art alert-penalty"><div class="qtop"><p class="sys" style="margin:0">Penalty Quest</p><span class="qn">${P.prog} / ${P.target}</span></div>
    <p class="dim small">${P.target} push-ups before midnight or your ${S.streak}-day streak resets.</p>
    <div class="btns qb"><button class="b" data-a="padd" data-n="5">+5</button><button class="b" data-a="padd" data-n="10">+10</button><button class="b r" data-a="padd" data-n="${P.target}">Done</button></div></section>` : '');
  // At most one quiet notice, and only when nothing urgent is showing
