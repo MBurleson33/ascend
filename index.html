@@ -572,6 +572,9 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
  @keyframes rotph{0%,20%{transform:rotate(-90deg)}55%,100%{transform:rotate(0)}}
  body>*:not(#rotate){visibility:hidden}
 }
+.log-head{display:flex;justify-content:space-between;align-items:center;width:100%;padding:0;background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-align:left}
+.log-head h2{margin:0}.log-chev{display:inline-block;margin-left:6px;font-size:18px;color:var(--c1);transition:transform .2s}.log-chev.on{transform:rotate(90deg)}
+.log-head+.log{margin-top:10px}
 /* cosmetics: backgrounds */
 .pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
@@ -1380,7 +1383,7 @@ function vCoach() {
   <div class="vnport" id="vnPort">${coachPic(CL.expr)}</div>
   <div class="vnbody"><span class="vnname">${c.name}</span><p id="vnText">${typed()}</p><div class="vnch" id="vnCh">${CL.shown >= CL.text.length ? choicesHTML() : ''}</div><span class="vnnext">${CL.choices.length ? '' : CL.queue.length && CL.shown >= CL.text.length ? '▼ more' : '▼ tap'}</span></div></section>`;
 }
-let focusQ = null, sview = 'hunter';
+let focusQ = null, sview = 'hunter', logOpen = false;
 function vQuests() {
  const T = S.today, P = S.penalty, A = activePop(), req = T.quests.filter(q => !q.optional), doneN = req.filter(q => q.done).length;
  const f = T.quests.find(q => q.id === focusQ && !q.done) || T.quests.find(q => !q.done && !q.optional) || T.quests.find(q => !q.done);
@@ -1488,8 +1491,9 @@ function vStats() {
   ${[[S.streak,'Streak'],[S.bestStreak,'Best streak'],[S.totals.questDays,'Quest days'],[S.totals.workouts,'Workouts'],[S.totals.runs,'Runs'],[S.totals.walkMin,'Walk min'],[S.totals.pushups,'Push-ups'],[S.totals.squats,'Squats'],[S.totals.sudden || 0,'Sudden']].map(([v, l]) => `<div class="cell"><b>${v}</b><span>${l}</span></div>`).join('')}</div></section>`;
 }
 function vLog() {
- return `<section class="panel"><h2>ACTIVITY LOG</h2>
-  ${S.log.length ? `<ul class="log">${S.log.slice(0, 80).map(l => { const d = new Date(l.t); return `<li><span>${esc(l.why)}<br><span class="dim small">${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} · ${d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}</span></span><b>${l.n ? '+' + l.n : '★'}</b></li>`; }).join('')}</ul>` : '<p class="dim">Nothing yet. Clear a quest and it shows up here.</p>'}</section>
+ const all = S.log.slice(0, 80), shown = logOpen ? all : all.slice(0, 3);
+ return `<section class="panel"><button class="log-head" data-a="logtoggle" aria-expanded="${logOpen}"><h2>ACTIVITY LOG</h2><span class="dim small">${S.log.length ? `${S.log.length} entries` : ''} <b class="log-chev${logOpen ? ' on' : ''}">›</b></span></button>
+  ${all.length ? `<ul class="log">${shown.map(l => { const d = new Date(l.t); return `<li><span>${esc(l.why)}<br><span class="dim small">${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} · ${d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}</span></span><b>${l.n ? '+' + l.n : '★'}</b></li>`; }).join('')}</ul>${all.length > 3 ? `<button class="rowlink" data-a="logtoggle" style="margin-top:8px">${logOpen ? 'Show less' : `Show full log (${all.length})`}</button>` : ''}` : '<p class="dim">Nothing yet. Clear a quest and it shows up here.</p>'}</section>
  ${storyHTML()}
  <section class="panel"><h2>CLOUD SAVE</h2>${cloudHTML()}</section>
  <section class="panel"><h2>SETTINGS</h2>
@@ -2459,6 +2463,7 @@ document.addEventListener('click', e => {
   case 'fmvoice': S.voice = !S.voice; save(); drawFocus(); if (S.voice) speak('Voice on'); return;
   case 'carprev': carGo(-1); return;
   case 'pcard': startTilt(); return;
+  case 'logtoggle': logOpen = !logOpen; render(); return;
   case 'goprofile': tab = 'status'; sview = 'hunter'; try { history.replaceState(null, '', '#status'); } catch (x) {} render(); toTop(); return;
   case 'ranks': openRanks(); return;
   case 'cos': cosTap(id); return;
