@@ -1133,7 +1133,6 @@ function say(ev, text, choices) {
  clearInterval(typeInt);
  typeInt = setInterval(() => {
   CL.shown = Math.min(CL.text.length, CL.shown + 1);
-  if (CL.shown % 3 === 0 && tab === 'quests' && !mOpen) sfx('blip');
   const t = $('#vnText'); if (t) t.innerHTML = typed();
   if (CL.shown >= CL.text.length) { clearInterval(typeInt); const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = CL.choices.length ? '' : CL.queue.length ? '▼ more' : '▼ tap'; showChoices(); }
  }, 22);
@@ -1906,7 +1905,7 @@ function vParty() {
 
 /* ================= cinematic System moments ================= */
 function animateScene(root) {
- root.querySelectorAll('[data-type]').forEach(el => { const t = el.dataset.type; let i = 0; el.textContent = ''; const iv = setInterval(() => { el.textContent = t.slice(0, ++i); if (i % 2) sfx('blip'); if (i >= t.length) clearInterval(iv); }, 45); });
+ root.querySelectorAll('[data-type]').forEach(el => { const t = el.dataset.type; let i = 0; el.textContent = ''; const iv = setInterval(() => { el.textContent = t.slice(0, ++i); if (i >= t.length) clearInterval(iv); }, 45); });
  root.querySelectorAll('[data-count]').forEach(el => {
   const to = +el.dataset.count, from = +(el.dataset.from || 0), pre = el.dataset.prefix || '', suf = el.dataset.suffix || '', delay = +(el.dataset.delay || 600);
   el.textContent = pre + from + suf;
