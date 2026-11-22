@@ -403,7 +403,9 @@ body:has(.ov.cine:not([hidden])) #toasts{opacity:0;transition:opacity .2s}
 #splash.art .sp-grid{opacity:.35}
 #splash.art .sp-core{width:min(30vw,130px);margin-bottom:-6px}
 #splash.art .sp-core,#splash.art .sp-word,#splash.art .sp-foot{position:relative;z-index:2}
-#splash.art .sp-word{text-shadow:0 0 18px rgba(var(--c1rgb),.8),0 2px 10px rgba(0,0,0,.8)}
+#splash.art .sp-word{text-shadow:0 0 18px rgba(var(--c1rgb),.85),0 0 4px rgba(var(--c1rgb),.6)}
+#splash.art .sp-word span{animation-name:letter2}
+@keyframes letter2{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 #splash.art .sp-top{display:flex;flex-direction:column;align-items:center;gap:14px;position:relative;z-index:2}
 main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 @keyframes enter{from{opacity:0;transform:translateY(18px)}}
