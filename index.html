@@ -452,17 +452,17 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .pcard{--rx:0deg;--ry:0deg;--mx:50%;--my:50%;position:relative;max-width:360px;margin:0 auto;padding:16px 18px 14px;border-radius:18px;overflow:hidden;cursor:pointer;
  background:radial-gradient(120% 70% at 50% 30%,color-mix(in srgb,var(--rk) 26%,transparent),transparent 70%),linear-gradient(160deg,#10224a,#060a18 70%);
  border:2px solid var(--rk);box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 0 34px color-mix(in srgb,var(--rk) 45%,transparent),0 18px 40px rgba(0,0,0,.55);
- transform:rotateX(var(--rx)) rotateY(var(--ry));transform-style:preserve-3d;transition:transform .12s ease-out}
+ transform:rotateX(var(--rx)) rotateY(var(--ry))}
 .pc-foil{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:calc(var(--tilt,0) * .9);transition:opacity .25s;z-index:4;
  background:linear-gradient(115deg,transparent 36%,rgba(255,255,255,.12) 46%,rgba(255,255,255,.28) 50%,rgba(255,255,255,.12) 54%,transparent 64%);background-size:260% 260%;background-position:var(--mx) var(--my)}
 .pcard.frame-prism .pc-foil{mix-blend-mode:color-dodge;opacity:calc(.45 + var(--tilt,0) * .4);background:linear-gradient(115deg,transparent 25%,rgba(var(--c1rgb),.5) 40%,rgba(255,120,220,.45) 50%,rgba(255,230,120,.4) 58%,transparent 72%);background-size:250% 250%;background-position:var(--mx) var(--my)}
 .pc-grid{position:absolute;inset:0;pointer-events:none;opacity:.12;background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(transparent,#000 40%,transparent)}
-.pc-top{position:relative;display:flex;justify-content:space-between;align-items:flex-start}
+.pc-top{position:relative;transform:translate(calc(var(--x,0) * 3px),calc(var(--y,0) * 3px));display:flex;justify-content:space-between;align-items:flex-start}
 .pc-brand{font:700 11px Oxanium,sans-serif;letter-spacing:.22em;color:var(--dim);margin-top:6px}
 .pc-rank{font:900 54px/1 Orbitron,sans-serif;color:var(--rk);text-shadow:0 0 22px var(--rk)}
-.pc-art{position:relative;width:min(64vw,240px);margin:-30px auto 2px;transform:translateZ(30px)}
+.pc-art{position:relative;width:min(64vw,240px);margin:-30px auto 2px;transform:translate(calc(var(--x,0) * 9px),calc(var(--y,0) * 7px)) scale(1.02)}
 .pc-art .pimg{margin:0}
-.pc-id{position:relative;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;border-top:1px solid rgba(255,255,255,.1);padding-top:10px}
+.pc-id{position:relative;transform:translate(calc(var(--x,0) * 4px),calc(var(--y,0) * 3px));display:flex;justify-content:space-between;align-items:flex-end;gap:10px;border-top:1px solid rgba(255,255,255,.1);padding-top:10px}
 .pc-name{font:900 22px/1.1 Orbitron,sans-serif;letter-spacing:.06em;text-transform:uppercase;overflow-wrap:anywhere}
 .pc-title{font:700 13px Oxanium,sans-serif;color:var(--c1);margin-top:4px}
 .pc-lv{font:800 40px/1 Oxanium,sans-serif;text-align:right}.pc-lv small{display:block;font-size:11px;letter-spacing:.2em;color:var(--dim)}
@@ -471,12 +471,12 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .pc-stats span{display:block;font:700 10px Oxanium,sans-serif;letter-spacing:.14em;color:var(--dim)}.pc-stats b{font:800 20px Oxanium,sans-serif}
 .pc-foot{position:relative;display:flex;justify-content:space-between;font:700 11px Oxanium,sans-serif;letter-spacing:.1em;color:var(--dim)}.pc-foot b{color:var(--ink)}
 /* cosmetics: backgrounds */
-.pc-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
 .pcard:has(.pc-bg) .pc-grid{display:none}
 /* cosmetics: auras */
 .pc-art .pimg{position:relative;z-index:1}
-.pc-aura{position:absolute;inset:-10% -14% 0;z-index:0;pointer-events:none}
+.pc-aura{position:absolute;inset:-10% -14% 0;z-index:0;pointer-events:none;transform:translate(calc(var(--x,0) * -5px),calc(var(--y,0) * -4px))}
 .pc-art:has(.aura-spark) img{--ac:#ffe066;--ac2:rgba(255,224,102,.7)}.pc-art:has(.aura-inferno) img{--ac:#ff8a3d;--ac2:rgba(255,110,40,.85)}
 .pc-art:has(.aura-frost) img{--ac:#8fe9ff;--ac2:rgba(143,233,255,.75)}.pc-art:has(.aura-thunder) img{--ac:#5ad1ff;--ac2:rgba(90,209,255,.85)}.pc-art:has(.aura-void) img{--ac:#a77bff;--ac2:rgba(167,123,255,.85)}
 .pc-art:has(.pc-aura:not(.aura-pulse)) img{filter:drop-shadow(0 0 4px var(--ac)) drop-shadow(0 0 18px var(--ac2));animation:aglow 2.6s ease-in-out infinite}
@@ -2038,15 +2038,39 @@ function bossArt(G, cls = '', fresh = 99) {
 let gateFx = null;
 
 /* ================= profile card ================= */
-let tiltOn = false;
-function tiltSet(x, y) { const c = $('#pcard'); if (!c) return; c.style.setProperty('--ry', (x * 14).toFixed(1) + 'deg'); c.style.setProperty('--rx', (-y * 14).toFixed(1) + 'deg'); c.style.setProperty('--mx', (50 + x * 50).toFixed(0) + '%'); c.style.setProperty('--my', (50 + y * 50).toFixed(0) + '%'); c.style.setProperty('--tilt', Math.min(1, Math.hypot(x, y) * 1.4).toFixed(2)); }
-document.addEventListener('pointermove', e => { const c = e.target.closest && e.target.closest('#pcard'); if (!c || e.pointerType === 'touch' && tiltOn) return; const r = c.getBoundingClientRect(); tiltSet((e.clientX - r.left) / r.width * 2 - 1, (e.clientY - r.top) / r.height * 2 - 1); });
-document.addEventListener('pointerleave', e => { if (!tiltOn) tiltSet(0, 0); }, true);
+let tiltOn = false, motionAsked = false, tTgt = {x:0, y:0}, tCur = {x:0, y:0}, tBase = null, tRaf = null;
+const clamp1 = v => Math.max(-1, Math.min(1, v));
+function tiltSet(x, y) { const c = $('#pcard'); if (!c) return; const s = c.style;
+ s.setProperty('--x', x.toFixed(3)); s.setProperty('--y', y.toFixed(3));
+ s.setProperty('--ry', (x * 12).toFixed(1) + 'deg'); s.setProperty('--rx', (-y * 12).toFixed(1) + 'deg');
+ s.setProperty('--mx', (50 + x * 50).toFixed(0) + '%'); s.setProperty('--my', (50 + y * 50).toFixed(0) + '%');
+ s.setProperty('--tilt', Math.min(1, Math.hypot(x, y) * 1.4).toFixed(2)); }
+function tiltLoop() {
+ tRaf = null; if (!$('#pcard')) return;
+ tCur.x += (tTgt.x - tCur.x) * .14; tCur.y += (tTgt.y - tCur.y) * .14; tiltSet(tCur.x, tCur.y);
+ if (Math.abs(tTgt.x - tCur.x) > .002 || Math.abs(tTgt.y - tCur.y) > .002) tRaf = requestAnimationFrame(tiltLoop);
+}
+const tiltKick = () => { if (!tRaf) tRaf = requestAnimationFrame(tiltLoop); };
+function onOrient(e) {
+ if (e.gamma == null || !$('#pcard')) return;
+ if (!tBase) tBase = {g:e.gamma, b:e.beta};
+ tBase.g += (e.gamma - tBase.g) * .015; tBase.b += (e.beta - tBase.b) * .015;
+ tTgt.x = clamp1((e.gamma - tBase.g) / 18); tTgt.y = clamp1((e.beta - tBase.b) / 18); tiltKick();
+}
 function startTilt() {
  if (tiltOn) return;
- const go = () => { tiltOn = true; addEventListener('deviceorientation', e => { if (e.gamma == null) return; tiltSet(Math.max(-1, Math.min(1, e.gamma / 30)), Math.max(-1, Math.min(1, (e.beta - 45) / 30))); }); };
- try { if (window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission().then(s => { if (s === 'granted') go(); }).catch(() => {}); else if (window.DeviceOrientationEvent) go(); } catch (e) {}
+ const go = () => { if (tiltOn) return; tiltOn = true; addEventListener('deviceorientation', onOrient); try { localStorage.setItem('ascend.motion', '1'); } catch (e) {} };
+ try {
+  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+   if (motionAsked) return; motionAsked = true;
+   DeviceOrientationEvent.requestPermission().then(s => { if (s === 'granted') go(); }).catch(() => { motionAsked = false; });
+  } else if (window.DeviceOrientationEvent) go();
+ } catch (e) {}
 }
+if (!(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function')) startTilt();
+document.addEventListener('click', e => { if (!tiltOn && ($('#pcard') || (e.target.closest && e.target.closest('[data-tab="status"]')) || localStorage.getItem('ascend.motion') === '1')) startTilt(); }, {capture:true});
+document.addEventListener('pointermove', e => { if (tiltOn && e.pointerType === 'touch') return; const c = e.target.closest && e.target.closest('#pcard'); if (!c) return; const r = c.getBoundingClientRect(); tTgt.x = clamp1((e.clientX - r.left) / r.width * 2 - 1); tTgt.y = clamp1((e.clientY - r.top) / r.height * 2 - 1); tiltKick(); });
+document.addEventListener('pointerleave', () => { if (!tiltOn) { tTgt.x = tTgt.y = 0; tiltKick(); } }, true);
 function profileCard(locker) {
  cosInit();
  const r = rankOf(), t = TITLES.find(x => x.id === S.title), ex = S.penalty && !S.penalty.done ? 'fierce' : S.today.complete ? 'happy' : 'neutral';
@@ -2057,7 +2081,7 @@ function profileCard(locker) {
   <div class="pc-id"><div><div class="pc-name">${esc(S.name)}</div><div class="pc-title">${t ? t.n : 'No title yet'}</div></div><div class="pc-lv"><small>LV</small>${S.level}</div></div>
   <div class="pc-stats">${STATS.map(s => `<div><span>${s.n}</span><b>${statVal(s.k)}</b></div>`).join('')}</div>
   <div class="pc-foot"><span>STREAK <b>${S.streak}</b></span><span>BEST <b>${S.bestStreak}</b></span><span>DAYS <b>${S.totals.questDays}</b></span></div>
- </div>${locker ? '' : `<p class="dim small" style="text-align:center;margin:8px 0 0">Tilt your phone or drag across the card</p><div class="pc-cust"><button class="b" data-a="sview" data-v="locker">Customize card · ${S.cosOwned.length}/${COSMETICS.length}</button></div>`}</section>`;
+ </div>${locker ? '' : `<p class="dim small" style="text-align:center;margin:8px 0 0">Move your phone to see it in 3D</p><div class="pc-cust"><button class="b" data-a="sview" data-v="locker">Customize card · ${S.cosOwned.length}/${COSMETICS.length}</button></div>`}</section>`;
 }
 function loadImg(src) { return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; }); }
 async function shareCard() {
