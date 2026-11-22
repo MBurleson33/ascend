@@ -22,7 +22,7 @@
    PICTURE: your own drawn character with a rank aura, and the coach's dialogue box.
    COLOUR and TYPE: void black, hologram cyan + violet, gold for rewards; Orbitron, Oxanium, Chakra Petch.
    LAYOUT: phone column with bottom tabs; two columns on desktop. */
-:root{color-scheme:dark;--bg:#04060d;--c1:#3ef0ff;--c2:#9b6bff;--c1rgb:62,240,255;--c2rgb:155,107,255;--ink:#eaf6ff;--dim:#8ea3c6;--gold:#ffcf5a;--red:#ff4f6d;--ok:#4dffb5}
+:root{color-scheme:dark;--bg:#04060d;--c1:#3ef0ff;--c2:#9b6bff;--c1rgb:62,240,255;--c2rgb:155,107,255;--x:0;--y:0;--tilt:0;--rx:0deg;--ry:0deg;--mx:50%;--my:50%;--ink:#eaf6ff;--dim:#8ea3c6;--gold:#ffcf5a;--red:#ff4f6d;--ok:#4dffb5}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 html,body{height:100%}
@@ -449,7 +449,7 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 @keyframes shatter{0%{transform:scale(.6);opacity:0}25%{transform:scale(1);opacity:1}55%{transform:scale(1.04);filter:drop-shadow(0 0 30px #fff) brightness(2.2)}75%{transform:scale(1.25);opacity:.4}100%{transform:scale(1.1);opacity:.32;filter:grayscale(.6)}}
 /* profile card */
 .pcard-wrap{grid-column:1/-1;perspective:1000px;padding:4px 0 6px}
-.pcard{--rx:0deg;--ry:0deg;--mx:50%;--my:50%;position:relative;max-width:360px;margin:0 auto;padding:16px 18px 14px;border-radius:18px;overflow:hidden;cursor:pointer;
+.pcard{position:relative;max-width:360px;margin:0 auto;padding:16px 18px 14px;border-radius:18px;overflow:hidden;cursor:pointer;
  background:radial-gradient(120% 70% at 50% 30%,color-mix(in srgb,var(--rk) 26%,transparent),transparent 70%),linear-gradient(160deg,#10224a,#060a18 70%);
  border:2px solid var(--rk);box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 0 34px color-mix(in srgb,var(--rk) 45%,transparent),0 18px 40px rgba(0,0,0,.55);
  transform:rotateX(var(--rx)) rotateY(var(--ry))}
@@ -473,6 +473,31 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .mot-ico{width:84px;margin:0 auto 6px}.mot-ico svg{width:100%;fill:none;stroke:var(--c1);stroke-width:2.2;stroke-linecap:round;filter:drop-shadow(0 0 6px var(--c1))}
 .mot-ico rect{transform-origin:32px 30px;animation:motrock 2.4s ease-in-out infinite}.mot-ico .mot-a{opacity:.7;animation:aurapulse 2.4s ease-in-out infinite}
 @keyframes motrock{25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
+.mo #bgfx{translate:calc(var(--x) * -14px) calc(var(--y) * -14px);scale:1.06}
+.mo .rift-card .boss{translate:calc(var(--x) * 6px) calc(var(--y) * 5px)}
+.mo .embw::before,.mo .rift-big::before{translate:calc(var(--x) * -7px) calc(var(--y) * -6px)}
+.mo .rift-card .gname{translate:calc(var(--x) * -2px) 0}
+.mo .lv-hunter{translate:calc(var(--x) * 16px) calc(var(--y) * 10px)}
+.mo .lv-word{translate:calc(var(--x) * -7px) calc(var(--y) * -4px)}
+.mo .lv-num{translate:calc(var(--x) * -3px) 0}
+.mo .rk-letter{translate:calc(var(--x) * 20px) calc(var(--y) * 14px)}
+.mo .rk-word,.mo .rk-from{translate:calc(var(--x) * -5px) 0}
+.mo .rk-coach{translate:calc(var(--x) * -9px) calc(var(--y) * -4px)}
+.mo .rift-big{translate:calc(var(--x) * 15px) calc(var(--y) * 10px)}
+.mo .holo{translate:calc(var(--x) * 6px) calc(var(--y) * 4px)}
+.mo .holo .hr,.mo .holo .holo-title{translate:calc(var(--x) * -3px) 0}
+.mo .car-art{translate:calc(var(--x) * 13px) calc(var(--y) * 9px)}
+.mo .car-name,.mo .car-role{translate:calc(var(--x) * -4px) 0}
+.mo .car-art img{filter:drop-shadow(calc(var(--x) * -8px) calc(var(--y) * -6px + 10px) 14px rgba(0,0,0,.45))}
+/* focus: stability + auto count */
+.fm-stab{width:100%;max-width:300px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;font:700 11px Oxanium,sans-serif;letter-spacing:.14em;color:var(--dim)}
+.fm-stab i{height:8px;background:rgba(var(--c1rgb),.12);overflow:hidden}.fm-stab em{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--c1));transition:width .3s,background .3s}
+.fm-stab b{font:900 22px Orbitron,sans-serif;min-width:30px;text-align:right;color:var(--ink)}
+.fm-stab b.g-S{color:var(--gold);text-shadow:0 0 14px var(--gold)}.fm-stab b.g-A{color:var(--ok)}.fm-stab b.g-B{color:var(--c1)}.fm-stab b.g-C{color:#ff9a5a}.fm-stab b.g-D{color:var(--red)}
+.fm-link{font:600 13px 'Chakra Petch',sans-serif;color:var(--c1);background:none;border:0;text-decoration:underline;cursor:pointer}
+.fm-auto{display:flex;align-items:center;gap:8px;justify-content:center;font-size:13px;color:var(--dim)}
+.fm-auto .beta{font:700 9px Oxanium,sans-serif;letter-spacing:.12em;color:var(--gold);border:1px solid rgba(255,207,90,.5);padding:1px 4px}
+.fm-auto.on .fm-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:blink 1s steps(2) infinite}
 /* cosmetics: backgrounds */
 .pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
@@ -1819,21 +1844,56 @@ const fq = () => FM && S.today.quests.find(x => x.id === FM.id);
 const fkind = q => q.unit === ' sec' ? 'sec' : q.unit === ' min' ? 'min' : 'rep';
 function speak(t) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = 1.15; speechSynthesis.speak(u); } catch (e) {} }
 function openFocus(id) { const q = S.today.quests.find(x => x.id === id && !x.done); if (!q) return; FM = {id, timer:null}; $('#focus').hidden = false; drawFocus(); sfx('chime', [30]); }
-function closeFocus() { if (!FM) return; stopFocusTimer(true); FM = null; $('#focus').hidden = true; $('#focus').innerHTML = ''; try { speechSynthesis.cancel(); } catch (e) {} commit(); }
+function closeFocus() { if (!FM) return; if (AC) { AC = null; removeEventListener('devicemotion', onMotion); } stopFocusTimer(true); FM = null; $('#focus').hidden = true; $('#focus').innerHTML = ''; try { speechSynthesis.cancel(); } catch (e) {} commit(); }
 function focusVals() {
  const q = fq(), k = fkind(q), el = FM.timer ? (Date.now() - FM.t0) / 1000 : 0, extra = k === 'sec' ? Math.floor(el) : k === 'min' ? Math.floor(el / 60) : 0;
  const val = Math.min(q.target, q.prog + extra);
  return {q, k, el, val, p:val / q.target, label:k === 'min' && FM.timer ? fmt(q.prog * 60 + el) : String(val), of:k === 'min' && FM.timer ? `of ${q.target}:00` : `of ${q.target}${q.unit}`};
 }
+const STAB_EX = q => fkind(q) === 'sec';
+const AUTO_EX = q => fkind(q) === 'rep' && /squat|lunge/i.test(q.label);
+const STAB_GRADES = [['S', .6, 15], ['A', 1.2, 10], ['B', 2.2, 5], ['C', 4, 0], ['D', 1e9, 0]];
+let stabLast = null;
+function stabFeed(e) {
+ if (!FM || !FM.timer || !FM.stab) { stabLast = null; return; }
+ if (!stabLast) { stabLast = {g:e.gamma, b:e.beta}; return; }
+ stabLast.g += (e.gamma - stabLast.g) * .05; stabLast.b += (e.beta - stabLast.b) * .05;
+ const d = Math.hypot(e.gamma - stabLast.g, e.beta - stabLast.b); if (d < 60) { FM.stab.sum += d; FM.stab.n++; }
+}
+function stabGrade() { if (!FM || !FM.stab || !FM.timer) return null; const r = FM.stab.n ? FM.stab.sum / FM.stab.n : 0; return {r, g:STAB_GRADES.find(x => r < x[1])}; }
+function stabUI() {
+ const b = $('#fmStab'), bar = $('#fmStabBar'), s = stabGrade(); if (!b || !s) return;
+ b.textContent = (Date.now() - FM.t0) < 3000 ? '…' : s.g[0]; b.className = 'g-' + s.g[0];
+ if (bar) bar.style.width = Math.max(4, 100 - Math.min(100, s.r / 5 * 100)).toFixed(0) + '%';
+}
+/* auto rep counter (squats/lunges): vertical acceleration peaks */
+let AC = null;
+function onMotion(e) {
+ if (!AC || !FM) return; const g = e.accelerationIncludingGravity; if (!g || g.x == null) return;
+ AC.gx += (g.x - AC.gx) * .08; AC.gy += (g.y - AC.gy) * .08; AC.gz += (g.z - AC.gz) * .08;
+ const n = Math.hypot(AC.gx, AC.gy, AC.gz) || 1, ax = g.x - AC.gx, ay = g.y - AC.gy, az = g.z - AC.gz;
+ const v = (ax * AC.gx + ay * AC.gy + az * AC.gz) / n; AC.f += (v - AC.f) * .35;
+ const now = performance.now();
+ if (AC.armed && AC.f > 1.4 && now - AC.t > 850) { AC.armed = false; AC.t = now; focusRep(1); burst(innerWidth / 2, innerHeight * .42, '#4dffb5', 10, .6); }
+ if (AC.f < -0.9) AC.armed = true;
+}
+function autoToggle() {
+ if (AC) { AC = null; removeEventListener('devicemotion', onMotion); drawFocus(); return; }
+ if (!tiltOn) { motionStep(); return; }
+ AC = {gx:0, gy:0, gz:9.8, f:0, armed:false, t:0}; addEventListener('devicemotion', onMotion); drawFocus(); toast('Auto count on. Hold your phone to your chest and go.');
+}
 function drawFocus() {
  const q = fq(); if (!q) return;
+ if (AC && !AUTO_EX(q)) { AC = null; removeEventListener('devicemotion', onMotion); }
  const v = focusVals(), run = !!FM.timer;
  $('#focus').innerHTML = `<div class="fm">
   <button class="fm-x" data-a="fmclose" aria-label="Close focus mode">✕</button>
   <div><p class="sys">Focus mode${S.today.theme ? ' · ' + S.today.theme : ''}</p><div class="fm-name">${q.label}</div></div>
   <div class="fm-ringwrap"><svg viewBox="0 0 100 100"><defs><linearGradient id="fmg"><stop offset="0" stop-color="#9b6bff"/><stop offset="1" stop-color="#3ef0ff"/></linearGradient></defs><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(62,240,255,.12)" stroke-width="5"/><circle id="fmRing" cx="50" cy="50" r="46" fill="none" stroke="url(#fmg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="${(289 * (1 - v.p)).toFixed(1)}"/></svg>
    <div class="fm-mid"><div class="fm-count" id="fmCount">${v.label}</div><div class="fm-of" id="fmOf">${v.of}</div></div></div>
-  <p class="fm-hint" id="fmHint">${v.k === 'rep' ? 'Tap anywhere to count a rep' : run ? 'Timer running. Tap Stop when you rest.' : 'Tap Start when you begin'}</p>
+  <p class="fm-hint" id="fmHint">${v.k === 'rep' ? (AC ? 'Hold your phone to your chest. Reps count themselves.' : 'Tap anywhere to count a rep') : run ? (FM.stab ? 'Hold steady. Tap Stop when you rest.' : 'Timer running. Tap Stop when you rest.') : (STAB_EX(q) && tiltOn ? 'Rest your phone on your lower back, then tap Start' : 'Tap Start when you begin')}</p>
+  ${STAB_EX(q) ? (tiltOn ? `<div class="fm-stab"><span>STABILITY</span><i><em id="fmStabBar"></em></i><b id="fmStab">${run ? '…' : '–'}</b></div>` : '<button class="fm-link" data-a="fmlink">Link motion sensor for a stability grade</button>') : ''}
+  ${AUTO_EX(q) ? `<div class="fm-auto${AC ? ' on' : ''}">${AC ? '<span class="fm-dot"></span>' : ''}<button class="b" data-a="fmauto">${AC ? 'Auto count: On' : 'Auto count'}</button><span class="beta">BETA</span></div>` : ''}
   <div class="fm-ctrl">${v.k === 'rep' ? '<button class="b" data-a="fmminus">−1</button>' : `<button class="b p" data-a="fmtimer">${run ? 'Stop' : 'Start'}</button>${v.k === 'min' ? '<button class="b" data-a="fmplus5">+5 min</button>' : ''}`}<button class="b" data-a="fmvoice">Voice: ${S.voice ? 'On' : 'Off'}</button></div>
   <button class="fm-hold" data-hold="1"><i id="fmHold"></i><span>HOLD TO COMPLETE</span></button></div>`;
 }
@@ -1861,20 +1921,22 @@ function focusDone() {
  }, 1300);
 }
 function startFocusTimer() {
- FM.t0 = Date.now(); FM.spoken = -1; FM.timer = setInterval(focusTick, 250); drawFocus(); sfx('success', [30]); if (S.voice) speak('Go');
+ FM.t0 = Date.now(); FM.spoken = -1; FM.stab = STAB_EX(fq()) && tiltOn ? {sum:0, n:0} : null; stabLast = null; FM.timer = setInterval(focusTick, 250); drawFocus(); sfx('success', [30]); if (S.voice) speak('Go');
  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(l => { if (FM) FM.lock = l; }).catch(() => {}); } catch (e) {}
 }
 function focusTick() {
  const q = fq(); if (!q || !FM.timer) return;
  const el = (Date.now() - FM.t0) / 1000, k = fkind(q), units = k === 'sec' ? Math.floor(el) : Math.floor(el / 60);
- updFocus();
+ updFocus(); stabUI();
  if (S.voice) { const s = Math.floor(el), left = k === 'sec' ? q.target - q.prog - s : null;
   if (s !== FM.spoken && s > 0) { if (left !== null && left > 0 && left <= 3) { FM.spoken = s; speak(String(left)); } else if (s % (k === 'sec' ? 10 : 60) === 0) { FM.spoken = s; speak(k === 'sec' ? String(s) : `${s / 60} minute${s === 60 ? '' : 's'}`); } } }
  if (q.prog + units >= q.target) { stopFocusTimer(true); if (q.done) focusDone(); }
 }
 function stopFocusTimer(apply) {
  if (!FM || !FM.timer) return;
- clearInterval(FM.timer); const el = (Date.now() - FM.t0) / 1000, q = fq(); FM.timer = null;
+ const sg = stabGrade(); clearInterval(FM.timer); const el = (Date.now() - FM.t0) / 1000, q = fq(); FM.timer = null;
+ if (sg && el >= 10) { const [g, , bonus] = sg.g; S.totals.steady = Math.max(S.totals.steady || 0, 'DCBAS'.indexOf(g)); toast(`Stability grade ${g}${bonus ? ` · +${bonus} XP` : ''}`); if (bonus) setTimeout(() => { addXp(bonus, null, `Steady hold · grade ${g}`); commit(); }, 50); if (g === 'S') sfx('chime', [30, 30, 60]); }
+ FM.stab = null;
  try { if (FM.lock) FM.lock.release(); } catch (e) {}
  if (apply && q) { const u = fkind(q) === 'sec' ? Math.floor(el) : Math.floor(el / 60); if (u > 0) { questAdd(q.id, u); save(); render(); } }
 }
@@ -2044,36 +2106,38 @@ let gateFx = null;
 /* ================= profile card ================= */
 let tiltOn = false, motionAsked = false, tTgt = {x:0, y:0}, tCur = {x:0, y:0}, tBase = null, tRaf = null;
 const clamp1 = v => Math.max(-1, Math.min(1, v));
-function tiltSet(x, y) { const c = $('#pcard'); if (!c) return; const s = c.style;
+function tiltSet(x, y) { const s = document.documentElement.style;
  s.setProperty('--x', x.toFixed(3)); s.setProperty('--y', y.toFixed(3));
  s.setProperty('--ry', (x * 12).toFixed(1) + 'deg'); s.setProperty('--rx', (-y * 12).toFixed(1) + 'deg');
  s.setProperty('--mx', (50 + x * 50).toFixed(0) + '%'); s.setProperty('--my', (50 + y * 50).toFixed(0) + '%');
  s.setProperty('--tilt', Math.min(1, Math.hypot(x, y) * 1.4).toFixed(2)); }
 function tiltLoop() {
- tRaf = null; if (!$('#pcard')) return;
+ tRaf = null;
  tCur.x += (tTgt.x - tCur.x) * .14; tCur.y += (tTgt.y - tCur.y) * .14; tiltSet(tCur.x, tCur.y);
  if (Math.abs(tTgt.x - tCur.x) > .002 || Math.abs(tTgt.y - tCur.y) > .002) tRaf = requestAnimationFrame(tiltLoop);
 }
 const tiltKick = () => { if (!tRaf) tRaf = requestAnimationFrame(tiltLoop); };
 function onOrient(e) {
- if (e.gamma == null || !$('#pcard')) return;
+ if (e.gamma == null) return;
+ stabFeed(e);
  if (!tBase) tBase = {g:e.gamma, b:e.beta};
  tBase.g += (e.gamma - tBase.g) * .015; tBase.b += (e.beta - tBase.b) * .015;
  tTgt.x = clamp1((e.gamma - tBase.g) / 18); tTgt.y = clamp1((e.beta - tBase.b) / 18); tiltKick();
 }
 function startTilt() {
  if (tiltOn) return;
- const go = () => { if (tiltOn) return; tiltOn = true; addEventListener('deviceorientation', onOrient); try { localStorage.setItem('ascend.motion', '1'); } catch (e) {} };
+ const go = () => { if (tiltOn) return; tiltOn = true; document.documentElement.classList.add('mo'); addEventListener('deviceorientation', onOrient); try { localStorage.setItem('ascend.motion', '1'); } catch (e) {} };
  try {
   if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
    if (motionAsked) return; motionAsked = true;
    DeviceOrientationEvent.requestPermission().then(s => { if (s === 'granted') go(); }).catch(() => { motionAsked = false; });
+   try { if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') DeviceMotionEvent.requestPermission().catch(() => {}); } catch (e) {}
   } else if (window.DeviceOrientationEvent) go();
  } catch (e) {}
 }
 if (!(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function')) startTilt();
 document.addEventListener('click', () => { if (!tiltOn && localStorage.getItem('ascend.motion') === '1') startTilt(); }, {capture:true});
-document.addEventListener('pointermove', e => { if (tiltOn && e.pointerType === 'touch') return; const c = e.target.closest && e.target.closest('#pcard'); if (!c) return; const r = c.getBoundingClientRect(); tTgt.x = clamp1((e.clientX - r.left) / r.width * 2 - 1); tTgt.y = clamp1((e.clientY - r.top) / r.height * 2 - 1); tiltKick(); });
+document.addEventListener('pointermove', e => { if (tiltOn && e.pointerType === 'touch') return; if (e.pointerType === 'mouse') document.documentElement.classList.add('mo'); const c = e.target.closest && e.target.closest('#pcard'); if (!c) return; const r = c.getBoundingClientRect(); tTgt.x = clamp1((e.clientX - r.left) / r.width * 2 - 1); tTgt.y = clamp1((e.clientY - r.top) / r.height * 2 - 1); tiltKick(); });
 document.addEventListener('pointerleave', () => { if (!tiltOn) { tTgt.x = tTgt.y = 0; tiltKick(); } }, true);
 function profileCard(locker) {
  cosInit();
@@ -2267,6 +2331,8 @@ document.addEventListener('click', e => {
   case 'fmminus': focusRep(-1); return;
   case 'fmtimer': if (FM.timer) { stopFocusTimer(true); const q = fq(); if (q && q.done) focusDone(); else drawFocus(); } else startFocusTimer(); return;
   case 'fmplus5': { const q = fq(); if (q) { stopFocusTimer(true); questAdd(q.id, 5); save(); render(); if (q.done) focusDone(); else drawFocus(); } return; }
+  case 'fmlink': motionStep(() => drawFocus()); return;
+  case 'fmauto': autoToggle(); return;
   case 'fmvoice': S.voice = !S.voice; save(); drawFocus(); if (S.voice) speak('Voice on'); return;
   case 'carprev': carGo(-1); return;
   case 'pcard': startTilt(); return;
