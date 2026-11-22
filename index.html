@@ -1219,7 +1219,7 @@ function rankUp() {
 function checkTitles() {
  for (const t of TITLES) if (!S.titles.includes(t.id) && t.t(S)) {
   S.titles.push(t.id); const auto = !S.title; if (auto) S.title = t.id;
-  setTimeout(() => sfx('chime', [30, 30, 30]), 400);
+  setTimeout(() => sfx('unlock', [30, 30, 30]), 400);
   setTimeout(() => dialog({sys:false, cls:'gold lvup', body:`<p class="sys" style="color:var(--gold)">Title acquired</p><div class="big" style="font-size:clamp(26px,8vw,36px)">${t.n}</div><p class="dim">${t.d}</p>
    <p class="dim small">${auto ? 'Equipped. It shows under your name on the Status screen.' : `Equip it to show it under your name. You have ${S.titles.length} of ${TITLES.length} titles.`}</p>`,
    buttons:auto ? [{label:'Nice', cls:'p full'}] : [{label:'Equip now', cls:'p', fn:() => { S.title = t.id; commit(); }}, {label:'Keep current'}]}), 0);
@@ -1503,7 +1503,7 @@ function vLog() {
 const reducedMotion = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
 let sfxCtx = null, lastPt = {x:innerWidth / 2, y:innerHeight / 2}, lastHitSfx = 0;
 function sfxInit() { if (sfxCtx) return; try { sfxCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
-document.addEventListener('pointerdown', e => { lastPt = {x:e.clientX, y:e.clientY}; sfxInit(); try { if (sfxCtx && sfxCtx.state === 'suspended') sfxCtx.resume(); } catch (x) {} }, {capture:true});
+document.addEventListener('pointerdown', e => { lastPt = {x:e.clientX, y:e.clientY}; sfxInit(); try { if (sfxCtx && sfxCtx.state === 'suspended') sfxCtx.resume(); sfxLoad(); } catch (x) {} }, {capture:true});
 function tone(f, t0, dur, type, vol, f2) {
  const c = sfxCtx, o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
  o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
@@ -1522,8 +1522,20 @@ const SFX = {
  alarm:() => { tone(880, 0, .12, 'square', .05); tone(880, .18, .12, 'square', .05); tone(1175, .36, .22, 'square', .05); },
  fail:() => tone(320, 0, .4, 'sawtooth', .05, 140)
 };
+/* recorded sound effects (fall back to synth tones until loaded) */
+const SFX_FILES = {tap:['tap', .35], blip:['tap', .18], rep:['rep', .55], coin:['rep', .45], success:['quest_clear', .7], chime:['unlock', .65], unlock:['unlock', .7], levelup:['level_up', .8], rankup:['rank_up', .9], riftclear:['rift_clear', .85], hit:['rift_hit', .6], alarm:['sudden', .75], fail:['penalty', .75], penalty:['penalty', .75], tick:['countdown', .6], boot:['boot', .6], clear:['quest_clear', .85]};
+const SFX_BUF = {}; let sfxLoading = false;
+function sfxLoad() {
+ if (sfxLoading || !sfxCtx) return; sfxLoading = true;
+ [...new Set(Object.values(SFX_FILES).map(v => v[0]))].forEach(n => fetch(`assets/sfx/sfx_${n}.mp3`).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(b => new Promise((res, rej) => sfxCtx.decodeAudioData(b, res, rej))).then(buf => { SFX_BUF[n] = buf; }).catch(() => {}));
+}
+function playBuf(name) {
+ const m = SFX_FILES[name], buf = m && SFX_BUF[m[0]]; if (!buf) return false;
+ const s = sfxCtx.createBufferSource(), g = sfxCtx.createGain(); s.buffer = buf; g.gain.value = m[1]; s.connect(g); g.connect(sfxCtx.destination); s.start(); return true;
+}
+SFX.tick = () => tone(1400, 0, .05, 'square', .03); SFX.unlock = SFX.chime; SFX.riftclear = SFX.rankup; SFX.rep = SFX.coin; SFX.penalty = SFX.fail; SFX.boot = SFX.chime; SFX.clear = SFX.success;
 function sfx(name, buzz) {
- if (S.sound !== false) { try { sfxInit(); if (sfxCtx) SFX[name](); } catch (e) {} }
+ if (S.sound !== false) { try { sfxInit(); if (sfxCtx) { sfxLoad(); if (!playBuf(name) && SFX[name]) SFX[name](); } } catch (e) {} }
  if (buzz && S.haptics !== false) { try { if (navigator.vibrate) navigator.vibrate(buzz); } catch (e) {} }
 }
 const fx = document.createElement('canvas'); fx.id = 'fx'; document.body.appendChild(fx);
@@ -1572,7 +1584,7 @@ function gateClear() {
  cine(`<div class="rk-stage" style="--aura:var(--red)"><p class="sys">Weekly Rift</p><div class="rift-big" style="${bossVars(G)}">${bossArt(G, 'shatter', 0)}</div>
   <div class="lv-word" style="${bossVars(G)};color:color-mix(in srgb,var(--bc) 60%,#fff);text-shadow:0 0 30px var(--bc)">RIFT CLEARED</div><p class="dim" style="margin:6px 0 0">${G.boss} defeated</p>
   <div class="hr" style="animation-delay:1.2s"><span>Reward</span><b data-count="${xp}" data-prefix="+" data-suffix=" XP" data-delay="1300"></b></div>${cineCoach('gateClear', txt)}<button class="b p full" data-i="0">Continue</button></div>`,
-  () => setTimeout(() => { sfx('rankup', [80, 40, 80, 40, 160]); shake(); burst(x, y, '#ff4f6d', 70, 1.5); burst(x, y, '#ffcf5a', 40, 1.1); }, 700));
+  () => setTimeout(() => { sfx('riftclear', [80, 40, 80, 40, 160]); shake(); burst(x, y, '#ff4f6d', 70, 1.5); burst(x, y, '#ffcf5a', 40, 1.1); }, 700));
  addXp(xp, null, `Rift cleared: ${G.boss}`);
 }
 function gateHTML() {
@@ -1907,7 +1919,7 @@ function sceneClear(bonus, extraHTML, txt) {
   <div class="hr"><span>Reward</span><b data-count="${bonus}" data-prefix="+" data-suffix=" XP" data-delay="800"></b></div>
   <div class="hr"><span>Streak</span><b data-count="${S.streak}" data-suffix="${S.streak === 1 ? ' day' : ' days'}" data-delay="1000"></b></div>
   ${extraHTML ? `<div class="hx">${extraHTML}</div>` : ''}${cineCoach('clear', txt)}<button class="b p full" data-i="0">Continue</button></div>`,
-  () => setTimeout(() => { sfx('chime', [50, 50, 120]); const [x, y] = mid(); burst(x, y, '#4dffb5', 50, 1.3); burst(x, y, '#ffcf5a', 30, 1); }, 500));
+  () => setTimeout(() => { sfx('clear', [50, 50, 120]); const [x, y] = mid(); burst(x, y, '#4dffb5', 50, 1.3); burst(x, y, '#ffcf5a', 30, 1); }, 500));
 }
 function sceneLevel(oldL, capNote, txt) {
  cine(`<div class="cine-flash"></div><div class="lv-stage"><div class="lv-hunter">${playerImg('happy')}</div><div class="lv-word">LEVEL UP</div>
@@ -1989,7 +2001,7 @@ function focusRep(n) {
  const q = fq(); if (!q || q.done) return;
  questAdd(q.id, n); save(); render(); updFocus(); bumpCount();
  if (S.voice && n > 0) speak(String(q.prog));
- sfx('tap', [10]);
+ sfx(n > 0 ? 'rep' : 'tap', [10]);
  if (q.done) focusDone();
 }
 function focusDone() {
@@ -2013,6 +2025,7 @@ function focusTick() {
  updFocus(); stabUI();
  if (S.voice) { const s = Math.floor(el), left = k === 'sec' ? q.target - q.prog - s : null;
   if (s !== FM.spoken && s > 0) { if (left !== null && left > 0 && left <= 3) { FM.spoken = s; speak(String(left)); } else if (s % (k === 'sec' ? 10 : 60) === 0) { FM.spoken = s; speak(k === 'sec' ? String(s) : `${s / 60} minute${s === 60 ? '' : 's'}`); } } }
+ if (k === 'sec') { const left = q.target - q.prog - Math.floor(el); if (left > 0 && left <= 3 && left !== FM.ticked) { FM.ticked = left; sfx('tick', [20]); } }
  if (q.prog + units >= q.target) { stopFocusTimer(true); if (q.done) focusDone(); }
 }
 function stopFocusTimer(apply) {
@@ -2316,7 +2329,7 @@ function checkCos() {
  cosInit();
  for (const c of COSMETICS) { if (S.cosOwned.includes(c.id)) continue; const [a, b] = c.t(S); if (a < b) continue;
   S.cosOwned.push(c.id);
-  setTimeout(() => sfx('chime', [30, 30, 60]), 500);
+  setTimeout(() => sfx('unlock', [30, 30, 60]), 500);
   dialog({sys:false, cls:'gold lvup', body:`<p class="sys" style="color:var(--gold)">Reward unlocked · ${COS_KIND[c.k].slice(0, -1)}</p><div class="cos-show">${cosSwatch(c)}</div><div class="big" style="font-size:clamp(24px,7.5vw,32px)">${c.n.toUpperCase()}</div><p class="dim">${c.d}</p>`,
    buttons:[{label:'Equip now', cls:'p', fn:() => { S.cos[c.k] = c.id; commit(); }}, {label:'Later'}]});
  }
@@ -2342,6 +2355,7 @@ function cosTap(id) {
 /* ================= daily flow ================= */
 const lateNow = () => new Date().getHours() >= 18 && !S.today.complete;
 function arrival(msgs) {
+ if ((msgs || []).some(m => /Penalty Quest/.test(m))) setTimeout(() => sfx('penalty', [120, 60, 120]), 600);
  const T = S.today, ev = opener();
  setTimeout(() => sfx('chime', [40, 40, 40]), 150);
  let txt;
@@ -2404,7 +2418,7 @@ function setupFlow(after) { openCreator(() => openCoach(after)); }
 function onboard() {
  dialog({title:'You have been chosen.', body:`<p>You've become a Player. Clear Daily Quests to level up, raise your stats and rank up from E to S.</p><p class="dim small">What should the System call you?</p>`,
   input:{value:'', placeholder:'Your name'},
-  buttons:[{label:'Accept', cls:'p full', fn:v => { S.name = (v || '').trim().slice(0, 24) || 'Player'; save(); render(); setupFlow(() => motionStep(() => arrival([]))); }}]});
+  buttons:[{label:'Accept', cls:'p full', fn:v => { sfx('boot', [30]); S.name = (v || '').trim().slice(0, 24) || 'Player'; save(); render(); setupFlow(() => motionStep(() => arrival([]))); }}]});
 }
 
 /* ================= events ================= */
