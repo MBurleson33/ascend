@@ -563,6 +563,7 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .ha-penalty{animation:haglow 2.6s ease-in-out infinite,alertglitch 5s steps(1) infinite}
 @keyframes alertglitch{0%,100%{transform:none}91%{transform:translateX(-2px)}92%{transform:translateX(3px) skewX(-1deg)}93%{transform:none}}
 #rotate{display:none}
+.ov[hidden],#focus[hidden],#cc[hidden]{display:none!important}
 @media (orientation:landscape) and (max-height:520px) and (pointer:coarse){
  #rotate{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:radial-gradient(500px 300px at 50% 45%,rgba(var(--c1rgb),.14),transparent 70%),#02030b}
  #rotate .sys{margin:6px 0 0}#rotate b{font:900 20px Orbitron,sans-serif;letter-spacing:.08em}#rotate span{color:var(--dim);font-size:14px}
@@ -1150,7 +1151,7 @@ const mq = []; let mOpen = false;
 function dialog(spec) { mq.push(spec); if (!mOpen) nextDialog(); }
 function nextDialog() {
  const ov = $('#ov'), spec = mq.shift();
- if (!spec) { ov.hidden = true; ov.innerHTML = ''; mOpen = false; return; }
+ if (!spec) { ov.hidden = true; ov.className = 'ov'; ov.innerHTML = ''; mOpen = false; return; }
  mOpen = true;
  if (spec.cine) {
   ov.className = 'ov cine'; ov.innerHTML = spec.html; ov.hidden = false; ov.scrollTop = 0;
