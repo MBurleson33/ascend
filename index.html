@@ -544,20 +544,22 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .rt-mid p{margin:3px 0 0;font-size:13px;line-height:1.35}.rt-mid .rt-sub{font:600 11px Oxanium,sans-serif;letter-spacing:.06em;color:var(--dim)}
 .rt-mid .bar{margin-top:6px;height:6px}
 .rt-tag{font:800 11px Oxanium,sans-serif;letter-spacing:.12em;color:var(--ra)}
-.alert-wrap{--ag:255,207,90;position:relative}
-.alert-penalty{--ag:255,79,109}
-.alert-ban{position:relative;aspect-ratio:1942/809;background:url(assets/alert_sudden.webp) center/contain no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;animation:alertpulse 2s ease-in-out infinite}
-.alert-penalty .alert-ban{background-image:url(assets/alert_penalty.webp);animation:alertpulse 2.6s ease-in-out infinite,alertglitch 5s steps(1) infinite}
-.alert-ban .sys{margin:0 0 2px;color:rgb(var(--ag))!important;text-shadow:0 0 10px rgba(var(--ag),.8),0 1px 4px #000}
-.alert-penalty .alert-ban .sys{color:#ff8da0!important}
-.ab-big{font:800 clamp(34px,11vw,48px)/1 Oxanium,sans-serif;color:#fff;text-shadow:0 0 18px rgba(var(--ag),.9),0 2px 8px #000;font-variant-numeric:tabular-nums}
-.ab-big small{font-size:.45em;color:var(--dim)}
-.ab-sub{font:700 11px Oxanium,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#e9e3d0;text-shadow:0 1px 4px #000;margin-top:4px}
-.alert-body{margin:-2px 3% 0;padding:12px 14px;background:linear-gradient(180deg,rgba(var(--ag),.1),rgba(6,10,22,.92) 60%);border:1px solid rgba(var(--ag),.45);border-top:0;border-radius:0 0 6px 6px}
-.alert-body .sqtask{margin:0 0 10px}
-@keyframes alertpulse{50%{filter:drop-shadow(0 0 14px rgba(var(--ag),.55)) brightness(1.08)}}
+.hud-alert{--ag:255,207,90;--k1:rgb(var(--ag));--k2:rgba(var(--ag),.55);padding-top:0;overflow:hidden;animation:haglow 2.2s ease-in-out infinite}
+.ha-penalty{--ag:255,79,109}
+.hud-alert::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 70% at 50% 0,rgba(var(--ag),.16),transparent 60%)}
+.ha-head{position:relative;display:flex;align-items:center;gap:10px;margin:0 -18px 12px;padding:9px 18px;background:repeating-linear-gradient(-45deg,rgba(var(--ag),.22) 0 10px,rgba(var(--ag),.08) 10px 20px);background-size:28px 28px;border-bottom:1px solid rgba(var(--ag),.6);animation:hastripe 1.2s linear infinite}
+.ha-ico{display:grid;place-items:center;width:24px;height:24px;flex:none;font:900 14px Orbitron,sans-serif;color:#04060d;background:rgb(var(--ag));clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 12px rgb(var(--ag));animation:haping 1.2s ease-in-out infinite}
+.ha-penalty .ha-ico{clip-path:none;border-radius:4px;font-size:13px}
+.ha-title{font:900 13px Orbitron,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgb(var(--ag));text-shadow:0 0 10px rgba(var(--ag),.7)}
+.ha-tag{margin-left:auto;font:800 13px Oxanium,sans-serif;letter-spacing:.06em;color:#fff;padding:2px 8px;border:1px solid rgba(var(--ag),.6);background:rgba(4,6,13,.6)}
+.ha-row{display:flex;align-items:baseline;gap:10px;margin:2px 0 4px}
+.hud-alert .sqtask{margin:0 0 6px}
+.ha-sudden .sqt{color:rgb(var(--ag));text-shadow:0 0 16px rgba(var(--ag),.6)}
+@keyframes haglow{50%{filter:drop-shadow(0 0 12px rgba(var(--ag),.45))}}
+@keyframes hastripe{to{background-position:28px 0}}
+@keyframes haping{50%{transform:scale(1.15)}}
+.ha-penalty{animation:haglow 2.6s ease-in-out infinite,alertglitch 5s steps(1) infinite}
 @keyframes alertglitch{0%,100%{transform:none}91%{transform:translateX(-2px)}92%{transform:translateX(3px) skewX(-1deg)}93%{transform:none}}
-.mo .alert-wrap{translate:calc(var(--x) * 3px) calc(var(--y) * 2px)}
 /* cosmetics: backgrounds */
 .pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
@@ -1363,10 +1365,13 @@ let focusQ = null, sview = 'hunter';
 function vQuests() {
  const T = S.today, P = S.penalty, A = activePop(), req = T.quests.filter(q => !q.optional), doneN = req.filter(q => q.done).length;
  const f = T.quests.find(q => q.id === focusQ && !q.done) || T.quests.find(q => !q.done && !q.optional) || T.quests.find(q => !q.done);
- const urgent = (A ? `<section class="wide alert-wrap alert-sudden"><div class="alert-ban"><p class="sys">Sudden Quest</p><div class="ab-big" id="sqTime">${fmt((A.exp - Date.now()) / 1000)}</div><span class="ab-sub">+${A.xp} XP</span></div>
-   <div class="alert-body"><p class="sqtask">${esc(A.task)}</p><div class="btns"><button class="b p" data-a="sqdone">Done</button><button class="b" data-a="sqskip">Skip</button></div></div></section>` : '')
-  + (P && !P.done ? `<section class="wide alert-wrap alert-penalty"><div class="alert-ban"><p class="sys">Penalty Quest</p><div class="ab-big">${P.prog}<small> / ${P.target}</small></div><span class="ab-sub">push-ups before midnight</span></div>
-   <div class="alert-body"><p class="dim small" style="margin:0 0 10px">Miss it and your ${S.streak}-day streak resets.</p><div class="btns qb"><button class="b" data-a="padd" data-n="5">+5</button><button class="b" data-a="padd" data-n="10">+10</button><button class="b r" data-a="padd" data-n="${P.target}">Done</button></div></div></section>` : '');
+ const urgent = (A ? `<section class="panel wide hud-alert ha-sudden"><div class="ha-head"><span class="ha-ico">!</span><span class="ha-title">Sudden Quest</span><span class="ha-tag">+${A.xp} XP</span></div>
+   <p class="sqtask">${esc(A.task)}</p><div class="ha-row"><div class="sqt" id="sqTime">${fmt((A.exp - Date.now()) / 1000)}</div><span class="dim small">left to clear it</span></div>
+   <div class="btns"><button class="b p" data-a="sqdone">Done</button><button class="b" data-a="sqskip">Skip</button></div></section>` : '')
+  + (P && !P.done ? `<section class="panel wide hud-alert ha-penalty"><div class="ha-head"><span class="ha-ico">⚠</span><span class="ha-title">Penalty Quest</span><span class="ha-tag">${P.prog} / ${P.target}</span></div>
+   <p class="dim small" style="margin:0 0 10px">${P.target} push-ups before midnight or your ${S.streak}-day streak resets.</p>
+   <div class="bar r" style="margin:0 0 12px"><i style="width:${(P.prog / P.target * 100).toFixed(1)}%"></i></div>
+   <div class="btns qb"><button class="b" data-a="padd" data-n="5">+5</button><button class="b" data-a="padd" data-n="10">+10</button><button class="b r" data-a="padd" data-n="${P.target}">Done</button></div></section>` : '');
  // At most one quiet notice, and only when nothing urgent is showing
  const notice = urgent ? '' : S.exam ? `<button class="panel gold wide alert" data-a="go" data-t="status"><span><span class="sys" style="color:var(--gold)">Rank-Up Exam ready</span><b>${S.exam.done.filter(Boolean).length} of ${S.exam.done.length} trials passed</b></span><span class="arr">›</span></button>`
   : testDue() && S.totals.questDays >= 1 ? `<button class="panel wide alert" data-a="ptopen"><span><span class="sys">Monthly Power Test</span><b>See how strong you are today</b></span><span class="arr" style="color:var(--c1)">›</span></button>`
