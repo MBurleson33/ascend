@@ -14,7 +14,7 @@ Single-file PWA: vanilla HTML/JS, saved in localStorage. No build step.
 ## Assets
 Character art goes in `assets/` as transparent images. Source PNGs from ChatGPT are converted to 640×640 WebP:
 
-- `assets/characters/player01_neutral.webp`, `player01_happy.webp`, `player01_fierce.webp` … through `player12_*`. Add each new Hunter to the `PLAYERS` list in `index.html`.
+- `assets/characters/player01_neutral.webp`, `player01_happy.webp`, `player01_fierce.webp` … through `player12_*`. Add each new character to the `PLAYERS` list in `index.html`.
 - `assets/coaches/coach_kaida_smile.webp`, `_happy`, `_fierce`, `_surprised` (same for `rei` and `bolt`)
 
 ## Run

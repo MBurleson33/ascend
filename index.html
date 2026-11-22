@@ -357,7 +357,7 @@ body:has(.ov.cine:not([hidden])) #toasts{opacity:0;transition:opacity .2s}
 .car-name{font:900 clamp(26px,8vw,34px)/1 Orbitron,sans-serif;letter-spacing:.12em;margin-right:-.12em;text-shadow:0 0 22px rgba(62,240,255,.55)}
 .car-role{color:var(--c1);font:700 12px Oxanium,sans-serif;letter-spacing:.16em;text-transform:uppercase;margin:8px 0 10px}
 .car-lore{font-size:15px;line-height:1.5;max-width:40ch;margin:0 0 8px}
-.car-name+.car-lore{margin-top:12px}
+.car-slide .car-role{margin-top:6px}
 .car-quote{font-style:italic;color:var(--dim);font-size:14px;max-width:38ch;margin:4px 0 0}
 .car-stats{display:grid;gap:7px;margin:6px 0 4px;width:min(100%,280px)}
 .car-stats div{display:flex;justify-content:space-between;align-items:center;font:700 11px Oxanium,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
@@ -532,11 +532,11 @@ const TITLES = [
  {id:'tested', n:'Know Thyself', d:'Take your first Power Test', t:s => (s.tests || []).length >= 1, p:s => [(s.tests || []).length, 1]},
  {id:'unbreak', n:'Unbreakable', d:'Reach a 30-day streak', t:s => s.bestStreak >= 30, p:s => [s.bestStreak, 30]},
  {id:'road', n:'Road Runner', d:'Finish the 8-week run plan', t:s => s.runPlan.done, p:s => [s.runPlan.done ? 24 : s.runPlan.week * 3 + s.runPlan.day, 24]},
- {id:'rd', n:'D-Rank Hunter', d:'Pass the D-Rank Exam', t:s => s.rankIdx >= 1, p:s => [Math.min(s.rankIdx, 1), 1]},
- {id:'rc', n:'C-Rank Hunter', d:'Pass the C-Rank Exam', t:s => s.rankIdx >= 2, p:s => [Math.min(s.rankIdx, 2), 2]},
- {id:'rb', n:'B-Rank Hunter', d:'Pass the B-Rank Exam', t:s => s.rankIdx >= 3, p:s => [Math.min(s.rankIdx, 3), 3]},
- {id:'ra', n:'A-Rank Hunter', d:'Pass the A-Rank Exam', t:s => s.rankIdx >= 4, p:s => [Math.min(s.rankIdx, 4), 4]},
- {id:'rs', n:'S-Rank Hunter', d:'Pass the S-Rank Exam', t:s => s.rankIdx >= 5, p:s => [Math.min(s.rankIdx, 5), 5]}
+ {id:'rd', n:'D-Rank Ascendant', d:'Pass the D-Rank Exam', t:s => s.rankIdx >= 1, p:s => [Math.min(s.rankIdx, 1), 1]},
+ {id:'rc', n:'C-Rank Ascendant', d:'Pass the C-Rank Exam', t:s => s.rankIdx >= 2, p:s => [Math.min(s.rankIdx, 2), 2]},
+ {id:'rb', n:'B-Rank Ascendant', d:'Pass the B-Rank Exam', t:s => s.rankIdx >= 3, p:s => [Math.min(s.rankIdx, 3), 3]},
+ {id:'ra', n:'A-Rank Ascendant', d:'Pass the A-Rank Exam', t:s => s.rankIdx >= 4, p:s => [Math.min(s.rankIdx, 4), 4]},
+ {id:'rs', n:'S-Rank Ascendant', d:'Pass the S-Rank Exam', t:s => s.rankIdx >= 5, p:s => [Math.min(s.rankIdx, 5), 5]}
 ];
 // Rank-Up Exams, keyed by the rank you're testing into
 const EXAMS = {
@@ -574,11 +574,11 @@ const PLAYERS = [
  {id:'player08', desc:'Ponytail · visor · purple hoodie'},
  {id:'player09', desc:'Wavy blonde · scar · white hoodie'},
  {id:'player10', desc:'Pink twin tails · tech suit'},
- {id:'player11', desc:'Shaved head · hunter armor'},
+ {id:'player11', desc:'Shaved head · armored suit'},
  {id:'player12', desc:'Teal undercut · techwear'}
 ];
 const charSrc = (expr, c) => `assets/characters/${c || (S.avatar && S.avatar.char) || PLAYERS[0].id}_${expr}.webp`;
-const playerImg = (expr, cls = '') => `<div class="pimg r${S.rankIdx || 0} ${cls}" style="--aura:${AURA[rankOf()]}"><img src="${charSrc(expr)}" alt="Your Hunter"></div>`;
+const playerImg = (expr, cls = '') => `<div class="pimg r${S.rankIdx || 0} ${cls}" style="--aura:${AURA[rankOf()]}"><img src="${charSrc(expr)}" alt="Your character"></div>`;
 const DEF_AV = {skin:1, hair:'short', hairColor:'#1e1d2c', eyes:'#4fb3ff', outfit:'hoodie', outfitColor:'#22324f', gear:'none'};
 
 /* ================= coaches ================= */
@@ -654,7 +654,7 @@ const EXPR = {greet_m:'smile', greet_a:'smile', greet_e:'smile', push:'happy', s
 const MORE = {
  kaida:{ask:["Before we start: how's the body feeling today, {name}?"],
   moodFired:["That's what I like to hear! Burn it on {next}. Go!"], moodTired:["Tired is fine. Quitting isn't. Just do {next} and see how you feel."], moodSore:["Sore means it's working. Go easy, but go. A slow walk still counts for cardio."],
-  sudden:["Sudden Quest! {task}. You've got 30 minutes. Move it!","Hey! Off that chair. {task}. Thirty minutes. Now!"], suddenDone:["Ha! Sudden Quest cleared. Reflexes of a hunter.","That's how you answer a surprise. Nice."],
+  sudden:["Sudden Quest! {task}. You've got 30 minutes. Move it!","Hey! Off that chair. {task}. Thirty minutes. Now!"], suddenDone:["Ha! Sudden Quest cleared. Reflexes like a pro.","That's how you answer a surprise. Nice."],
   suddenMiss:["That Sudden Quest expired. Next one, you're faster."], suddenSkip:["Fine. But the next one, you're taking."]},
  rei:{ask:["Quick check-in. How are you feeling today?"],
   moodFired:["Excellent. Channel it. Begin with {next}."], moodTired:["Understood. Start small: {next}. Momentum usually follows."], moodSore:["Soreness is adaptation. Prioritize the cardio quest today. A gentle walk is ideal."],
@@ -959,7 +959,7 @@ function rankUp() {
  S.log.unshift({t:Date.now(), why:`Rank up: ${from} → ${to}`, n:0});
  const txt = line('rankup', {rank:to});
  say('rankup', txt); CL.queue = storyItems(S.rankIdx);
- sceneRank(from, to, `${S.level > oldL ? `Saved XP released: Lv ${oldL} → Lv ${S.level}. ` : ''}${to === 'S' ? 'You passed every exam. You are an S-Rank Hunter.' : 'Daily Quests get harder starting tomorrow.'} Tap your coach afterward: they have something to tell you.`, txt);
+ sceneRank(from, to, `${S.level > oldL ? `Saved XP released: Lv ${oldL} → Lv ${S.level}. ` : ''}${to === 'S' ? 'You passed every exam. You are an S-Rank Ascendant.' : 'Daily Quests get harder starting tomorrow.'} Tap your coach afterward: they have something to tell you.`, txt);
  checkTitles(); checkCap();
 }
 function checkTitles() {
@@ -1179,7 +1179,7 @@ function radarSVG() {
 }
 function examHTML() {
  const next = S.rankIdx + 1;
- if (next > 5) return `<section class="panel gold wide" id="exam"><p class="sys" style="color:var(--gold)">Rank</p><h2>S-RANK HUNTER</h2><p>You've passed every Rank-Up Exam. Levels no longer have a cap. Keep your streak alive.</p></section>`;
+ if (next > 5) return `<section class="panel gold wide" id="exam"><p class="sys" style="color:var(--gold)">Rank</p><h2>S-RANK ASCENDANT</h2><p>You've passed every Rank-Up Exam. Levels no longer have a cap. Keep your streak alive.</p></section>`;
  const E = S.exam, to = RANKS[next];
  const rows = EXAMS[next].map((x, i) => { const ok = E && E.done[i];
   return `<div class="trial ${ok ? 'ok' : ''} ${E ? '' : 'lock'}"><b>${ok ? '✓ ' : ''}${x.t}</b>${x.how ? `<br><span class="dim small">${x.how}</span>` : ''}
@@ -1198,7 +1198,7 @@ function vTitles() {
    <span class="small">${S.title === t.id ? 'Equipped' : has ? 'Equip' : 'Locked'}</span></button>`).join('')}</div></section>`;
 }
 function vStatus() {
- const seg = `<div class="seg wide">${[['hunter', 'Hunter'], ['stats', 'Stats'], ['titles', 'Titles'], ['party', 'Party']].map(([k, n]) => `<button class="${sview === k ? 'on' : ''}" data-a="sview" data-v="${k}">${n}</button>`).join('')}</div>`;
+ const seg = `<div class="seg wide">${[['hunter', 'You'], ['stats', 'Stats'], ['titles', 'Titles'], ['party', 'Party']].map(([k, n]) => `<button class="${sview === k ? 'on' : ''}" data-a="sview" data-v="${k}">${n}</button>`).join('')}</div>`;
  if (sview === 'titles') return seg + vTitles();
  if (sview === 'party') { loadParty(); return seg + vParty(); }
  if (sview === 'stats') return seg + vStats();
@@ -1213,7 +1213,7 @@ function vHunter() {
     <div class="bar"><i style="width:${pct.toFixed(1)}%"></i></div><p class="dim small">${capped ? `Level cap · ${S.xp} XP saved for after your exam` : `${S.xp} / ${need(S.level)} XP to level ${S.level + 1}`}</p>
     <p class="nextt">Rest shields: <b style="color:var(--c1);letter-spacing:.15em">${shieldIcons()}</b> <span class="dim">· earn one every 7-day streak</span></p>
     ${nt ? `<p class="nextt">Next title: <b style="color:var(--ink)">${nt.t.n}</b>${nt.g > 1 && !nt.t.id.startsWith('r') ? ` · ${nt.c}/${nt.g}` : ''}</p>` : ''}
-    <div class="btns"><button class="b" data-a="editav">Change Hunter</button><button class="b" data-a="editcoach">Coach: ${c.name}</button><button class="b" data-a="rename">Rename</button></div></div></div></section>
+    <div class="btns"><button class="b" data-a="editav">Change look</button><button class="b" data-a="editcoach">Coach: ${c.name}</button><button class="b" data-a="rename">Rename</button></div></div></div></section>
  ${examHTML()}`;
 }
 function vStats() {
@@ -1786,8 +1786,8 @@ const HUNTER_EXPR = ['neutral', 'happy', 'fierce'], COACH_EXPR = ['smile', 'happ
 let CAR = null;
 function carSlide(kind, id, i) {
  if (kind === 'hunter') { const L = HUNTER_LORE[id] || {spec:'', lore:'', quote:''};
-  return `<section class="car-slide"><button class="car-art pimg r${S.rankIdx || 0}" style="--aura:${AURA[rankOf()]}" data-a="carexpr" data-i="${i}" aria-label="Change expression"><img src="${charSrc('neutral', id)}" alt="Hunter option ${i + 1}"></button>
-   <p class="car-role">Hunter ${String(i + 1).padStart(2, '0')} · Your style</p><div class="car-name">${L.spec.toUpperCase()}</div><p class="car-lore">${L.lore}</p><p class="car-quote">Your motto: “${L.quote}”</p></section>`; }
+  return `<section class="car-slide"><button class="car-art pimg r${S.rankIdx || 0}" style="--aura:${AURA[rankOf()]}" data-a="carexpr" data-i="${i}" aria-label="Change expression"><img src="${charSrc('neutral', id)}" alt="Character option ${i + 1}"></button>
+   <p class="car-role">Style · ${L.spec}</p><p class="car-lore">${L.lore}</p><p class="car-quote">Your motto: “${L.quote}”</p></section>`; }
  const c = COACHES[id], L = COACH_LORE[id];
  return `<section class="car-slide"><button class="car-art coachart" data-a="carexpr" data-i="${i}" aria-label="Change expression">${coachPic('smile', id)}</button>
   <div class="car-name">${c.name}</div><p class="car-role">${L.title}</p><p class="car-lore">${L.lore}</p>
@@ -1798,7 +1798,7 @@ function openCarousel(kind, done) {
  CAR = {kind, items, idx:Math.max(0, items.indexOf(cur)), expr:{}};
  $('#cc').hidden = false;
  $('#cc').innerHTML = `<div class="car">
-  <div class="car-head"><p class="sys">${kind === 'hunter' ? 'Character select' : 'Choose your coach'}</p><h2>${kind === 'hunter' ? 'CHOOSE YOUR HUNTER' : 'WHO\'S TRAINING YOU?'}</h2><p class="dim small">${kind === 'hunter' ? 'This is you. Swipe to pick your look and style.' : 'Swipe to browse · tap the art to see their moods'}</p></div>
+  <div class="car-head"><p class="sys">${kind === 'hunter' ? 'Character select' : 'Choose your coach'}</p><h2>${kind === 'hunter' ? 'WHO ARE YOU?' : 'WHO\'S TRAINING YOU?'}</h2><p class="dim small">${kind === 'hunter' ? 'This is you. Swipe to pick your look and style.' : 'Swipe to browse · tap the art to see their moods'}</p></div>
   <div class="car-track" id="carTrack">${items.map((id, i) => carSlide(kind, id, i)).join('')}</div>
   <div class="car-dots">${items.map(() => '<span></span>').join('')}</div>
   <div class="car-nav"><button class="car-arrow" data-a="carprev" aria-label="Previous">‹</button><button class="b p" id="carPick">Choose</button><button class="car-arrow" data-a="carnext" aria-label="Next">›</button></div>
@@ -1959,7 +1959,7 @@ document.addEventListener('click', e => {
    TM.paused = true; drawTimer();
    dialog({title:'End this session?', body:'<p>It won\'t count.</p>', buttons:[{label:'End session', cls:'r', fn:() => stopTimer(false)}, {label:'Keep going', cls:'p', fn:() => { if (TM) { TM.paused = false; drawTimer(); } }}]});
    return;
-  case 'pickchar': { S.avatar = {char:id}; const d = ccDone; ccDone = null; closeCC(); commit(); if (d) d(); else toast('Hunter selected.'); return; }
+  case 'pickchar': { S.avatar = {char:id}; const d = ccDone; ccDone = null; closeCC(); commit(); if (d) d(); else toast('Look updated.'); return; }
   case 'pickcoach': {
    S.coach = id; preloadCoach(); const d = cpDone; cpDone = null; closeCC(); commit();
    if (d) d(); else { say(opener()); toast(`${coach().name} is now your coach.`); }
@@ -2059,7 +2059,7 @@ var splashOn = true;
  const sp = $('#splash'), bar = $('#spBar'), msg = $('#spMsg'), t0 = Date.now();
  let reduced = false; try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
  const MIN = reduced ? 500 : 2300, MAX = 5000;
- const steps = ['Initializing System', 'Syncing Daily Quests', 'Calibrating stats', firstRun ? 'Preparing Hunter selection' : 'Summoning ' + coach().name.charAt(0) + coach().name.slice(1).toLowerCase(),
+ const steps = ['Initializing System', 'Syncing Daily Quests', 'Calibrating stats', firstRun ? 'Preparing character select' : 'Summoning ' + coach().name.charAt(0) + coach().name.slice(1).toLowerCase(),
   firstRun ? 'Awaiting new Player' : 'Welcome back, ' + S.name];
  const urls = [];
  if (S.avatar && S.avatar.char) ['neutral', 'happy'].forEach(e => urls.push(charSrc(e)));
