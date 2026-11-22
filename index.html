@@ -25,14 +25,16 @@
 :root{color-scheme:dark;--bg:#04060d;--c1:#3ef0ff;--c2:#9b6bff;--ink:#eaf6ff;--dim:#8ea3c6;--gold:#ffcf5a;--red:#ff4f6d;--ok:#4dffb5}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
-body{font:16px/1.5 "Chakra Petch",system-ui,sans-serif;overflow-x:clip;min-height:100vh;padding-bottom:calc(84px + env(safe-area-inset-bottom));
+html,body{height:100%}
+/* App shell: the page never scrolls (iOS home-screen apps drift fixed bars when it does); only #scroll does */
+body{font:16px/1.5 "Chakra Petch",system-ui,sans-serif;overflow:hidden;height:100vh;height:100dvh;display:flex;flex-direction:column;overscroll-behavior:none;
  background:radial-gradient(800px 480px at 10% -8%,rgba(155,107,255,.28),transparent 60%),radial-gradient(900px 560px at 105% 0%,rgba(62,240,255,.18),transparent 55%),
  linear-gradient(rgba(62,240,255,.05) 1px,transparent 1px) 0 0/34px 34px,linear-gradient(90deg,rgba(62,240,255,.05) 1px,transparent 1px) 0 0/34px 34px,var(--bg);background-attachment:fixed}
 body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:40;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px)}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--c1);outline-offset:2px}
-.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 14px 8px;background:rgba(4,6,13,.8);backdrop-filter:blur(12px);border-bottom:1px solid rgba(62,240,255,.18)}
+.top{position:relative;flex:none;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 14px 8px;background:rgba(4,6,13,.8);backdrop-filter:blur(12px);border-bottom:1px solid rgba(62,240,255,.18)}
 .brand{display:flex;align-items:center;gap:10px}
 .mini{width:38px;height:38px;border-radius:50%;overflow:hidden;border:1.5px solid var(--c1);box-shadow:0 0 12px rgba(62,240,255,.5);background:#0b1430;flex:none}
 .mini svg{width:100%;height:100%;display:block}
@@ -40,6 +42,7 @@ button{cursor:pointer}
 .chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .chip{font:700 12px/1 Oxanium,sans-serif;padding:7px 10px;border:1px solid rgba(62,240,255,.45);color:var(--c1);white-space:nowrap;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
 .chip.hot{border-color:rgba(255,207,90,.6);color:var(--gold)}
+#scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 main{max-width:1020px;margin:0 auto;padding:16px 14px;display:grid;gap:16px}
 @media(min-width:820px){main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}.wide{grid-column:1/-1}}
 .panel{--cut:16px;--k1:var(--c1);--k2:var(--c2);position:relative;padding:18px;border:1px solid transparent;
@@ -290,7 +293,7 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
  <div class="chips" id="chips"></div>
  <div class="xpline"><i id="xpl"></i></div>
 </header>
-<main id="view"></main>
+<div id="scroll"><main id="view"></main></div>
 <nav class="tabs" aria-label="Sections">
  <button data-tab="quests"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>QUESTS</button>
  <button data-tab="train"><svg viewBox="0 0 24 24"><path d="M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12"/></svg>TRAIN</button>
@@ -571,6 +574,7 @@ function makePops() {
 
 /* ================= helpers ================= */
 const $ = s => document.querySelector(s);
+const toTop = () => { const s = document.getElementById('scroll'); if (s) s.scrollTop = 0; };
 const pad = n => String(n).padStart(2, '0');
 const dstr = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const dayNum = s => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
@@ -1305,7 +1309,7 @@ const STORY = {
   5:["S... S-RANK!!! I CAN'T BREATHE!", "Okay. Okay. Deep breath. You did it, {name}. You actually did it.", "Best. Partner. EVER. Now let's go show the world!"]}
 };
 const storyItems = r => (STORY[coachId()][r] || []).map(t => ({ev:'story', text:fill(t)}));
-function playStory(r) { tab = 'quests'; render(); window.scrollTo(0, 0); sayQueue(storyItems(r)); }
+function playStory(r) { tab = 'quests'; render(); toTop(); sayQueue(storyItems(r)); }
 function storyHTML() {
  return `<section class="panel"><h2>COACH STORIES</h2><p class="dim small">${coach().name.charAt(0) + coach().name.slice(1).toLowerCase()} opens up a little more at each rank.</p>
   <div class="tlist">${[1, 2, 3, 4, 5].map(r => { const open = S.rankIdx >= r; return `<button class="tt ${open ? '' : 'lock'}" ${open ? `data-a="story" data-r="${r}"` : 'disabled'}><span><b>Chapter ${r}</b><br><span class="dim small">${open ? 'Tap to replay' : `Reach ${RANKS[r]}-Rank`}</span></span><span class="small">${open ? '▶' : 'Locked'}</span></button>`; }).join('')}</div></section>`;
@@ -1561,7 +1565,7 @@ function suddenTick() {
  const txt = line('sudden', {task:p.task});
  say('sudden', txt, [{label:'On it!', fn:() => say('next', line(S.today.complete ? 'train' : 'next'))}, {label:'Not now', fn:suddenSkip}]);
  dialog({cls:'gold', title:'SUDDEN QUEST', body:`<p class="sqtask">${esc(p.task)}</p><p>Reward: <b style="color:var(--gold)">+${p.xp} XP</b> · ${p.cat.toUpperCase()}</p><p class="dim small">You have ${SQ_MIN} minutes. Log it on the Quests screen when you're done.</p>${coachBlock('sudden', txt)}`,
-  buttons:[{label:'Accept', cls:'p', fn:() => { CL.choices = []; tab = 'quests'; render(); window.scrollTo(0, 0); }}, {label:'Not now', fn:() => { suddenSkip(); commit(); }}]});
+  buttons:[{label:'Accept', cls:'p', fn:() => { CL.choices = []; tab = 'quests'; render(); toTop(); }}, {label:'Not now', fn:() => { suddenSkip(); commit(); }}]});
  tab === 'quests' && render();
 }
 function suddenDone() {
@@ -1581,7 +1585,7 @@ function onboard() {
 /* ================= events ================= */
 document.addEventListener('click', e => {
  const tb = e.target.closest('[data-tab]');
- if (tb) { tab = tb.dataset.tab; try { history.replaceState(null, '', '#' + tab); } catch (x) {} render(); window.scrollTo(0, 0); return; }
+ if (tb) { tab = tb.dataset.tab; try { history.replaceState(null, '', '#' + tab); } catch (x) {} render(); toTop(); return; }
  const el = e.target.closest('[data-a]');
  if (!el || el.disabled) return;
  if (el.classList.contains('b') || el.classList.contains('bn')) sfx('tap', [8]);
@@ -1611,7 +1615,7 @@ document.addEventListener('click', e => {
   case 'prefresh': loadParty(true); return;
   case 'pinvite': copyText(`Join my party on Ascend! Open ${location.origin}${location.pathname} → Status → Party → Join, and enter code ${S.party.code}`, 'Invite copied. Send it to your party!'); return;
   case 'pleave': dialog({title:'Leave the party?', body:`<p>You can rejoin later with code ${S.party.code}.</p>`, buttons:[{label:'Leave', cls:'r', fn:() => { partyAction('leave', {code:S.party.code}); }}, {label:'Cancel', cls:'p'}]}); return;
-  case 'goparty': tab = 'status'; sview = 'party'; window.scrollTo(0, 0); break;
+  case 'goparty': tab = 'status'; sview = 'party'; toTop(); break;
   case 'ptopen': openTest(); return;
   case 'ptwatch': toggleWatch(); return;
   case 'ptsave': saveTest(); commit(); return;
@@ -1619,7 +1623,7 @@ document.addEventListener('click', e => {
   case 'tsound': S.sound = S.sound === false; if (S.sound) sfx('success'); break;
   case 'thaptic': S.haptics = S.haptics === false; if (S.haptics) sfx('tap', [40]); break;
   case 'focusq': focusQ = id; break;
-  case 'sview': sview = el.dataset.v; window.scrollTo(0, 0); break;
+  case 'sview': sview = el.dataset.v; toTop(); break;
   case 'trialtimer': { const i = +el.dataset.i; startTimer(EXAMS[S.exam.to][i].timer, `${RANKS[S.exam.to]}-Rank Exam`, () => passTrial(i), true); return; }
   case 'trialpass': { const i = +el.dataset.i, x = EXAMS[S.exam.to][i];
    dialog({title:'Trial complete?', body:`<p><b>${x.t}</b></p><p class="dim small">Only mark it if you did it for real, in one go. The System is watching.</p>`,
@@ -1631,7 +1635,7 @@ document.addEventListener('click', e => {
   case 'qfill': questAdd(id, qs.target); break;
   case 'padd': penaltyAdd(n); break;
   case 'water': water(); break;
-  case 'go': tab = el.dataset.t; if (tab === 'status') sview = 'hunter'; window.scrollTo(0, 0); break;
+  case 'go': tab = el.dataset.t; if (tab === 'status') sview = 'hunter'; toTop(); break;
   case 'wk': return;
   case 'wkdone': workoutDone(); break;
   case 'run': startRun(); return;
