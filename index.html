@@ -267,6 +267,105 @@ body.shake main,body.shake .top{animation:shk .6s cubic-bezier(.36,.07,.19,.97)}
 .toggle .sw2{width:46px;height:26px;border-radius:13px;background:rgba(62,240,255,.15);position:relative;flex:none}
 .toggle .sw2::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--dim);transition:left .2s,background .2s}
 .toggle.on .sw2{background:rgba(62,240,255,.45)}.toggle.on .sw2::after{left:23px;background:#fff}
+body:has(.ov.cine:not([hidden])) #toasts{opacity:0;transition:opacity .2s}
+/* background drift */
+#bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.45;background-image:radial-gradient(circle,rgba(62,240,255,.8) 0 1px,transparent 1.6px),radial-gradient(circle,rgba(155,107,255,.7) 0 1px,transparent 1.6px);background-size:120px 120px,190px 190px;background-position:0 0,40px 60px;animation:drift 60s linear infinite}
+@keyframes drift{to{background-position:0 -1200px,40px -1840px}}
+#scroll{position:relative;z-index:1}
+/* tab transitions, ripples, bumps */
+#view.tabin{animation:tabin .38s cubic-bezier(.2,.9,.3,1)}
+@keyframes tabin{from{opacity:0;transform:translateX(calc(var(--dir,1) * 28px))}}
+.tabs button.pop svg{animation:tpop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes tpop{40%{transform:scale(1.35) translateY(-3px)}}
+.tabs button.on::before{animation:sweep .5s ease-out}
+@keyframes sweep{from{left:50%;right:50%;opacity:0}}
+.b,.bn,.qp,.rowlink,.car-arrow{position:relative;overflow:hidden}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.28);transform:scale(0);animation:rip .55s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+.qbig b.bump,.fm-count.bump{animation:bump .28s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bump{50%{transform:scale(1.18);color:#fff;text-shadow:0 0 30px var(--c1)}}
+.qcard.flipin{animation:flipin .5s cubic-bezier(.2,.9,.3,1)}
+@keyframes flipin{from{transform:perspective(800px) rotateX(-80deg);opacity:0}}
+.qrow1{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.fmopen{flex:none;margin-top:16px;font:700 12px Oxanium,sans-serif;letter-spacing:.08em;color:var(--c1);background:rgba(62,240,255,.08);border:1px solid rgba(62,240,255,.35);padding:8px 10px;cursor:pointer;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
+.qbig[data-a]{cursor:pointer}
+/* cinematic scenes */
+.ov.cine{display:grid;place-items:center;padding:calc(20px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));overflow:auto;background:radial-gradient(circle at 50% 38%,rgba(62,240,255,.14),rgba(2,4,10,.97) 68%);backdrop-filter:blur(8px)}
+.holo{position:relative;overflow:hidden;width:min(100%,420px);padding:24px 22px;border:1px solid var(--c1);background:linear-gradient(160deg,rgba(14,32,64,.95),rgba(5,10,24,.97));box-shadow:0 0 50px rgba(62,240,255,.35);clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));animation:unfold .6s cubic-bezier(.2,.9,.3,1) both}
+@keyframes unfold{0%{transform:scale(.2,.02);opacity:0}45%{transform:scale(1,.02);opacity:1}100%{transform:none}}
+.holo-scan{position:absolute;left:0;right:0;height:35%;top:-35%;background:linear-gradient(transparent,rgba(62,240,255,.16),transparent);animation:hscan 2.6s linear .6s infinite;pointer-events:none}
+@keyframes hscan{to{top:110%}}
+.holo-title{font:900 clamp(22px,7vw,30px)/1.15 Orbitron,sans-serif;letter-spacing:.04em;color:var(--ok);min-height:2.3em;margin:4px 0 10px;text-shadow:0 0 18px rgba(77,255,181,.55)}
+.holo-title::after{content:"▌";color:var(--c1);animation:blink 1s steps(2) infinite}
+.hr{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-top:1px solid rgba(62,240,255,.18);opacity:0;animation:rowin .4s ease-out forwards}
+.hr:nth-of-type(1){animation-delay:.75s}.hr:nth-of-type(2){animation-delay:.95s}
+.hr b{font:800 24px Oxanium,sans-serif;color:var(--gold)}
+.hx{animation:rowin .4s 1.2s both}.hx p{margin:8px 0 0;font-size:14px}
+@keyframes rowin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.cine-coach{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid rgba(62,240,255,.18);text-align:left;animation:rowin .4s 1.3s both}
+.cine-coach img,.cine-coach svg{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:50% 20%;border:2px solid var(--c1);background:#0b1430}
+.cine-coach b{font:700 12px Orbitron,sans-serif;letter-spacing:.08em;color:var(--c1)}.cine-coach p{margin:4px 0 0;font-size:14px}
+.cine .b.full{margin-top:18px;min-height:52px;animation:rowin .4s 1.5s both}
+.cine-flash{position:fixed;inset:0;background:#fff;pointer-events:none;animation:flash .7s ease-out forwards;z-index:2}
+@keyframes flash{from{opacity:.95}to{opacity:0}}
+.lv-stage,.rk-stage{position:relative;width:min(100%,420px);text-align:center}
+.lv-hunter{width:min(62vw,250px);margin:0 auto;animation:slidein .8s cubic-bezier(.2,.9,.3,1) .1s both}
+@keyframes slidein{from{transform:translateX(-70vw) scale(.8);opacity:0}to{transform:none;opacity:1}}
+.lv-word{font:900 clamp(42px,14vw,62px)/1 Orbitron,sans-serif;letter-spacing:.05em;color:var(--gold);text-shadow:0 0 30px rgba(255,207,90,.85);animation:slam .55s cubic-bezier(.3,1.6,.5,1) .4s both}
+@keyframes slam{from{transform:scale(2.8);opacity:0;filter:blur(10px)}to{transform:none;opacity:1;filter:none}}
+.lv-num{margin:8px 0 2px;animation:rowin .4s .7s both}.lv-num small{font:700 18px Oxanium,sans-serif;color:var(--dim);margin-right:6px}
+.lv-num b{font:800 clamp(56px,18vw,76px)/1 Oxanium,sans-serif;text-shadow:0 0 26px rgba(62,240,255,.8)}
+.rk-dark{position:fixed;inset:0;background:#000;pointer-events:none;animation:darkfade 1.5s ease-out forwards;z-index:2}
+@keyframes darkfade{0%,45%{opacity:1}100%{opacity:0}}
+.rk-from{font:700 18px Oxanium,sans-serif;color:var(--dim);text-decoration:line-through;animation:rowin .4s .4s both}
+.rk-letter{font:900 clamp(130px,42vw,190px)/1 Orbitron,sans-serif;color:var(--aura);text-shadow:0 0 40px var(--aura),0 0 100px var(--aura);animation:bigslam .75s cubic-bezier(.3,1.5,.5,1) .75s both}
+@keyframes bigslam{from{transform:scale(5) rotate(-10deg);opacity:0}60%{opacity:1}to{transform:none;opacity:1}}
+.rk-word{font:900 26px Orbitron,sans-serif;letter-spacing:.32em;margin-right:-.32em;animation:rowin .5s 1.35s both}
+.rk-coach{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center;text-align:left;margin-top:18px;animation:rowin .5s 1.7s both}
+.rk-coach img,.rk-coach svg{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 0 16px var(--aura))}
+.rk-coach b{font:700 12px Orbitron,sans-serif;letter-spacing:.08em;color:var(--aura)}.rk-coach p{margin:4px 0 0}
+.rk-stage .b.full{animation:rowin .4s 2s both}
+/* focus mode */
+#focus{position:fixed;inset:0;z-index:26;display:flex;justify-content:center;padding:calc(18px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom));background:radial-gradient(600px 460px at 50% 45%,rgba(62,240,255,.12),transparent 70%),var(--bg);touch-action:manipulation;-webkit-user-select:none;user-select:none;animation:fmin .3s ease-out}
+#focus[hidden]{display:none}
+@keyframes fmin{from{opacity:0;transform:scale(1.04)}}
+.fm{position:relative;width:100%;max-width:440px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;gap:10px}
+.fm-x{position:absolute;top:0;right:0;width:44px;height:44px;font-size:20px;color:var(--dim);background:rgba(62,240,255,.06);border:1px solid rgba(62,240,255,.25);cursor:pointer}
+.fm-name{font:900 clamp(24px,7.5vw,34px)/1.1 Orbitron,sans-serif;letter-spacing:.03em;padding:0 44px}
+.fm-ringwrap{position:relative;width:min(74vw,320px,46vh);aspect-ratio:1}
+.fm-ringwrap svg{position:absolute;inset:0;transform:rotate(-90deg);filter:drop-shadow(0 0 10px rgba(62,240,255,.45))}
+#fmRing{transition:stroke-dashoffset .35s ease-out}
+.fm-mid{position:absolute;inset:0;display:grid;place-content:center}
+.fm-count{font:800 clamp(72px,24vw,118px)/1 Oxanium,sans-serif;font-variant-numeric:tabular-nums}
+.fm-of{font:700 18px Oxanium,sans-serif;color:var(--dim)}
+.fm-clear{font:900 clamp(34px,10vw,46px)/1 Orbitron,sans-serif;color:var(--ok);text-shadow:0 0 26px rgba(77,255,181,.7);animation:slam .5s cubic-bezier(.3,1.6,.5,1) both}
+.fm-hint{color:var(--dim);margin:0}
+.fm-ctrl{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.fm-ctrl .b{min-height:50px;min-width:96px}
+.fm-hold{position:relative;width:100%;min-height:66px;font:800 15px Orbitron,sans-serif;letter-spacing:.14em;color:#fff;border:1px solid var(--c1);background:rgba(62,240,255,.07);overflow:hidden;cursor:pointer;touch-action:none;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.fm-hold i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--c2),var(--c1));box-shadow:0 0 20px var(--c1)}
+.fm-hold span{position:relative}
+/* lore carousels */
+.car{max-width:540px;margin:0 auto;display:flex;flex-direction:column;min-height:100%}
+.car-head{text-align:center;padding:2px 12px 6px}.car-head h2{font-size:18px}
+.car-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:1}
+.car-track::-webkit-scrollbar{display:none}
+.car-slide{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;padding:6px 20px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.car-art{width:min(62vw,260px,36vh);aspect-ratio:1;background:none;border:0;padding:0;cursor:pointer;margin-bottom:8px}
+.car-art img{width:100%;height:100%;object-fit:contain;display:block}
+.car-art.pop{animation:bump .35s cubic-bezier(.3,1.6,.5,1)}
+.coachart{filter:drop-shadow(0 0 18px rgba(62,240,255,.35))}
+.car-name{font:900 clamp(26px,8vw,34px)/1 Orbitron,sans-serif;letter-spacing:.12em;margin-right:-.12em;text-shadow:0 0 22px rgba(62,240,255,.55)}
+.car-role{color:var(--c1);font:700 12px Oxanium,sans-serif;letter-spacing:.16em;text-transform:uppercase;margin:8px 0 10px}
+.car-lore{font-size:15px;line-height:1.5;max-width:40ch;margin:0 0 8px}
+.car-quote{font-style:italic;color:var(--dim);font-size:14px;max-width:38ch;margin:4px 0 0}
+.car-stats{display:grid;gap:7px;margin:6px 0 4px;width:min(100%,280px)}
+.car-stats div{display:flex;justify-content:space-between;align-items:center;font:700 11px Oxanium,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.car-stats i{display:flex;gap:4px}.car-stats b,.car-stats em{width:24px;height:8px;background:var(--c1);box-shadow:0 0 6px var(--c1)}.car-stats em{background:rgba(62,240,255,.14);box-shadow:none}
+.car-dots{display:flex;justify-content:center;gap:7px;margin:12px 0}
+.car-dots span{width:7px;height:7px;background:rgba(62,240,255,.25);transform:rotate(45deg);transition:background .2s}.car-dots span.on{background:var(--c1);box-shadow:0 0 8px var(--c1)}
+.car-nav{display:grid;grid-template-columns:54px minmax(0,1fr) 54px;gap:10px;padding:0 14px}
+.car-arrow{min-height:54px;font:700 28px Oxanium,sans-serif;color:var(--c1);background:rgba(62,240,255,.07);border:1px solid rgba(62,240,255,.3);cursor:pointer}
+#carPick{min-height:54px;font-size:16px}
 /* splash */
 #splash{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(600px 420px at 50% 42%,rgba(62,240,255,.12),transparent 70%),#02030b;overflow:hidden;cursor:pointer;transition:clip-path .7s cubic-bezier(.7,0,.3,1),opacity .7s}
 #splash.out{clip-path:inset(0 0 100% 0);opacity:.6;pointer-events:none}
@@ -296,6 +395,7 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 </style>
 </head>
 <body>
+<div id="bgfx" aria-hidden="true"></div>
 <div id="splash" aria-label="Loading Ascend">
  <div class="sp-grid"></div><div class="sp-scan"></div>
  <div class="sp-core"><div class="sp-ring r3"></div><div class="sp-ring"></div><div class="sp-ring r2"></div><img class="sp-logo" src="assets/logo-mark.webp" alt=""></div>
@@ -319,6 +419,7 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 <div class="cc" id="cc" hidden></div>
 <div class="ov" id="ov" hidden></div>
 <div class="timer" id="timer" hidden></div>
+<div id="focus" hidden></div>
 
 <script>
 {
@@ -796,6 +897,13 @@ function nextDialog() {
  const ov = $('#ov'), spec = mq.shift();
  if (!spec) { ov.hidden = true; ov.innerHTML = ''; mOpen = false; return; }
  mOpen = true;
+ if (spec.cine) {
+  ov.className = 'ov cine'; ov.innerHTML = spec.html; ov.hidden = false; ov.scrollTop = 0;
+  if (spec.onShow) spec.onShow(ov);
+  ov.querySelectorAll('[data-i]').forEach(btn => btn.onclick = () => { const b = (spec.buttons || [])[+btn.dataset.i] || {}; if (b.fn && b.fn() === false) return; nextDialog(); });
+  return;
+ }
+ ov.className = 'ov';
  ov.innerHTML = `<div class="panel dlg ${spec.cls || ''}" role="dialog" aria-modal="true">
   ${spec.sys !== false ? `<p class="sys">System</p>` : ''}${spec.title ? `<h2>${spec.title}</h2>` : ''}<div>${spec.body || ''}</div>
   ${spec.input ? `<div class="field"><input id="dlgIn" maxlength="${spec.input.max || 24}" value="${esc(spec.input.value || '')}" placeholder="${esc(spec.input.placeholder || '')}"></div>` : ''}
@@ -824,10 +932,7 @@ function addXp(n, cat, why) {
  if (S.level > oldL) {
   const txt = line('levelup');
   say('levelup', txt);
-  setTimeout(() => { sfx('levelup', [40, 40, 90]); const [x, y] = mid(); burst(x, y, '#ffcf5a', 50, 1.3); burst(x, y, '#3ef0ff', 30, 1); }, 120);
-  dialog({cls:'lvup gold', body:`${playerImg('happy', 'dpimg')}<div class="big">LEVEL UP</div><div class="arrow">Lv ${oldL} → Lv ${S.level}</div>
-   ${S.level >= cap ? `<p style="margin-top:12px">Level cap for ${rankOf()}-Rank reached.<br><span class="dim small">Pass the ${RANKS[S.rankIdx + 1]}-Rank Exam to keep leveling. Extra XP is saved.</span></p>` : `<p class="dim small" style="margin-top:12px">${need(S.level)} XP to the next level.</p>`}
-   ${coachBlock('levelup', txt)}`, buttons:[{label:'Continue', cls:'p full'}]});
+  sceneLevel(oldL, S.level >= cap ? `Level cap for ${rankOf()}-Rank reached. Pass the ${RANKS[S.rankIdx + 1]}-Rank Exam to keep leveling. Extra XP is saved.` : `${need(S.level)} XP to the next level.`, txt);
  }
  checkTitles(); checkCap();
 }
@@ -853,10 +958,7 @@ function rankUp() {
  S.log.unshift({t:Date.now(), why:`Rank up: ${from} → ${to}`, n:0});
  const txt = line('rankup', {rank:to});
  say('rankup', txt); CL.queue = storyItems(S.rankIdx);
- setTimeout(() => { sfx('rankup', [100, 50, 100, 50, 250]); shake(); const [x, y] = mid(); burst(x, y, AURA[to], 80, 1.6); burst(x, y, '#ffffff', 30, 1.2); }, 150);
- dialog({cls:'lvup gold', body:`${playerImg('happy', 'dpimg')}<div class="big">RANK UP</div><div class="arrow">${from} → <span style="color:${AURA[to]}">${to}</span></div>
-  <p style="margin-top:12px">Your aura changed. Your coach has something to tell you.${S.level > oldL ? ` Saved XP released: Lv ${oldL} → Lv ${S.level}.` : ''}</p><p class="dim small">${to === 'S' ? 'You passed every exam. You are an S-Rank Hunter.' : 'Daily Quests get harder starting tomorrow.'}</p>${coachBlock('rankup', txt)}`,
-  buttons:[{label:'Continue', cls:'p full'}]});
+ sceneRank(from, to, `${S.level > oldL ? `Saved XP released: Lv ${oldL} → Lv ${S.level}. ` : ''}${to === 'S' ? 'You passed every exam. You are an S-Rank Hunter.' : 'Daily Quests get harder starting tomorrow.'} Tap your coach afterward: they have something to tell you.`, txt);
  checkTitles(); checkCap();
 }
 function checkTitles() {
@@ -892,16 +994,15 @@ function checkDaily() {
  let shieldMsg = '';
  if (T.rest) { T.rest = false; S.shields++; shieldMsg = '<p class="dim small">You trained on your rest day, so your shield was refunded.</p>'; }
  if (S.streak % 7 === 0 && S.shields < 3) { S.shields++; shieldMsg += `<p style="color:var(--c1)">${S.streak}-day streak: you earned a rest shield (${S.shields}/3).</p>`; }
- setTimeout(() => { sfx('chime', [50, 50, 120]); const [x, y] = mid(); burst(x, y, '#4dffb5', 50, 1.3); burst(x, y, '#ffcf5a', 30, 1); }, 200);
  let bonus = 50 + Math.min(S.streak * 5, 50); if (T.event && T.event.id === 'over') bonus = Math.round(bonus * 1.5);
- const txt = line('clear');
- addXp(bonus, null, `Daily Quest cleared · ${S.streak}-day streak`);
- if (T.event && T.event.id === 'early' && new Date().getHours() < 12) { addXp(25, null, 'Early Bird bonus'); shieldMsg += '<p style="color:var(--gold)">Early Bird: +25 XP for clearing before noon.</p>'; }
- if (T.event && T.event.id === 'mystery' && !T.quests.some(q => q.optional)) { const g = ['upper', 'lower', 'core', 'blast'][Math.floor(Math.random() * 4)], used = new Set(T.quests.map(q => q.id)); T.quests.push(makeQuest(pickFrom(g, used, Math.random), 1, 40, true)); shieldMsg += '<p style="color:var(--gold)">Mystery Quest revealed! Check your board for a bonus quest worth +40 XP.</p>'; }
+ const txt = line('clear'), early = T.event && T.event.id === 'early' && new Date().getHours() < 12;
+ if (early) shieldMsg += '<p style="color:var(--gold)">Early Bird: +25 XP for clearing before noon.</p>';
+ if (T.event && T.event.id === 'mystery' && !T.quests.some(q => q.optional)) { const g = ['upper', 'lower', 'core', 'blast'][Math.floor(Math.random() * 4)], used = new Set(T.quests.map(q => q.id)); T.quests.push(makeQuest(pickFrom(g, used, Math.random), 1, 40, true)); shieldMsg += '<p style="color:var(--gold)">Mystery Quest revealed: a bonus quest worth +40 XP is on your board.</p>'; }
+ if (S.penalty && !S.penalty.done) shieldMsg += '<p style="color:var(--red)">The Penalty Quest is still open. Clear it before midnight.</p>';
  say('clear', txt);
- dialog({title:'Daily Quest complete', body:`${playerImg('happy', 'dpimg')}<p>All quests cleared. Streak: <b>${S.streak}</b> day${S.streak === 1 ? '' : 's'}.</p><p class="dim">Reward: +${bonus} XP</p>
-  ${shieldMsg}${S.penalty && !S.penalty.done ? '<p style="color:var(--red)">The Penalty Quest is still open. Clear it before midnight.</p>' : ''}${coachBlock('clear', txt)}`,
-  buttons:[{label:'Continue', cls:'p full'}]});
+ sceneClear(bonus, shieldMsg, txt);
+ addXp(bonus, null, `Daily Quest cleared · ${S.streak}-day streak`);
+ if (early) addXp(25, null, 'Early Bird bonus');
  return true;
 }
 function penaltyAdd(amt) {
@@ -992,25 +1093,9 @@ function stopTimer(finished) {
 
 /* ================= creator & coach picker ================= */
 let ccDone = null;
-function openCreator(done) {
- ccDone = done || null; $('#cc').hidden = false;
- const cur = S.avatar && S.avatar.char;
- $('#cc').innerHTML = `<div class="ccin"><div class="panel"><p class="sys">Character select</p><h2>Choose your Hunter</h2>
-  <p class="dim small">This is you. Your Hunter's expression changes with what happens, and the aura behind them changes color as you rank up: E grey, D green, C cyan, B violet, A red, S gold.</p>
-  <div class="chars">${PLAYERS.map((p, i) => `<button class="panel charc ${cur === p.id ? 'on' : ''}" data-a="pickchar" data-id="${p.id}">
-   <div class="pimg r${S.rankIdx || 0}" style="--aura:${AURA[rankOf()]}"><img src="${charSrc('neutral', p.id)}" alt="Hunter ${i + 1}"></div>
-   <div class="vnname" style="display:table;margin:6px auto 0">HUNTER ${pad(i + 1)}</div><p class="dim">${p.desc}</p></button>`).join('')}</div>
-  <p class="dim small" style="margin-top:12px">12 Hunters available. You can switch any time from Status.</p>
-  ${ccDone ? '' : '<div class="btns"><button class="b" data-a="ccclose">Cancel</button></div>'}</div></div>`;
-}
+function openCreator(done) { ccDone = done || null; openCarousel('hunter', ccDone); }
 let cpDone = null;
-function openCoach(done) {
- cpDone = done || null; $('#cc').hidden = false;
- $('#cc').innerHTML = `<div class="ccin"><div class="panel"><p class="sys">Choose your coach</p><h2>Who's training you?</h2><p class="dim small">Your coach talks to you every day and reacts to what you do. You can switch any time from Status.</p>
-  <div class="coaches">${Object.entries(COACHES).map(([id, c]) => `<button class="panel coachc ${S.coach === id ? 'on' : ''}" data-a="pickcoach" data-id="${id}">
-   ${coachPic('smile', id)}<div class="vnname">${c.name}</div><p class="vnrole">${c.role}</p><p class="small">${c.tag}</p><p class="small dim">“${esc(c.lines.greet_m[1].replace('{leftList}', 'today\'s quests').replace('{next}', 'push-ups').replace(/\{name\}/g, S.name))}”</p></button>`).join('')}</div>
-  ${cpDone ? '' : '<div class="btns"><button class="b" data-a="ccclose">Cancel</button></div>'}</div></div>`;
-}
+function openCoach(done) { cpDone = done || null; openCarousel('coach', cpDone); }
 const closeCC = () => { if (typeof watch !== 'undefined' && watch) { clearInterval(watch.int); watch = null; } $('#cc').hidden = true; $('#cc').innerHTML = ''; };
 
 /* ================= rendering ================= */
@@ -1023,6 +1108,7 @@ function render() {
  const xpl = $('#xpl'); if (xpl) xpl.style.width = (S.level >= capOf() ? 100 : S.xp / need(S.level) * 100).toFixed(1) + '%';
  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
  $('#view').innerHTML = ({quests:vQuests, train:vTrain, status:vStatus, log:vLog})[tab]();
+ afterRender();
 }
 function vCoach() {
  const c = coach();
@@ -1045,8 +1131,8 @@ function vQuests() {
   : testDue() && S.totals.questDays >= 1 ? `<button class="panel wide alert" data-a="ptopen"><span><span class="sys">Monthly Power Test</span><b>See how strong you are today</b></span><span class="arr" style="color:var(--c1)">›</span></button>`
   : S.party && partyData ? `<button class="panel wide alert" data-a="goparty"><span><span class="sys">Party</span><b>${partyToday()} of ${partyData.members.length} cleared today</b></span><span class="arr" style="color:var(--c1)">›</span></button>` : '';
  const card = f ? `
-  <div class="qname">${f.label}${f.optional ? ` <span class="opt">BONUS +${f.xp}</span>` : ''}</div>
-  <div class="qbig"><b>${f.prog}</b><span>/ ${f.target}${f.unit}</span></div>
+  <div class="qrow1"><div class="qname">${f.label}${f.optional ? ` <span class="opt">BONUS +${f.xp}</span>` : ''}</div><button class="fmopen" data-a="focus" data-id="${f.id}">⤢ Focus</button></div>
+  <div class="qbig" data-a="focus" data-id="${f.id}"><b>${f.prog}</b><span>/ ${f.target}${f.unit}</span></div>
   <div class="bar gbar"><i style="width:${f.prog / f.target * 100}%"></i></div>
   <div class="btns qb big"><button class="b" data-a="qminus" data-id="${f.id}" aria-label="Remove ${f.steps[0]}">−${f.steps[0]}</button>${f.steps.map(s => `<button class="b" data-a="qadd" data-id="${f.id}" data-n="${s}">+${s}</button>`).join('')}<button class="b p" data-a="qfill" data-id="${f.id}">Done</button></div>`
   : `<div class="cleared"><div class="ck">✓</div><div><b>DAILY QUEST CLEARED</b><p class="dim small">+${50 + Math.min(S.streak * 5, 50)} XP · ${S.streak}-day streak. See you tomorrow.</p></div></div>`;
@@ -1055,7 +1141,7 @@ function vQuests() {
   : `<p class="dim small qfoot">${T.event ? `<b style="color:var(--gold)">⚡ ${T.event.name}:</b> ${T.event.desc}` : `Clear all ${req.length} for +${50 + Math.min((S.streak + 1) * 5, 50)} XP and +1 streak.`}${S.shields > 0 && S.streak > 0 ? ` <button class="linkish inline" data-a="shield">Rest day?</button>` : ''}</p>`;
  const G = S.gate, extra = [G && !G.cleared ? `${G.boss} · ${G.hp} HP` : G ? 'Gate cleared' : '', T.waterDone ? '' : `Water ${T.water}/8`].filter(Boolean).join(' · ');
  return `${vCoach()}${urgent}${notice}
- <section class="panel wide">
+ <section class="panel wide qcard" data-id="${f ? f.id : ''}" data-p="${f ? f.prog : ''}">
   <div class="qtop"><p class="sys" style="margin:0">Daily Quest · ${doneN}/${req.length}</p><span class="dim small">${T.theme || rankOf() + '-Rank'}</span></div>
   ${card}${pills}${sub}
  </section>
@@ -1197,6 +1283,7 @@ function fxLoop() {
  if (parts.length) requestAnimationFrame(fxLoop); else { g.clearRect(0, 0, W, H); fxRun = false; }
 }
 function floater(text, color, x, y) {
+ if (typeof FM !== 'undefined' && FM) return;
  const el = document.createElement('div'); el.className = 'floater'; el.textContent = text;
  el.style.left = (x ?? lastPt.x) + 'px'; el.style.top = (y ?? lastPt.y) + 'px'; el.style.color = color;
  document.body.appendChild(el); setTimeout(() => el.remove(), 1150);
@@ -1538,6 +1625,201 @@ function vParty() {
   <div class="btns"><button class="b p" data-a="pinvite">Copy invite</button><button class="b" data-a="prefresh">Refresh</button><button class="b r" data-a="pleave">Leave</button></div></section>`;
 }
 
+/* ================= cinematic System moments ================= */
+function animateScene(root) {
+ root.querySelectorAll('[data-type]').forEach(el => { const t = el.dataset.type; let i = 0; el.textContent = ''; const iv = setInterval(() => { el.textContent = t.slice(0, ++i); if (i % 2) sfx('blip'); if (i >= t.length) clearInterval(iv); }, 45); });
+ root.querySelectorAll('[data-count]').forEach(el => {
+  const to = +el.dataset.count, from = +(el.dataset.from || 0), pre = el.dataset.prefix || '', suf = el.dataset.suffix || '', delay = +(el.dataset.delay || 600);
+  el.textContent = pre + from + suf;
+  setTimeout(() => { const t0 = performance.now(); const step = now => { const k = Math.min(1, (now - t0) / 900), e = 1 - Math.pow(1 - k, 3); el.textContent = pre + Math.round(from + (to - from) * e) + suf; if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }, delay);
+ });
+}
+function cine(html, onShow) { dialog({cine:true, html, onShow:ov => { animateScene(ov); if (onShow) onShow(ov); }, buttons:[{label:'Continue'}]}); }
+const cineCoach = (ev, txt) => `<div class="cine-coach">${coachPic(EXPR[ev] || 'smile')}<div><b>${coach().name}</b><p>${esc(txt)}</p></div></div>`;
+function sceneClear(bonus, extraHTML, txt) {
+ cine(`<div class="holo"><div class="holo-scan"></div><p class="sys">System notice</p><h1 class="holo-title" data-type="DAILY QUEST COMPLETE"></h1>
+  <div class="hr"><span>Reward</span><b data-count="${bonus}" data-prefix="+" data-suffix=" XP" data-delay="800"></b></div>
+  <div class="hr"><span>Streak</span><b data-count="${S.streak}" data-suffix="${S.streak === 1 ? ' day' : ' days'}" data-delay="1000"></b></div>
+  ${extraHTML ? `<div class="hx">${extraHTML}</div>` : ''}${cineCoach('clear', txt)}<button class="b p full" data-i="0">Continue</button></div>`,
+  () => setTimeout(() => { sfx('chime', [50, 50, 120]); const [x, y] = mid(); burst(x, y, '#4dffb5', 50, 1.3); burst(x, y, '#ffcf5a', 30, 1); }, 500));
+}
+function sceneLevel(oldL, capNote, txt) {
+ cine(`<div class="cine-flash"></div><div class="lv-stage"><div class="lv-hunter">${playerImg('happy')}</div><div class="lv-word">LEVEL UP</div>
+  <div class="lv-num"><small>LV</small><b data-count="${S.level}" data-from="${oldL}" data-delay="900"></b></div><p class="dim small">${capNote}</p>${cineCoach('levelup', txt)}<button class="b p full" data-i="0">Continue</button></div>`,
+  () => { sfx('levelup', [40, 40, 90]); setTimeout(() => { const [x, y] = mid(); burst(x, y, '#ffcf5a', 60, 1.4); burst(x, y, '#3ef0ff', 30, 1); }, 380); });
+}
+function sceneRank(from, to, note, txt) {
+ cine(`<div class="rk-dark"></div><div class="rk-stage" style="--aura:${AURA[to]}"><p class="sys">Reassessment complete</p><div class="rk-from">${from}-RANK</div>
+  <div class="rk-letter">${to}</div><div class="rk-word">RANK UP</div>
+  <div class="rk-coach">${coachPic('surprised')}<div><b>${coach().name}</b><p>${esc(txt)}</p></div></div><p class="dim small" style="margin-top:12px">${note}</p><button class="b p full" data-i="0">Continue</button></div>`,
+  () => setTimeout(() => { sfx('rankup', [100, 50, 100, 50, 250]); shake(); const [x, y] = mid(); burst(x, y, AURA[to], 90, 1.7); burst(x, y, '#ffffff', 30, 1.2); }, 850));
+}
+
+/* ================= focus mode ================= */
+let FM = null, holdRaf = null;
+const fq = () => FM && S.today.quests.find(x => x.id === FM.id);
+const fkind = q => q.unit === ' sec' ? 'sec' : q.unit === ' min' ? 'min' : 'rep';
+function speak(t) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = 1.15; speechSynthesis.speak(u); } catch (e) {} }
+function openFocus(id) { const q = S.today.quests.find(x => x.id === id && !x.done); if (!q) return; FM = {id, timer:null}; $('#focus').hidden = false; drawFocus(); sfx('chime', [30]); }
+function closeFocus() { if (!FM) return; stopFocusTimer(true); FM = null; $('#focus').hidden = true; $('#focus').innerHTML = ''; try { speechSynthesis.cancel(); } catch (e) {} commit(); }
+function focusVals() {
+ const q = fq(), k = fkind(q), el = FM.timer ? (Date.now() - FM.t0) / 1000 : 0, extra = k === 'sec' ? Math.floor(el) : k === 'min' ? Math.floor(el / 60) : 0;
+ const val = Math.min(q.target, q.prog + extra);
+ return {q, k, el, val, p:val / q.target, label:k === 'min' && FM.timer ? fmt(q.prog * 60 + el) : String(val), of:k === 'min' && FM.timer ? `of ${q.target}:00` : `of ${q.target}${q.unit}`};
+}
+function drawFocus() {
+ const q = fq(); if (!q) return;
+ const v = focusVals(), run = !!FM.timer;
+ $('#focus').innerHTML = `<div class="fm">
+  <button class="fm-x" data-a="fmclose" aria-label="Close focus mode">✕</button>
+  <div><p class="sys">Focus mode${S.today.theme ? ' · ' + S.today.theme : ''}</p><div class="fm-name">${q.label}</div></div>
+  <div class="fm-ringwrap"><svg viewBox="0 0 100 100"><defs><linearGradient id="fmg"><stop offset="0" stop-color="#9b6bff"/><stop offset="1" stop-color="#3ef0ff"/></linearGradient></defs><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(62,240,255,.12)" stroke-width="5"/><circle id="fmRing" cx="50" cy="50" r="46" fill="none" stroke="url(#fmg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="${(289 * (1 - v.p)).toFixed(1)}"/></svg>
+   <div class="fm-mid"><div class="fm-count" id="fmCount">${v.label}</div><div class="fm-of" id="fmOf">${v.of}</div></div></div>
+  <p class="fm-hint" id="fmHint">${v.k === 'rep' ? 'Tap anywhere to count a rep' : run ? 'Timer running. Tap Stop when you rest.' : 'Tap Start when you begin'}</p>
+  <div class="fm-ctrl">${v.k === 'rep' ? '<button class="b" data-a="fmminus">−1</button>' : `<button class="b p" data-a="fmtimer">${run ? 'Stop' : 'Start'}</button>${v.k === 'min' ? '<button class="b" data-a="fmplus5">+5 min</button>' : ''}`}<button class="b" data-a="fmvoice">Voice: ${S.voice ? 'On' : 'Off'}</button></div>
+  <button class="fm-hold" data-hold="1"><i id="fmHold"></i><span>HOLD TO COMPLETE</span></button></div>`;
+}
+function updFocus() {
+ if (!fq()) return; const v = focusVals(), c = $('#fmCount'), r = $('#fmRing'), o = $('#fmOf');
+ if (c) c.textContent = v.label; if (o) o.textContent = v.of; if (r) r.setAttribute('stroke-dashoffset', (289 * (1 - v.p)).toFixed(1));
+}
+function bumpCount() { const c = $('#fmCount'); if (c) { c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump'); } }
+function focusRep(n) {
+ const q = fq(); if (!q || q.done) return;
+ questAdd(q.id, n); save(); render(); updFocus(); bumpCount();
+ if (S.voice && n > 0) speak(String(q.prog));
+ sfx('tap', [10]);
+ if (q.done) focusDone();
+}
+function focusDone() {
+ stopFocusTimer(false);
+ const m = $('.fm-mid'); if (m) m.innerHTML = '<div class="fm-clear">CLEARED</div>';
+ const r = $('#fmRing'); if (r) r.setAttribute('stroke-dashoffset', '0');
+ if (S.voice) speak('Quest complete');
+ setTimeout(() => {
+  if (!FM) return;
+  const next = S.today.quests.find(x => !x.done && !x.optional);
+  if (next && !S.today.complete) { FM.id = next.id; drawFocus(); sfx('chime'); } else closeFocus();
+ }, 1300);
+}
+function startFocusTimer() {
+ FM.t0 = Date.now(); FM.spoken = -1; FM.timer = setInterval(focusTick, 250); drawFocus(); sfx('success', [30]); if (S.voice) speak('Go');
+ try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(l => { if (FM) FM.lock = l; }).catch(() => {}); } catch (e) {}
+}
+function focusTick() {
+ const q = fq(); if (!q || !FM.timer) return;
+ const el = (Date.now() - FM.t0) / 1000, k = fkind(q), units = k === 'sec' ? Math.floor(el) : Math.floor(el / 60);
+ updFocus();
+ if (S.voice) { const s = Math.floor(el), left = k === 'sec' ? q.target - q.prog - s : null;
+  if (s !== FM.spoken && s > 0) { if (left !== null && left > 0 && left <= 3) { FM.spoken = s; speak(String(left)); } else if (s % (k === 'sec' ? 10 : 60) === 0) { FM.spoken = s; speak(k === 'sec' ? String(s) : `${s / 60} minute${s === 60 ? '' : 's'}`); } } }
+ if (q.prog + units >= q.target) { stopFocusTimer(true); if (q.done) focusDone(); }
+}
+function stopFocusTimer(apply) {
+ if (!FM || !FM.timer) return;
+ clearInterval(FM.timer); const el = (Date.now() - FM.t0) / 1000, q = fq(); FM.timer = null;
+ try { if (FM.lock) FM.lock.release(); } catch (e) {}
+ if (apply && q) { const u = fkind(q) === 'sec' ? Math.floor(el) : Math.floor(el / 60); if (u > 0) { questAdd(q.id, u); save(); render(); } }
+}
+document.addEventListener('pointerdown', e => {
+ if (!FM) return;
+ const hold = e.target.closest('[data-hold]');
+ if (hold) {
+  e.preventDefault(); const t0 = performance.now(), bar = $('#fmHold'), px = e.clientX, py = e.clientY; sfx('tap', [20]);
+  const step = now => { const k = Math.min(1, (now - t0) / 900); if (bar) bar.style.width = (k * 100) + '%';
+   if (k < 1) { holdRaf = requestAnimationFrame(step); return; }
+   holdRaf = null; stopFocusTimer(true); const q = fq();
+   if (q && !q.done) questAdd(q.id, q.target - q.prog);
+   save(); render(); sfx('success', [40, 30, 60]); burst(px, py, '#4dffb5', 40, 1.2); focusDone(); };
+  holdRaf = requestAnimationFrame(step); return;
+ }
+ if (e.target.closest('button') || !e.target.closest('#focus')) return;
+ const q = fq(); if (q && fkind(q) === 'rep' && !q.done) { focusRep(1); burst(e.clientX, e.clientY, '#3ef0ff', 8, .5); }
+});
+const holdCancel = () => { if (holdRaf) { cancelAnimationFrame(holdRaf); holdRaf = null; const bar = $('#fmHold'); if (bar) bar.style.width = '0'; } };
+['pointerup', 'pointercancel'].forEach(t => document.addEventListener(t, holdCancel));
+
+/* ================= motion polish ================= */
+let lastTab = null, lastQ = {id:null, p:null};
+function afterRender() {
+ if (tab !== lastTab) {
+  const order = ['quests', 'train', 'status', 'log'], dir = lastTab ? Math.sign(order.indexOf(tab) - order.indexOf(lastTab)) : 0, v = $('#view');
+  if (dir && !reducedMotion) { v.style.setProperty('--dir', dir); v.classList.remove('tabin'); void v.offsetWidth; v.classList.add('tabin'); }
+  const b = document.querySelector('.tabs button.on'); if (b && lastTab) { b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+  lastTab = tab;
+ }
+ const c = $('.qcard');
+ if (c) {
+  if (c.dataset.id && c.dataset.id === lastQ.id && c.dataset.p !== lastQ.p) { const n = c.querySelector('.qbig b'); if (n) n.classList.add('bump'); }
+  else if (lastQ.id && c.dataset.id !== lastQ.id) c.classList.add('flipin');
+  lastQ = {id:c.dataset.id, p:c.dataset.p};
+ }
+}
+document.addEventListener('pointerdown', e => {
+ const t = e.target.closest('.b,.bn,.qp,.rowlink,.alert,.car-arrow'); if (!t || reducedMotion) return;
+ const r = t.getBoundingClientRect(), s = Math.max(r.width, r.height) * 2, sp = document.createElement('span');
+ sp.className = 'rip'; sp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+ t.appendChild(sp); setTimeout(() => sp.remove(), 550);
+});
+
+/* ================= lore carousels ================= */
+const HUNTER_LORE = {
+ player01:{code:'NIGHTFALL', spec:'Consistency', lore:'Awakened at 2 a.m. after another all-nighter at the desk. Quiet, stubborn, and done waiting for "someday."', quote:'One rep tonight beats a perfect plan tomorrow.'},
+ player02:{code:'EMBER', spec:'Speed', lore:'A former sprinter who walked away from the track for years, then finally came back. Burns hot, never burns out.', quote:'I didn\'t lose it. I just put it down for a while.'},
+ player03:{code:'PULSE', spec:'Rhythm', lore:'Trains to the beat in his earpiece. Every rep on rhythm, every rest on the clock, every set a track on the playlist.', quote:'Find the beat. Then don\'t miss it.'},
+ player04:{code:'FROST', spec:'Endurance', lore:'Calm under pressure and colder in competition. Her plank holds are the stuff of guild legend.', quote:'Stillness is a skill. I trained it.'},
+ player05:{code:'BLAZE', spec:'Power', lore:'Picked a fight with his own excuses, and won. Loud in the gym, louder on leg day, the first to cheer for a rookie.', quote:'Excuses don\'t lift anything.'},
+ player06:{code:'TEMPEST', spec:'Stamina', lore:'Works the night shift and turned every walk break into a training session. Slow to start, impossible to stop.', quote:'Twelve-hour shifts made me tough. This made me strong.'},
+ player07:{code:'RIDGE', spec:'Grit', lore:'Dad of three, weekend trail runner, weekday desk warrior. Living proof that busy is not an excuse.', quote:'I train at 5 a.m. so I can keep up at 5 p.m.'},
+ player08:{code:'VECTOR', spec:'Precision', lore:'Engineer by day, Hunter by night. Tracks every stat, optimizes every set, and debugs her form like code.', quote:'Measure it. Improve it. Repeat.'},
+ player09:{code:'HALO', spec:'Resilience', lore:'Got the scar learning to skateboard at thirty. Still smiling, still falling, still getting back up.', quote:'Falling is just the first half of getting up.'},
+ player10:{code:'NOVA', spec:'Agility', lore:'A gamer who noticed her character was stronger than she was, and decided to fix that. Fast hands, faster feet.', quote:'Real life has the best graphics. Time to level up.'},
+ player11:{code:'BASTION', spec:'Strength', lore:'A veteran who rebuilt himself from the ground up. Slow to speak, steady as stone, impossible to break.', quote:'Brick by brick. Rep by rep.'},
+ player12:{code:'GLITCH', spec:'Focus', lore:'Codes all day, lifts all night, and treats every workout like a bug to squash before shipping.', quote:'Every plateau is just a bug. Find it. Fix it.'}
+};
+const COACH_LORE = {
+ kaida:{title:'The Ember Coach', lore:'A junior champion who quit at seventeen and came back at twenty, because her coach never gave up on her. Now she trains rookies the same way: loud, honest, and never letting you quit.', stats:{Intensity:5, Patience:2, Hype:4}, quote:'I\'m tough on you because I already know you can do it.'},
+ rei:{title:'The Analyst', lore:'Spent years as an analyst measuring everything except herself. Started running at night to clear her head, then built the training system you\'re using now. Quiet, precise, secretly proud.', stats:{Intensity:3, Patience:5, Hype:2}, quote:'Data describes the past. You decide the future.'},
+ bolt:{title:'The Hype', lore:'Grew up as the kid nobody cheered for, so he decided to become the loudest supporter in every room. Former street dancer. Does burpees for fun. Genuinely believes in you.', stats:{Intensity:4, Patience:4, Hype:5}, quote:'Every rep is a tiny victory dance!'}
+};
+const HUNTER_EXPR = ['neutral', 'happy', 'fierce'], COACH_EXPR = ['smile', 'happy', 'fierce', 'surprised'];
+let CAR = null;
+function carSlide(kind, id, i) {
+ if (kind === 'hunter') { const L = HUNTER_LORE[id] || {code:id, spec:'', lore:'', quote:''};
+  return `<section class="car-slide"><button class="car-art pimg r${S.rankIdx || 0}" style="--aura:${AURA[rankOf()]}" data-a="carexpr" data-i="${i}" aria-label="Change expression"><img src="${charSrc('neutral', id)}" alt="${L.code}"></button>
+   <div class="car-name">${L.code}</div><p class="car-role">Specialty · ${L.spec}</p><p class="car-lore">${L.lore}</p><p class="car-quote">“${L.quote}”</p></section>`; }
+ const c = COACHES[id], L = COACH_LORE[id];
+ return `<section class="car-slide"><button class="car-art coachart" data-a="carexpr" data-i="${i}" aria-label="Change expression">${coachPic('smile', id)}</button>
+  <div class="car-name">${c.name}</div><p class="car-role">${L.title}</p><p class="car-lore">${L.lore}</p>
+  <div class="car-stats">${Object.entries(L.stats).map(([k, v]) => `<div><span>${k}</span><i>${'<b></b>'.repeat(v)}${'<em></em>'.repeat(5 - v)}</i></div>`).join('')}</div><p class="car-quote">“${L.quote}”</p></section>`;
+}
+function openCarousel(kind, done) {
+ const items = kind === 'hunter' ? PLAYERS.map(p => p.id) : Object.keys(COACHES), cur = kind === 'hunter' ? (S.avatar && S.avatar.char) : S.coach;
+ CAR = {kind, items, idx:Math.max(0, items.indexOf(cur)), expr:{}};
+ $('#cc').hidden = false;
+ $('#cc').innerHTML = `<div class="car">
+  <div class="car-head"><p class="sys">${kind === 'hunter' ? 'Character select' : 'Choose your coach'}</p><h2>${kind === 'hunter' ? 'CHOOSE YOUR HUNTER' : 'WHO\'S TRAINING YOU?'}</h2><p class="dim small">Swipe to browse · tap the art to see their moods</p></div>
+  <div class="car-track" id="carTrack">${items.map((id, i) => carSlide(kind, id, i)).join('')}</div>
+  <div class="car-dots">${items.map(() => '<span></span>').join('')}</div>
+  <div class="car-nav"><button class="car-arrow" data-a="carprev" aria-label="Previous">‹</button><button class="b p" id="carPick">Choose</button><button class="car-arrow" data-a="carnext" aria-label="Next">›</button></div>
+  ${done ? '' : '<button class="linkish" data-a="ccclose" style="display:block;margin:8px auto 0">Cancel</button>'}</div>`;
+ const tr = $('#carTrack');
+ requestAnimationFrame(() => { tr.scrollLeft = CAR.idx * tr.clientWidth; carUpdate(); });
+ tr.addEventListener('scroll', () => { const i = Math.round(tr.scrollLeft / Math.max(1, tr.clientWidth)); if (CAR && i !== CAR.idx && i >= 0 && i < CAR.items.length) { CAR.idx = i; carUpdate(); sfx('tap'); } }, {passive:true});
+}
+function carUpdate() {
+ document.querySelectorAll('.car-dots span').forEach((d, i) => d.classList.toggle('on', i === CAR.idx));
+ const id = CAR.items[CAR.idx], b = $('#carPick'); if (!b) return;
+ b.textContent = CAR.kind === 'hunter' ? `Choose ${(HUNTER_LORE[id] || {code:'Hunter'}).code}` : `Train with ${COACHES[id].name}`;
+ b.dataset.id = id; b.dataset.a = CAR.kind === 'hunter' ? 'pickchar' : 'pickcoach';
+}
+function carGo(d) { const tr = $('#carTrack'); if (!tr || !CAR) return; const i = Math.max(0, Math.min(CAR.items.length - 1, CAR.idx + d)); tr.scrollTo({left:i * tr.clientWidth, behavior:reducedMotion ? 'auto' : 'smooth'}); }
+function carExpr(i) {
+ const id = CAR.items[i], list = CAR.kind === 'hunter' ? HUNTER_EXPR : COACH_EXPR, n = ((CAR.expr[id] || 0) + 1) % list.length; CAR.expr[id] = n;
+ const art = document.querySelectorAll('.car-art')[i]; if (!art) return;
+ if (CAR.kind === 'hunter') art.querySelector('img').src = charSrc(list[n], id); else art.innerHTML = coachPic(list[n], id);
+ art.classList.remove('pop'); void art.offsetWidth; art.classList.add('pop'); sfx('blip'); sfx('tap', [15]);
+}
+
 /* ================= daily flow ================= */
 const lateNow = () => new Date().getHours() >= 18 && !S.today.complete;
 function arrival(msgs) {
@@ -1617,6 +1899,15 @@ document.addEventListener('click', e => {
   case 'vnchoice': { const c = CL.choices[+el.dataset.i]; CL.choices = []; if (c) c.fn(); commit(); return; }
   case 'sqdone': suddenDone(); break;
   case 'shield': shieldPrompt(); return;
+  case 'focus': openFocus(id); return;
+  case 'fmclose': closeFocus(); return;
+  case 'fmminus': focusRep(-1); return;
+  case 'fmtimer': if (FM.timer) { stopFocusTimer(true); const q = fq(); if (q && q.done) focusDone(); else drawFocus(); } else startFocusTimer(); return;
+  case 'fmplus5': { const q = fq(); if (q) { stopFocusTimer(true); questAdd(q.id, 5); save(); render(); if (q.done) focusDone(); else drawFocus(); } return; }
+  case 'fmvoice': S.voice = !S.voice; save(); drawFocus(); if (S.voice) speak('Voice on'); return;
+  case 'carprev': carGo(-1); return;
+  case 'carnext': carGo(1); return;
+  case 'carexpr': carExpr(+el.dataset.i); return;
   case 'cloudon': cloudCreate(); commit(); syncNow(true); return;
   case 'cloudlink': linkPrompt(); return;
   case 'cloudsync': syncNow(true); return;
