@@ -1,7 +1,7 @@
 # Wakes the Ascend notification sender every 10 minutes (GitHub may delay runs a few minutes).
 # Setup: repo Settings → Secrets and variables → Actions:
-#   Variable  ASCEND_URL   = your Vercel URL, e.g. https://ascend-yourname.vercel.app
-#   Secret    CRON_SECRET  = the same value you set as CRON_SECRET in Vercel
+#   ASCEND_URL   = your Vercel production URL, e.g. https://ascend-yourname.vercel.app (variable OR secret)
+#   CRON_SECRET  = the same value you set as CRON_SECRET in Vercel (secret)
 name: Ascend notifications
 on:
   schedule:
@@ -12,6 +12,20 @@ on:
 jobs:
   tick:
     runs-on: ubuntu-latest
-    if: ${{ vars.ASCEND_URL != '' }}
     steps:
-      - run: curl -fsS -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" "${{ vars.ASCEND_URL }}/api/tick"
+      - name: Ping the notification sender
+        env:
+          URL: ${{ vars.ASCEND_URL || secrets.ASCEND_URL }}
+          KEY: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$URL" ]; then echo "::error::ASCEND_URL is not set. Add it under Settings → Secrets and variables → Actions."; exit 1; fi
+          URL="${URL%/}"
+          code=$(curl -sS -o body.txt -w '%{http_code}' -H "Authorization: Bearer $KEY" "$URL/api/tick" || echo 000)
+          echo "HTTP $code"; head -c 400 body.txt; echo
+          case "$code" in
+            200) echo "Scheduler OK" ;;
+            401) echo "::error::401 Unauthorized. Either CRON_SECRET doesn't match Vercel (redeploy Vercel after changing it), or ASCEND_URL is a protected deployment link. Use your production domain."; exit 1 ;;
+            404) echo "::error::404. ASCEND_URL doesn't point at the Ascend Vercel deployment."; exit 1 ;;
+            000) echo "::error::Couldn't reach $URL. Check ASCEND_URL for typos."; exit 1 ;;
+            *) echo "::error::Unexpected response $code"; exit 1 ;;
+          esac
