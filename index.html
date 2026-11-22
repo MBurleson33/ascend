@@ -517,6 +517,18 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .st-row{display:grid!important;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center}
 .st-th{width:64px;height:42px;background-size:cover;background-position:center;border:1px solid rgba(var(--c1rgb),.3)}
 .st-row.lock .st-th{filter:grayscale(1) brightness(.35) blur(1px)}
+.mini{padding:0;cursor:pointer;font:inherit}.mini:active{transform:scale(.94)}
+.chips button.chip{font:inherit;cursor:pointer;background:none}.chips button.chip:active{transform:scale(.96)}
+.rt-dlg{max-height:86vh;overflow:auto}
+.rt-list{display:grid;gap:8px;margin-top:10px}
+.rt-row{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px 10px 8px;border:1px solid rgba(255,255,255,.08);background:rgba(10,18,40,.6);text-align:left}
+.rt-row.rt-now{border-color:var(--ra);box-shadow:inset 0 0 22px color-mix(in srgb,var(--ra) 22%,transparent),0 0 16px color-mix(in srgb,var(--ra) 30%,transparent)}
+.rt-row.rt-lock .remb{filter:grayscale(.85) brightness(.55)}.rt-row.rt-lock .rt-mid{opacity:.6}
+.remb.rt{width:56px;height:56px}.remb.rt b{font-size:18px}
+.rt-mid b{font:900 14px Orbitron,sans-serif;letter-spacing:.06em;color:var(--ra)}.rt-mid b span{font:700 11px Oxanium,sans-serif;letter-spacing:.12em;color:var(--dim);margin-left:6px}
+.rt-mid p{margin:3px 0 0;font-size:13px;line-height:1.35}.rt-mid .rt-sub{font:600 11px Oxanium,sans-serif;letter-spacing:.06em;color:var(--dim)}
+.rt-mid .bar{margin-top:6px;height:6px}
+.rt-tag{font:800 11px Oxanium,sans-serif;letter-spacing:.12em;color:var(--ra)}
 /* cosmetics: backgrounds */
 .pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
@@ -598,7 +610,7 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
  <div class="sp-msg" id="spMsg">System boot</div>
 </div>
 <header class="top">
- <div class="brand"><div class="mini" id="mini"></div><div class="logo">ASCEND</div></div>
+ <div class="brand"><button class="mini" id="mini" data-a="goprofile" aria-label="Open your profile card"></button><div class="logo">ASCEND</div></div>
  <div class="chips" id="chips"></div>
  <div class="xpline"><i id="xpl"></i></div>
 </header>
@@ -1304,7 +1316,7 @@ function render() {
  applyTheme();
  const r = rankOf(S.level);
  $('#mini').innerHTML = `<img src="${charSrc('neutral')}" alt="">`; $('#mini').style.borderColor = AURA[rankOf()]; $('#mini').style.boxShadow = `0 0 ${8 + S.rankIdx * 3}px ${AURA[rankOf()]}`;
- $('#chips').innerHTML = `<span class="chip rchip" aria-label="Level ${S.level}, ${r}-Rank">${rankEmb(r, 'sm')}LV ${S.level}</span><span class="chip ${S.streak ? 'hot' : ''}">STREAK ${S.streak}</span>`;
+ $('#chips').innerHTML = `<button class="chip rchip" data-a="ranks" aria-label="${r}-Rank, level ${S.level}. Open rank tiers">${rankEmb(r, 'sm')}LV ${S.level}</button><button class="chip ${S.streak ? 'hot' : ''}" data-a="goprofile" aria-label="Streak ${S.streak}. Open your profile">STREAK ${S.streak}</button>`;
  const xpl = $('#xpl'); if (xpl) xpl.style.width = (S.level >= capOf() ? 100 : S.xp / need(S.level) * 100).toFixed(1) + '%';
  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
  $('#view').innerHTML = ({quests:vQuests, train:vTrain, status:vStatus, log:vLog})[tab]();
@@ -2096,6 +2108,22 @@ function emblem(G, cls = '') {
   <g class="emb-glyph">${a.g}</g><g class="emb-cracks">${CRACKS.map((d, i) => f > (i + 1) * .2 ? `<path d="${d}"/>` : '').join('')}</g></svg>`;
 }
 const rankEmb = (r, cls = '') => `<span class="remb ${cls}" style="--ra:${AURA[r]}"><img src="assets/ranks/rank_${r}.webp" alt="${r}-Rank"><b>${r}</b></span>`;
+const RANK_INFO = [
+ {t:'Awakened', d:'Where everyone starts. Build the habit.'},
+ {t:'Initiate', d:'Daily Quests and Rift bosses get tougher.'},
+ {t:'Contender', d:'Tougher quests. Unlocks the Neon frame.'},
+ {t:'Veteran', d:'Quests and bosses step up again.'},
+ {t:'Elite', d:'Unlocks the Thunder aura. Few make it here.'},
+ {t:'Legend', d:'No level cap. Unlocks the Prismatic frame.'}];
+function openRanks() {
+ const cur = S.rankIdx || 0, lvPct = S.level >= capOf() ? 100 : S.xp / need(S.level) * 100;
+ const rows = RANKS.map((r, i) => {
+  const st = i < cur ? 'done' : i === cur ? 'now' : 'lock', lo = i * 10 + 1, hi = i >= 5 ? '∞' : (i + 1) * 10;
+  const sub = st === 'now' ? (i >= 5 ? `Level ${S.level} · no cap` : S.level >= capOf() ? `Level cap reached · pass the ${RANKS[i + 1]}-Rank Exam` : `Level ${S.level} of ${hi} · exam at ${hi}`) : st === 'done' ? 'Cleared' : `Levels ${lo}–${hi}`;
+  return `<div class="rt-row rt-${st}" style="--ra:${AURA[r]}">${rankEmb(r, 'rt')}<div class="rt-mid"><b>${r}-RANK <span>${RANK_INFO[i].t}</span></b><p>${RANK_INFO[i].d}</p><p class="rt-sub">${sub}</p>${st === 'now' && i < 5 ? `<div class="bar"><i style="width:${(((S.level - lo) + lvPct / 100) / 10 * 100).toFixed(1)}%"></i></div>` : ''}</div><span class="rt-tag">${st === 'done' ? '✓' : st === 'now' ? 'YOU' : ''}</span></div>`;
+ }).reverse().join('');
+ dialog({title:'Rank tiers', cls:'rt-dlg', body:`<p class="dim small" style="margin-top:0">Every 10 levels you hit a cap. Pass the Rank-Up Exam to climb to the next tier.</p><div class="rt-list">${rows}</div>`, buttons:[{label:'Close', cls:'p full'}]});
+}
 const bossVars = G => { const c = (BOSS_ART[G.boss] || {c:'#ff4f6d'}).c; return `--bc:${c};--bcr:${rgbOf(c)}`; };
 const bossSrc = n => `assets/bosses/boss_${n.toLowerCase().replace(/\s+/g, '-')}.webp`;
 const CRACK_N = 7, crackCache = {};
@@ -2362,6 +2390,8 @@ document.addEventListener('click', e => {
   case 'fmvoice': S.voice = !S.voice; save(); drawFocus(); if (S.voice) speak('Voice on'); return;
   case 'carprev': carGo(-1); return;
   case 'pcard': startTilt(); return;
+  case 'goprofile': tab = 'status'; sview = 'hunter'; try { history.replaceState(null, '', '#status'); } catch (x) {} render(); toTop(); return;
+  case 'ranks': openRanks(); return;
   case 'cos': cosTap(id); return;
   case 'sharecard': shareCard(); return;
   case 'carnext': carGo(1); return;
