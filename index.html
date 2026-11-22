@@ -485,7 +485,7 @@ const THEMES = [
 const RANK_MULT = [1, 1.6, 2.2, 3, 4, 5];
 const EVENTS = [
  {id:'early', name:'Early Bird', desc:'Clear the Daily Quest before noon for +25 XP.'},
- {id:'dmg', name:'Double Damage', desc:'Everything you log deals double damage to the Weekly Gate today.'},
+ {id:'dmg', name:'Double Damage', desc:'Everything you log deals double damage to the Weekly Rift today.'},
  {id:'bonus', name:'Bonus Round', desc:'A 4th quest is on the board today for +30 XP. Optional.'},
  {id:'over', name:'Overtime', desc:'Your Daily Quest clear bonus is 50% bigger today.'},
  {id:'mystery', name:'Mystery Quest', desc:'Clear the Daily Quest to reveal a secret quest worth +40 XP.'}
@@ -527,8 +527,8 @@ const TITLES = [
  {id:'push', n:'Push-Up Initiate', d:'500 total push-ups', t:s => s.totals.pushups >= 500, p:s => [s.totals.pushups, 500]},
  {id:'forge', n:'Forged', d:'Finish 20 workouts', t:s => s.totals.workouts >= 20, p:s => [s.totals.workouts, 20]},
  {id:'quick', n:'Quick Draw', d:'Clear 10 Sudden Quests', t:s => (s.totals.sudden || 0) >= 10, p:s => [s.totals.sudden || 0, 10]},
- {id:'gate1', n:'Gate Breaker', d:'Clear a Weekly Gate', t:s => (s.totals.gates || 0) >= 1, p:s => [s.totals.gates || 0, 1]},
- {id:'gate10', n:'Gatekeeper\'s Bane', d:'Clear 10 Weekly Gates', t:s => (s.totals.gates || 0) >= 10, p:s => [s.totals.gates || 0, 10]},
+ {id:'gate1', n:'Rift Breaker', d:'Clear a Weekly Rift', t:s => (s.totals.gates || 0) >= 1, p:s => [s.totals.gates || 0, 1]},
+ {id:'gate10', n:'Riftkeeper\'s Bane', d:'Clear 10 Weekly Rifts', t:s => (s.totals.gates || 0) >= 10, p:s => [s.totals.gates || 0, 10]},
  {id:'tested', n:'Know Thyself', d:'Take your first Power Test', t:s => (s.tests || []).length >= 1, p:s => [(s.tests || []).length, 1]},
  {id:'unbreak', n:'Unbreakable', d:'Reach a 30-day streak', t:s => s.bestStreak >= 30, p:s => [s.bestStreak, 30]},
  {id:'road', n:'Road Runner', d:'Finish the 8-week run plan', t:s => s.runPlan.done, p:s => [s.runPlan.done ? 24 : s.runPlan.week * 3 + s.runPlan.day, 24]},
@@ -817,7 +817,7 @@ function rollover() {
   }
  }
  newDay(t);
- const g = gateCheck(); if (g && g !== 'new') msgs.push(`The ${g.boss} Gate closed with ${g.hp} HP left.`);
+ const g = gateCheck(); if (g && g !== 'new') msgs.push(`The ${g.boss} Rift closed with ${g.hp} HP left.`);
  save();
  return msgs;
 }
@@ -1140,7 +1140,7 @@ function vQuests() {
  const pills = T.quests.length > 1 ? `<div class="qpills">${T.quests.map(q => `<button class="qp ${q.done ? 'ok' : ''} ${f && q.id === f.id ? 'on' : ''}" ${q.done ? 'disabled' : `data-a="focusq" data-id="${q.id}"`}>${q.done ? '✓ ' : ''}${q.label}</button>`).join('')}</div>` : '';
  const sub = T.complete ? '' : T.rest ? '<p class="dim small qfoot" style="color:var(--c1)">Rest day · streak protected</p>'
   : `<p class="dim small qfoot">${T.event ? `<b style="color:var(--gold)">⚡ ${T.event.name}:</b> ${T.event.desc}` : `Clear all ${req.length} for +${50 + Math.min((S.streak + 1) * 5, 50)} XP and +1 streak.`}${S.shields > 0 && S.streak > 0 ? ` <button class="linkish inline" data-a="shield">Rest day?</button>` : ''}</p>`;
- const G = S.gate, extra = [G && !G.cleared ? `${G.boss} · ${G.hp} HP` : G ? 'Gate cleared' : '', T.waterDone ? '' : `Water ${T.water}/8`].filter(Boolean).join(' · ');
+ const G = S.gate, extra = [G && !G.cleared ? `${G.boss} · ${G.hp} HP` : G ? 'Rift cleared' : '', T.waterDone ? '' : `Water ${T.water}/8`].filter(Boolean).join(' · ');
  return `${vCoach()}${urgent}${notice}
  <section class="panel wide qcard" data-id="${f ? f.id : ''}" data-p="${f ? f.prog : ''}">
   <div class="qtop"><p class="sys" style="margin:0">Daily Quest · ${doneN}/${req.length}</p><span class="dim small">${T.theme || rankOf() + '-Rank'}</span></div>
@@ -1237,7 +1237,7 @@ function vLog() {
   <div class="btns"><button class="b" data-a="export">Copy save code</button><button class="b" data-a="import">Restore from code</button><button class="b r" data-a="reset">Reset everything</button></div></section>
  <section class="panel wide"><h2>HOW IT WORKS</h2>
   <p class="small">Every day has a theme (Strength, Core, Cardio, Legs, Full Body, Endurance, Recovery) with exercises picked from a library of about 20, and most days bring a random System Event like Early Bird, Double Damage or a Mystery Quest. Three Daily Quests appear every day. Clear all three for bonus XP and +1 streak. Every 7-day streak earns a rest shield (max 3). A shield covers a rest day, and covers a missed day automatically. If you miss a day with no shield, a Penalty Quest appears. Clear it that day or the streak resets.</p>
-  <p class="small">Each week a <b>Weekly Gate</b> opens with a boss. Every rep and minute you log deals damage. Defeat it by Sunday for bonus XP. Once a month, take the <b>Power Test</b> to chart how much stronger you're getting.</p>
+  <p class="small">Each week a <b>Weekly Rift</b> opens with a boss. Every rep and minute you log deals damage. Defeat it by Sunday for bonus XP. Once a month, take the <b>Power Test</b> to chart how much stronger you're getting.</p>
   <p class="small">Each level takes a little more XP than the last. Every 10 levels you hit a level cap and unlock a <b>Rank-Up Exam</b>: real fitness trials like running without stopping, max push-ups and plank holds. Pass them all to rank up (E → D → C → B → A → S). Extra XP is saved while you're capped. Your aura changes color and the quests get harder with each rank.</p></section>`;
 }
 
@@ -1310,15 +1310,15 @@ function gateClear() {
  const G = S.gate; G.cleared = true; S.totals.gates = (S.totals.gates || 0) + 1;
  const xp = 150 + 50 * S.rankIdx, txt = line('gateClear', {boss:G.boss}), [x, y] = mid();
  setTimeout(() => { sfx('rankup', [80, 40, 80, 40, 160]); shake(); burst(x, y, '#ff4f6d', 60, 1.4); burst(x, y, '#ffcf5a', 40, 1.1); }, 150);
- addXp(xp, null, `Gate cleared: ${G.boss}`);
+ addXp(xp, null, `Rift cleared: ${G.boss}`);
  say('gateClear', txt);
- dialog({cls:'gold lvup', sys:false, body:`<p class="sys" style="color:var(--gold)">Weekly Gate</p><div class="big">GATE CLEARED</div><div class="arrow">${G.boss} defeated</div><p class="dim">Reward: +${xp} XP</p>${coachBlock('gateClear', txt)}`, buttons:[{label:'Continue', cls:'p full'}]});
+ dialog({cls:'gold lvup', sys:false, body:`<p class="sys" style="color:var(--gold)">Weekly Rift</p><div class="big">RIFT CLEARED</div><div class="arrow">${G.boss} defeated</div><p class="dim">Reward: +${xp} XP</p>${coachBlock('gateClear', txt)}`, buttons:[{label:'Continue', cls:'p full'}]});
 }
 function gateHTML() {
  const G = S.gate; if (!G) return '';
- if (G.cleared) return `<section class="panel wide"><div class="qtop"><p class="sys" style="margin:0">Weekly Gate</p><span class="dim small">New Gate opens Monday</span></div><p class="clear" style="margin:6px 0 0">✓ ${G.boss} defeated</p></section>`;
+ if (G.cleared) return `<section class="panel wide"><div class="qtop"><p class="sys" style="margin:0">Weekly Rift</p><span class="dim small">New Rift opens Monday</span></div><p class="clear" style="margin:6px 0 0">✓ ${G.boss} defeated</p></section>`;
  const d = gateDaysLeft();
- return `<section class="panel red wide"><div class="qtop"><p class="sys" style="margin:0">Weekly Gate</p><span class="dim small">${d === 1 ? 'Last day' : d + ' days left'}</span></div>
+ return `<section class="panel red wide"><div class="qtop"><p class="sys" style="margin:0">Weekly Rift</p><span class="dim small">${d === 1 ? 'Last day' : d + ' days left'}</span></div>
   <div class="gname">${G.boss}</div><div class="bar r gbar"><i style="width:${(G.hp / G.max * 100).toFixed(1)}%"></i></div>
   <p class="dim small">${G.hp} / ${G.max} HP · every rep and minute you log deals damage</p></section>`;
 }
@@ -1423,7 +1423,7 @@ const EXTRA_LINES = {
   powerTest:["Logged. That's your baseline now. Next month, we beat it."], powerUp:["Look at that! {gain}. That's real strength, {name}."]},
  rei:{gateClear:["{boss} defeated. Small efforts, added up, win every time."], restDay:["Recovery is part of the program. Your streak is protected."], shieldBack:["You completed the quests anyway. Shield refunded."],
   powerTest:["Recorded. Now we have data. Data is how we win."], powerUp:["{gain}. Measurable progress. Excellent."]},
- bolt:{gateClear:["WE BEAT THE {boss}!! GATE CLEARED! I'm screaming!"], restDay:["Rest day! Recharge those batteries, partner! Streak's safe!"], shieldBack:["You trained ANYWAY?! Legend! Shield refunded!"],
+ bolt:{gateClear:["WE BEAT THE {boss}!! RIFT CLEARED! I'm screaming!"], restDay:["Rest day! Recharge those batteries, partner! Streak's safe!"], shieldBack:["You trained ANYWAY?! Legend! Shield refunded!"],
   powerTest:["POWER LEVEL RECORDED! Next month we smash these numbers!"], powerUp:["{gain}!!! YOU'RE GETTING SO STRONG!"]}
 };
 for (const k in EXTRA_LINES) Object.assign(COACHES[k].lines, EXTRA_LINES[k]);
@@ -1577,7 +1577,7 @@ function buildSchedule() {
  (T.pops || []).forEach((p, i) => { if (p.status === 'pending' && p.at > now) out.push({at:p.at, tag:`pop-${T.date}-${i}`, title:'⚡ SUDDEN QUEST', body:`${p.task}. You have 30 minutes. +${p.xp} XP`}); });
  if (S.penalty && !S.penalty.done && at(18) > now) out.push({at:at(18), tag:`pen-${T.date}`, title:`${who}: Penalty Quest`, body:`You still owe ${c.pen} push-ups. Clear them before midnight or your ${S.streak}-day streak resets.`});
  if (!T.complete && !T.rest && at(20) > now) out.push({at:at(20), tag:`streak-${T.date}`, title:who, body:S.streak ? `Your ${S.streak}-day streak ends at midnight. ${c.leftList} left.` : `Still on the board: ${c.leftList}. Let's finish today.`});
- if (S.gate && !S.gate.cleared && gateDaysLeft() === 1 && at(19) > now) out.push({at:at(19), tag:`gate-${S.gate.week}`, title:'Weekly Gate closing', body:`The ${S.gate.boss} has ${S.gate.hp} HP left and the Gate closes at midnight.`});
+ if (S.gate && !S.gate.cleared && gateDaysLeft() === 1 && at(19) > now) out.push({at:at(19), tag:`gate-${S.gate.week}`, title:'Weekly Rift closing', body:`The ${S.gate.boss} has ${S.gate.hp} HP left and the Rift closes at midnight.`});
  out.push({at:at(8, 1), tag:`daily-${dstr(new Date(at(8, 1)))}`, title:'Daily Quest has arrived', body:`${who} is waiting. ${S.streak ? `Keep your ${S.streak}-day streak alive.` : 'Start a new streak today.'}`});
  return out;
 }
@@ -1612,14 +1612,14 @@ function partyJoinPrompt() {
 const partyToday = () => partyData ? partyData.members.filter(m => m.day === dstr() && m.cleared).length : 0;
 function vParty() {
  if (!cloudAvail()) return `<section class="panel wide"><h2>PARTY</h2><p class="dim small">Party mode runs on the Vercel version of Ascend.</p></section>`;
- if (!S.party) return `<section class="panel wide"><h2>PARTY</h2><p>Train with family or friends. See who cleared today, compare ranks and streaks, and stack your damage on the Weekly Gate together.</p>
+ if (!S.party) return `<section class="panel wide"><h2>PARTY</h2><p>Train with family or friends. See who cleared today, compare ranks and streaks, and stack your damage on the Weekly Rift together.</p>
   <div class="btns"><button class="b p" data-a="pcreate">Create a party</button><button class="b" data-a="pjoin">Join with a code</button></div>
   <p class="dim small" style="margin-top:10px">This turns on cloud save, so your party can see your progress.</p></section>`;
  const P = partyData, wk = weekKey();
  const list = P ? [...P.members].sort((a, b) => b.rank - a.rank || b.level - a.level) : [];
  const dmg = list.filter(m => m.gateWeek === wk).reduce((a, m) => a + m.gateDmg, 0);
  return `<section class="panel wide"><div class="qtop"><h2>${esc(S.party.name || 'PARTY')}</h2><span class="dim small">Code <b style="color:var(--c1);letter-spacing:.12em">${S.party.code}</b></span></div>
-  ${P ? `<p class="dim small">${partyToday()} of ${list.length} cleared today · ${dmg} Gate damage this week together</p>
+  ${P ? `<p class="dim small">${partyToday()} of ${list.length} cleared today · ${dmg} Rift damage this week together</p>
   <div class="plist">${list.map(m => `<div class="pm ${m.me ? 'me' : ''}"><div class="pav" style="border-color:${AURA[RANKS[m.rank]]}">${m.char ? `<img src="${charSrc('neutral', m.char)}" alt="">` : ''}</div>
    <div class="pinfo"><b>${esc(m.name)}${m.me ? ' <span class="dim small">(you)</span>' : ''}</b><span class="dim small">${RANKS[m.rank]}-Rank · Lv ${m.level} · ${m.streak}-day streak</span></div>
    <span class="pst ${m.day === dstr() && m.cleared ? 'ok' : ''}">${m.day === dstr() && m.cleared ? '✓ Cleared' : 'Not yet'}</span></div>`).join('')}</div>` : `<p class="dim small">${partyErr ? esc(partyErr) : 'Loading your party…'}</p>`}
@@ -1833,7 +1833,7 @@ function arrival(msgs) {
   <p class="dim small">${T.theme || rankOf() + '-Rank'} · Today's goals:</p>${T.quests.map(q => `<p>· ${q.label}: <b>${q.target}${q.unit}</b>${q.optional ? ' <span class="opt">BONUS</span>' : ''}</p>`).join('')}
   ${T.event ? `<p class="evt"><b>⚡ ${T.event.name}</b> ${T.event.desc}</p>` : ''}
   ${S.penalty ? `<p style="color:var(--red)">· Penalty: <b>${S.penalty.target} push-ups</b></p>` : ''}
-  ${S.gate && !S.gate.cleared ? `<p class="dim small" style="margin-top:8px">Weekly Gate: <b style="color:#ffd5db">${S.gate.boss}</b> · ${S.gate.hp}/${S.gate.max} HP</p>` : ''}${coachBlock(S.introDone && txt === CL.text && CL.queue.length ? 'first' : ev, txt)}`,
+  ${S.gate && !S.gate.cleared ? `<p class="dim small" style="margin-top:8px">Weekly Rift: <b style="color:#ffd5db">${S.gate.boss}</b> · ${S.gate.hp}/${S.gate.max} HP</p>` : ''}${coachBlock(S.introDone && txt === CL.text && CL.queue.length ? 'first' : ev, txt)}`,
   buttons:[{label:'Accept', cls:'p full', fn:() => { quietUntil = Date.now() + 90e3; tab = 'quests'; render(); }}]});
 }
 function checkinItem() {
