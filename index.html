@@ -357,6 +357,7 @@ body:has(.ov.cine:not([hidden])) #toasts{opacity:0;transition:opacity .2s}
 .car-name{font:900 clamp(26px,8vw,34px)/1 Orbitron,sans-serif;letter-spacing:.12em;margin-right:-.12em;text-shadow:0 0 22px rgba(62,240,255,.55)}
 .car-role{color:var(--c1);font:700 12px Oxanium,sans-serif;letter-spacing:.16em;text-transform:uppercase;margin:8px 0 10px}
 .car-lore{font-size:15px;line-height:1.5;max-width:40ch;margin:0 0 8px}
+.car-name+.car-lore{margin-top:12px}
 .car-quote{font-style:italic;color:var(--dim);font-size:14px;max-width:38ch;margin:4px 0 0}
 .car-stats{display:grid;gap:7px;margin:6px 0 4px;width:min(100%,280px)}
 .car-stats div{display:flex;justify-content:space-between;align-items:center;font:700 11px Oxanium,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
@@ -1763,18 +1764,18 @@ document.addEventListener('pointerdown', e => {
 
 /* ================= lore carousels ================= */
 const HUNTER_LORE = {
- player01:{code:'NIGHTFALL', spec:'Consistency', lore:'Awakened at 2 a.m. after another all-nighter at the desk. Quiet, stubborn, and done waiting for "someday."', quote:'One rep tonight beats a perfect plan tomorrow.'},
- player02:{code:'EMBER', spec:'Speed', lore:'A former sprinter who walked away from the track for years, then finally came back. Burns hot, never burns out.', quote:'I didn\'t lose it. I just put it down for a while.'},
- player03:{code:'PULSE', spec:'Rhythm', lore:'Trains to the beat in his earpiece. Every rep on rhythm, every rest on the clock, every set a track on the playlist.', quote:'Find the beat. Then don\'t miss it.'},
- player04:{code:'FROST', spec:'Endurance', lore:'Calm under pressure and colder in competition. Her plank holds are the stuff of guild legend.', quote:'Stillness is a skill. I trained it.'},
- player05:{code:'BLAZE', spec:'Power', lore:'Picked a fight with his own excuses, and won. Loud in the gym, louder on leg day, the first to cheer for a rookie.', quote:'Excuses don\'t lift anything.'},
- player06:{code:'TEMPEST', spec:'Stamina', lore:'Works the night shift and turned every walk break into a training session. Slow to start, impossible to stop.', quote:'Twelve-hour shifts made me tough. This made me strong.'},
- player07:{code:'RIDGE', spec:'Grit', lore:'Dad of three, weekend trail runner, weekday desk warrior. Living proof that busy is not an excuse.', quote:'I train at 5 a.m. so I can keep up at 5 p.m.'},
- player08:{code:'VECTOR', spec:'Precision', lore:'Engineer by day, Hunter by night. Tracks every stat, optimizes every set, and debugs her form like code.', quote:'Measure it. Improve it. Repeat.'},
- player09:{code:'HALO', spec:'Resilience', lore:'Got the scar learning to skateboard at thirty. Still smiling, still falling, still getting back up.', quote:'Falling is just the first half of getting up.'},
- player10:{code:'NOVA', spec:'Agility', lore:'A gamer who noticed her character was stronger than she was, and decided to fix that. Fast hands, faster feet.', quote:'Real life has the best graphics. Time to level up.'},
- player11:{code:'BASTION', spec:'Strength', lore:'A veteran who rebuilt himself from the ground up. Slow to speak, steady as stone, impossible to break.', quote:'Brick by brick. Rep by rep.'},
- player12:{code:'GLITCH', spec:'Focus', lore:'Codes all day, lifts all night, and treats every workout like a bug to squash before shipping.', quote:'Every plateau is just a bug. Find it. Fix it.'}
+ player01:{spec:'Consistency', lore:'You awaken at 2 a.m. after another all-nighter at the desk. Quiet, stubborn, and done waiting for "someday."', quote:'One rep tonight beats a perfect plan tomorrow.'},
+ player02:{spec:'Speed', lore:'You used to run. You walked away for years. Now you\'re back, and you burn hot without burning out.', quote:'I didn\'t lose it. I just put it down for a while.'},
+ player03:{spec:'Rhythm', lore:'You train to the beat in your earbuds. Every rep on rhythm, every rest on the clock, every set a track on the playlist.', quote:'Find the beat. Then don\'t miss it.'},
+ player04:{spec:'Endurance', lore:'Calm under pressure, colder in competition. You win by outlasting everyone, one long hold at a time.', quote:'Stillness is a skill. I trained it.'},
+ player05:{spec:'Power', lore:'You picked a fight with your own excuses, and you plan to win. Loud on leg day, first to cheer for a rookie.', quote:'Excuses don\'t lift anything.'},
+ player06:{spec:'Stamina', lore:'Long shifts, short breaks, and you turn every one into training. Slow to start, impossible to stop.', quote:'Long days made me tough. This makes me strong.'},
+ player07:{spec:'Grit', lore:'Busy schedule, full plate, no free time. You train anyway, because busy was never a real excuse.', quote:'I train early so I can keep up all day.'},
+ player08:{spec:'Precision', lore:'You track every stat, tune every set, and debug your form like code. Small gains, stacked daily.', quote:'Measure it. Improve it. Repeat.'},
+ player09:{spec:'Resilience', lore:'You\'ve fallen off before. Plenty of times. What matters is you keep getting back up.', quote:'Falling is just the first half of getting up.'},
+ player10:{spec:'Agility', lore:'You noticed your game character was stronger than you, and decided to fix that. Fast hands, faster feet.', quote:'Real life has the best graphics. Time to level up.'},
+ player11:{spec:'Strength', lore:'You rebuild from the ground up. Slow to speak, steady as stone, impossible to break.', quote:'Brick by brick. Rep by rep.'},
+ player12:{spec:'Focus', lore:'You code all day and treat every workout like a bug to squash before shipping. Locked in.', quote:'Every plateau is just a bug. Find it. Fix it.'}
 };
 const COACH_LORE = {
  kaida:{title:'The Ember Coach', lore:'A junior champion who quit at seventeen and came back at twenty, because her coach never gave up on her. Now she trains rookies the same way: loud, honest, and never letting you quit.', stats:{Intensity:5, Patience:2, Hype:4}, quote:'I\'m tough on you because I already know you can do it.'},
@@ -1784,9 +1785,9 @@ const COACH_LORE = {
 const HUNTER_EXPR = ['neutral', 'happy', 'fierce'], COACH_EXPR = ['smile', 'happy', 'fierce', 'surprised'];
 let CAR = null;
 function carSlide(kind, id, i) {
- if (kind === 'hunter') { const L = HUNTER_LORE[id] || {code:id, spec:'', lore:'', quote:''};
-  return `<section class="car-slide"><button class="car-art pimg r${S.rankIdx || 0}" style="--aura:${AURA[rankOf()]}" data-a="carexpr" data-i="${i}" aria-label="Change expression"><img src="${charSrc('neutral', id)}" alt="${L.code}"></button>
-   <div class="car-name">${L.code}</div><p class="car-role">Specialty · ${L.spec}</p><p class="car-lore">${L.lore}</p><p class="car-quote">“${L.quote}”</p></section>`; }
+ if (kind === 'hunter') { const L = HUNTER_LORE[id] || {spec:'', lore:'', quote:''};
+  return `<section class="car-slide"><button class="car-art pimg r${S.rankIdx || 0}" style="--aura:${AURA[rankOf()]}" data-a="carexpr" data-i="${i}" aria-label="Change expression"><img src="${charSrc('neutral', id)}" alt="Hunter option ${i + 1}"></button>
+   <p class="car-role">Hunter ${String(i + 1).padStart(2, '0')} · Your style</p><div class="car-name">${L.spec.toUpperCase()}</div><p class="car-lore">${L.lore}</p><p class="car-quote">Your motto: “${L.quote}”</p></section>`; }
  const c = COACHES[id], L = COACH_LORE[id];
  return `<section class="car-slide"><button class="car-art coachart" data-a="carexpr" data-i="${i}" aria-label="Change expression">${coachPic('smile', id)}</button>
   <div class="car-name">${c.name}</div><p class="car-role">${L.title}</p><p class="car-lore">${L.lore}</p>
@@ -1797,7 +1798,7 @@ function openCarousel(kind, done) {
  CAR = {kind, items, idx:Math.max(0, items.indexOf(cur)), expr:{}};
  $('#cc').hidden = false;
  $('#cc').innerHTML = `<div class="car">
-  <div class="car-head"><p class="sys">${kind === 'hunter' ? 'Character select' : 'Choose your coach'}</p><h2>${kind === 'hunter' ? 'CHOOSE YOUR HUNTER' : 'WHO\'S TRAINING YOU?'}</h2><p class="dim small">Swipe to browse · tap the art to see their moods</p></div>
+  <div class="car-head"><p class="sys">${kind === 'hunter' ? 'Character select' : 'Choose your coach'}</p><h2>${kind === 'hunter' ? 'CHOOSE YOUR HUNTER' : 'WHO\'S TRAINING YOU?'}</h2><p class="dim small">${kind === 'hunter' ? 'This is you. Swipe to pick your look and style.' : 'Swipe to browse · tap the art to see their moods'}</p></div>
   <div class="car-track" id="carTrack">${items.map((id, i) => carSlide(kind, id, i)).join('')}</div>
   <div class="car-dots">${items.map(() => '<span></span>').join('')}</div>
   <div class="car-nav"><button class="car-arrow" data-a="carprev" aria-label="Previous">‹</button><button class="b p" id="carPick">Choose</button><button class="car-arrow" data-a="carnext" aria-label="Next">›</button></div>
@@ -1809,7 +1810,7 @@ function openCarousel(kind, done) {
 function carUpdate() {
  document.querySelectorAll('.car-dots span').forEach((d, i) => d.classList.toggle('on', i === CAR.idx));
  const id = CAR.items[CAR.idx], b = $('#carPick'); if (!b) return;
- b.textContent = CAR.kind === 'hunter' ? `Choose ${(HUNTER_LORE[id] || {code:'Hunter'}).code}` : `Train with ${COACHES[id].name}`;
+ b.textContent = CAR.kind === 'hunter' ? 'This is me' : `Train with ${COACHES[id].name}`;
  b.dataset.id = id; b.dataset.a = CAR.kind === 'hunter' ? 'pickchar' : 'pickcoach';
 }
 function carGo(d) { const tr = $('#carTrack'); if (!tr || !CAR) return; const i = Math.max(0, Math.min(CAR.items.length - 1, CAR.idx + d)); tr.scrollTo({left:i * tr.clientWidth, behavior:reducedMotion ? 'auto' : 'smooth'}); }
