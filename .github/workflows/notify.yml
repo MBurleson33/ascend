@@ -21,8 +21,8 @@ jobs:
           if [ -z "$URL" ]; then echo "::error::ASCEND_URL is not set. Add it under Settings → Secrets and variables → Actions."; exit 1; fi
           URL="${URL%/}"
           case "$URL" in http://*|https://*) ;; *) URL="https://$URL" ;; esac
-          # Follow redirects (http→https, alias domains) and keep the auth header on the redirected request
-          out=$(curl -sS -L --location-trusted --max-redirs 5 -o body.txt -w '%{http_code} %{url_effective}' -H "Authorization: Bearer $KEY" "$URL/api/tick" || echo "000 $URL")
+          # Follow redirects; curl drops the auth header if a redirect goes to a different site, so the secret never leaks
+          out=$(curl -sS -L --max-redirs 5 -o body.txt -w '%{http_code} %{url_effective}' -H "Authorization: Bearer $KEY" "$URL/api/tick" || echo "000 $URL")
           code="${out%% *}"; final="${out#* }"
           echo "HTTP $code from $final"; head -c 400 body.txt; echo
           if [ "$final" != "$URL/api/tick" ]; then echo "::warning::ASCEND_URL redirects to $final. Set ASCEND_URL to ${final%/api/tick} to skip the redirect."; fi
