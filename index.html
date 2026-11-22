@@ -499,6 +499,15 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .fm-auto{display:flex;align-items:center;gap:8px;justify-content:center;font-size:13px;color:var(--dim)}
 .fm-auto .beta{font:700 9px Oxanium,sans-serif;letter-spacing:.12em;color:var(--gold);border:1px solid rgba(255,207,90,.5);padding:1px 4px}
 .fm-auto.on .fm-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:blink 1s steps(2) infinite}
+.remb{position:relative;display:inline-grid;place-items:center;flex:none;vertical-align:middle}
+.remb img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--ra) 60%,transparent))}
+.remb b{position:absolute;left:50%;top:51%;transform:translate(-50%,-50%);font-family:Orbitron,sans-serif;font-weight:900;line-height:1;color:var(--ra);text-shadow:0 0 10px var(--ra),0 0 2px #fff}
+.remb.sm{width:24px;height:24px;margin:-5px 6px -5px -6px}.remb.sm b{font-size:9px;text-shadow:0 0 4px var(--ra)}
+.remb.md{width:70px;height:70px;margin:-8px -8px -6px 0}.remb.md b{font-size:24px}
+.remb.xl{width:min(72vw,300px);height:min(72vw,300px)}.remb.xl b{font-size:min(26vw,108px);text-shadow:0 0 30px var(--ra),0 0 70px var(--ra),0 0 3px #fff}
+.rchip{display:inline-flex;align-items:center}
+.rk-emb{font-size:inherit;text-shadow:none;margin:4px auto}
+.pc-rank{text-shadow:none}
 /* cosmetics: backgrounds */
 .pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
@@ -1283,7 +1292,7 @@ function render() {
  applyTheme();
  const r = rankOf(S.level);
  $('#mini').innerHTML = `<img src="${charSrc('neutral')}" alt="">`; $('#mini').style.borderColor = AURA[rankOf()]; $('#mini').style.boxShadow = `0 0 ${8 + S.rankIdx * 3}px ${AURA[rankOf()]}`;
- $('#chips').innerHTML = `<span class="chip">LV ${S.level} · ${r}-RANK</span><span class="chip ${S.streak ? 'hot' : ''}">STREAK ${S.streak}</span>`;
+ $('#chips').innerHTML = `<span class="chip rchip" aria-label="Level ${S.level}, ${r}-Rank">${rankEmb(r, 'sm')}LV ${S.level}</span><span class="chip ${S.streak ? 'hot' : ''}">STREAK ${S.streak}</span>`;
  const xpl = $('#xpl'); if (xpl) xpl.style.width = (S.level >= capOf() ? 100 : S.xp / need(S.level) * 100).toFixed(1) + '%';
  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
  $('#view').innerHTML = ({quests:vQuests, train:vTrain, status:vStatus, log:vLog})[tab]();
@@ -1834,7 +1843,7 @@ function sceneLevel(oldL, capNote, txt) {
 }
 function sceneRank(from, to, note, txt) {
  cine(`<div class="rk-dark"></div><div class="rk-stage" style="--aura:${AURA[to]}"><p class="sys">Reassessment complete</p><div class="rk-from">${from}-RANK</div>
-  <div class="rk-letter">${to}</div><div class="rk-word">RANK UP</div>
+  <div class="rk-letter rk-emb">${rankEmb(to, 'xl')}</div><div class="rk-word">RANK UP</div>
   <div class="rk-coach">${coachPic('surprised')}<div><b>${coach().name}</b><p>${esc(txt)}</p></div></div><p class="dim small" style="margin-top:12px">${note}</p><button class="b p full" data-i="0">Continue</button></div>`,
   () => setTimeout(() => { sfx('rankup', [100, 50, 100, 50, 250]); shake(); const [x, y] = mid(); burst(x, y, AURA[to], 90, 1.7); burst(x, y, '#ffffff', 30, 1.2); }, 850));
 }
@@ -2071,6 +2080,7 @@ function emblem(G, cls = '') {
   <g class="emb-ring"><polygon points="50,4 89.8,27 89.8,73 50,96 10.2,73 10.2,27"/><polygon class="dash" points="50,10 84.6,30 84.6,70 50,90 15.4,70 15.4,30"/></g>
   <g class="emb-glyph">${a.g}</g><g class="emb-cracks">${CRACKS.map((d, i) => f > (i + 1) * .2 ? `<path d="${d}"/>` : '').join('')}</g></svg>`;
 }
+const rankEmb = (r, cls = '') => `<span class="remb ${cls}" style="--ra:${AURA[r]}"><img src="assets/ranks/rank_${r}.webp" alt="${r}-Rank"><b>${r}</b></span>`;
 const bossVars = G => { const c = (BOSS_ART[G.boss] || {c:'#ff4f6d'}).c; return `--bc:${c};--bcr:${rgbOf(c)}`; };
 const bossSrc = n => `assets/bosses/boss_${n.toLowerCase().replace(/\s+/g, '-')}.webp`;
 const CRACK_N = 7, crackCache = {};
@@ -2145,7 +2155,7 @@ function profileCard(locker) {
  const r = rankOf(), t = TITLES.find(x => x.id === S.title), ex = S.penalty && !S.penalty.done ? 'fierce' : S.today.complete ? 'happy' : 'neutral';
  return `<section class="pcard-wrap"><div class="pcard frame-${S.cos.frame.slice(6)}" id="pcard" data-a="pcard" style="--rk:${AURA[r]}">
   ${S.cos.bg !== 'bg_grid' ? `<div class="pc-bg" style="background-image:url(${bgSrc(S.cos.bg)})"></div>` : ''}<div class="pc-foil"></div><div class="pc-grid"></div><i class="pc-frame"></i>
-  <div class="pc-top"><span class="pc-brand">ASCEND · ID</span><span class="pc-rank">${r}</span></div>
+  <div class="pc-top"><span class="pc-brand">ASCEND · ID</span><span class="pc-rank">${rankEmb(r, 'md')}</span></div>
   <div class="pc-art"><div class="pc-aura aura-${S.cos.aura.slice(5)}"><i></i></div>${playerImg(ex)}</div>
   <div class="pc-id"><div><div class="pc-name">${esc(S.name)}</div><div class="pc-title">${t ? t.n : 'No title yet'}</div></div><div class="pc-lv"><small>LV</small>${S.level}</div></div>
   <div class="pc-stats">${STATS.map(s => `<div><span>${s.n}</span><b>${statVal(s.k)}</b></div>`).join('')}</div>
@@ -2166,7 +2176,7 @@ async function shareCard() {
  if (S.cos.bg === 'bg_grid') { x.strokeStyle = 'rgba(255,255,255,.05)'; x.lineWidth = 2; for (let i = 0; i < W; i += 60) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, H); x.stroke(); } for (let i = 0; i < H; i += 60) { x.beginPath(); x.moveTo(0, i); x.lineTo(W, i); x.stroke(); } }
  const g = x.createLinearGradient(0, 0, W, H); if (S.cos.frame === 'frame_prism') ['#3ef0ff', '#9b6bff', '#ff5fd2', '#ffcf5a', '#4dffb5'].forEach((c, i) => g.addColorStop(i / 4, c)); else if (frC) { g.addColorStop(0, frC); g.addColorStop(1, frC); } else { g.addColorStop(0, c1); g.addColorStop(.5, rk); g.addColorStop(1, c2); } x.strokeStyle = g; x.lineWidth = 12; x.strokeRect(30, 30, W - 60, H - 60);
  x.fillStyle = '#8ea3c6'; x.font = '700 34px Oxanium, sans-serif'; x.textAlign = 'left'; x.fillText('ASCEND · ID', 80, 120);
- x.fillStyle = rk; x.shadowColor = rk; x.shadowBlur = 40; x.font = '900 150px Orbitron, sans-serif'; x.textAlign = 'right'; x.fillText(r, W - 80, 200); x.shadowBlur = 0;
+ const re = await loadImg(`assets/ranks/rank_${r}.webp`); if (re) { x.shadowColor = rk; x.shadowBlur = 30; x.drawImage(re, W - 290, 40, 230, 230); } x.fillStyle = rk; x.shadowColor = rk; x.shadowBlur = 30; x.font = '900 84px Orbitron, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(r, W - 175, 160); x.textBaseline = 'alphabetic'; x.shadowBlur = 0;
  const im = await loadImg(charSrc(S.today.complete ? 'happy' : 'neutral')); if (im) { x.shadowColor = auC; x.shadowBlur = 70; x.drawImage(im, W / 2 - 330, 200, 660, 660); x.shadowBlur = 0; }
  x.textAlign = 'left'; x.fillStyle = '#eaf6ff'; x.font = '900 76px Orbitron, sans-serif'; x.fillText(S.name.toUpperCase().slice(0, 14), 80, 990);
  x.fillStyle = c1; x.font = '700 38px Oxanium, sans-serif'; x.fillText(t ? t.n : 'No title yet', 80, 1046);
