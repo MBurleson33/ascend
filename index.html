@@ -508,6 +508,15 @@ main.enter,.top.enter{animation:enter .6s cubic-bezier(.2,.9,.3,1) both}
 .rchip{display:inline-flex;align-items:center}
 .rk-emb{font-size:inherit;text-shadow:none;margin:4px auto}
 .pc-rank{text-shadow:none}
+.story-art{padding:0;overflow:hidden;position:relative;aspect-ratio:3/2;max-height:46vh;animation:rowin .6s ease-out both}
+.sa-img{position:absolute;inset:0;background-size:cover;background-position:center;animation:kenburns 18s ease-in-out infinite alternate}
+.mo .sa-img{translate:calc(var(--x) * -10px) calc(var(--y) * -8px)}
+@keyframes kenburns{from{transform:scale(1.06)}to{transform:scale(1.18) translate(-2%,-1%)}}
+.sa-cap{position:absolute;left:0;right:0;bottom:0;padding:34px 18px 14px;background:linear-gradient(transparent,rgba(4,6,13,.88))}
+.sa-cap .sys{margin:0 0 2px}.sa-cap b{font:900 clamp(18px,5.5vw,24px) Orbitron,sans-serif;letter-spacing:.04em;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.st-row{display:grid!important;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center}
+.st-th{width:64px;height:42px;background-size:cover;background-position:center;border:1px solid rgba(var(--c1rgb),.3)}
+.st-row.lock .st-th{filter:grayscale(1) brightness(.35) blur(1px)}
 /* cosmetics: backgrounds */
 .pc-bg{position:absolute;inset:-18px;background-size:cover;background-position:center;transform:translate(calc(var(--x,0) * -14px),calc(var(--y,0) * -12px))}
 .pc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.1),rgba(4,6,13,.25) 45%,rgba(4,6,13,.82) 72%,rgba(4,6,13,.92))}
@@ -1056,7 +1065,10 @@ function showChoices() { const el = $('#vnCh'); if (el) el.innerHTML = CL.shown 
 function say(ev, text, choices) {
  CL.queue = []; CL.choices = choices || [];
  const ch = $('#vnCh'); if (ch) ch.innerHTML = '';
- CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0;
+ CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0; CL.ev = ev;
+ { const sa = $('#storyArt'), vn = document.querySelector('.panel.vn');
+   if (ev !== 'story') { if (sa) sa.remove(); storyNow = 0; }
+   else if (!sa && vn && storyNow) vn.insertAdjacentHTML('beforebegin', storyArtHTML()); }
  { const t0 = $('#vnText'); if (t0) t0.innerHTML = typed(); }
  const nx = document.querySelector('.vnnext'); if (nx) nx.textContent = '▼ tap';
  const p = $('#vnPort'); if (p) p.innerHTML = coachPic(CL.expr);
@@ -1300,7 +1312,7 @@ function render() {
 }
 function vCoach() {
  const c = coach();
- return `<section class="panel vn wide" data-a="coachtap" aria-label="Coach dialogue, tap for more">
+ return `${CL.ev === 'story' ? storyArtHTML() : ''}<section class="panel vn wide" data-a="coachtap" aria-label="Coach dialogue, tap for more">
   <div class="vnport" id="vnPort">${coachPic(CL.expr)}</div>
   <div class="vnbody"><span class="vnname">${c.name}</span><p id="vnText">${typed()}</p><div class="vnch" id="vnCh">${CL.shown >= CL.text.length ? choicesHTML() : ''}</div><span class="vnnext">${CL.choices.length ? '' : CL.queue.length && CL.shown >= CL.text.length ? '▼ more' : '▼ tap'}</span></div></section>`;
 }
@@ -1604,11 +1616,14 @@ const STORY = {
   4:["...Hey. I'm not gonna yell for this one. Okay, maybe a little.", "A-Rank is where people start calling you strong. And they're right.", "Thanks for letting me be in your corner. Seriously."],
   5:["S... S-RANK!!! I CAN'T BREATHE!", "Okay. Okay. Deep breath. You did it, {name}. You actually did it.", "Best. Partner. EVER. Now let's go show the world!"]}
 };
-const storyItems = r => (STORY[coachId()][r] || []).map(t => ({ev:'story', text:fill(t)}));
+const STORY_T = ['', 'The First Step', 'Coming Back', 'A New Morning', 'When Nobody\'s Watching', 'The Summit'];
+let storyNow = 0;
+const storyArtHTML = () => storyNow ? `<section class="panel wide story-art" id="storyArt"><div class="sa-img" style="background-image:url(assets/story/story_${RANKS[storyNow]}.webp)"></div><div class="sa-cap"><p class="sys">Chapter ${storyNow}</p><b>${STORY_T[storyNow]}</b></div></section>` : '';
+const storyItems = r => { storyNow = r; return (STORY[coachId()][r] || []).map(t => ({ev:'story', text:fill(t)})); };
 function playStory(r) { tab = 'quests'; render(); toTop(); sayQueue(storyItems(r)); }
 function storyHTML() {
  return `<section class="panel"><h2>COACH STORIES</h2><p class="dim small">${coach().name.charAt(0) + coach().name.slice(1).toLowerCase()} opens up a little more at each rank.</p>
-  <div class="tlist">${[1, 2, 3, 4, 5].map(r => { const open = S.rankIdx >= r; return `<button class="tt ${open ? '' : 'lock'}" ${open ? `data-a="story" data-r="${r}"` : 'disabled'}><span><b>Chapter ${r}</b><br><span class="dim small">${open ? 'Tap to replay' : `Reach ${RANKS[r]}-Rank`}</span></span><span class="small">${open ? '▶' : 'Locked'}</span></button>`; }).join('')}</div></section>`;
+  <div class="tlist">${[1, 2, 3, 4, 5].map(r => { const open = S.rankIdx >= r; return `<button class="tt st-row ${open ? '' : 'lock'}" ${open ? `data-a="story" data-r="${r}"` : 'disabled'}><span class="st-th" style="background-image:url(assets/story/story_${RANKS[r]}.webp)"></span><span><b>Chapter ${r} · ${STORY_T[r]}</b><br><span class="dim small">${open ? 'Tap to replay' : `Reach ${RANKS[r]}-Rank`}</span></span><span class="small">${open ? '▶' : 'Locked'}</span></button>`; }).join('')}</div></section>`;
 }
 const EXTRA_LINES = {
  kaida:{gateClear:["The {boss} is down! That's what consistency looks like."], restDay:["Rest day. Fine. Recover hard, because tomorrow I'm not going easy."], shieldBack:["You trained on a rest day? Ha. Take your shield back, show-off."],
