@@ -1523,7 +1523,7 @@ const SFX = {
  fail:() => tone(320, 0, .4, 'sawtooth', .05, 140)
 };
 /* recorded sound effects (fall back to synth tones until loaded) */
-const SFX_FILES = {tap:['tap', .35], blip:['tap', .18], rep:['rep', .55], coin:['rep', .45], success:['quest_clear', .7], chime:['unlock', .65], unlock:['unlock', .7], levelup:['level_up', .8], rankup:['rank_up', .9], riftclear:['rift_clear', .85], hit:['rift_hit', .6], alarm:['sudden', .75], fail:['penalty', .75], penalty:['penalty', .75], tick:['countdown', .6], boot:['boot', .6], clear:['quest_clear', .85]};
+const SFX_FILES = {rep:['rep', .55], coin:['rep', .45], success:['quest_clear', .7], chime:['unlock', .65], unlock:['unlock', .7], levelup:['level_up', .8], rankup:['rank_up', .9], riftclear:['rift_clear', .85], hit:['rift_hit', .6], alarm:['sudden', .75], fail:['penalty', .75], penalty:['penalty', .75], tick:['countdown', .6], boot:['boot', .6], clear:['quest_clear', .85]};
 const SFX_BUF = {}; let sfxLoading = false;
 function sfxLoad() {
  if (sfxLoading || !sfxCtx) return; sfxLoading = true;
@@ -1533,6 +1533,7 @@ function playBuf(name) {
  const m = SFX_FILES[name], buf = m && SFX_BUF[m[0]]; if (!buf) return false;
  const s = sfxCtx.createBufferSource(), g = sfxCtx.createGain(); s.buffer = buf; g.gain.value = m[1]; s.connect(g); g.connect(sfxCtx.destination); s.start(); return true;
 }
+SFX.tap = SFX.blip = () => {};
 SFX.tick = () => tone(1400, 0, .05, 'square', .03); SFX.unlock = SFX.chime; SFX.riftclear = SFX.rankup; SFX.rep = SFX.coin; SFX.penalty = SFX.fail; SFX.boot = SFX.chime; SFX.clear = SFX.success;
 function sfx(name, buzz) {
  if (S.sound !== false) { try { sfxInit(); if (sfxCtx) { sfxLoad(); if (!playBuf(name) && SFX[name]) SFX[name](); } } catch (e) {} }
