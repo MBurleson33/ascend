@@ -1103,6 +1103,13 @@ function line(ev, vars) {
  const all = coach().lines[ev] || coach().lines.idle, opts = all.length > 1 ? all.filter(t => t !== lastLine[ev]) : all, t = pick(opts);
  lastLine[ev] = t; return fill(t, vars);
 }
+const liveSig = () => { const T = S.today; if (!T) return ''; return [T.quests.map(q => q.prog).join('.'), T.water, T.waterDone, T.runDone, T.wkDone, T.complete, T.walkXp, S.gate && S.gate.hp, S.exam && S.exam.done.join('')].join('|'); };
+const LIVE_EV = new Set(['greet_m', 'greet_a', 'greet_e', 'next', 'half', 'status', 'idle', 'late', 'train', 'extra', 'done', 'clear', 'push', 'squat', 'cardio']);
+function refreshCoach() {
+ if (!S.today || CL.queue.length || CL.choices.length || !LIVE_EV.has(CL.ev) || CL.sig === liveSig()) return;
+ const T = S.today, ev = T.complete ? 'done' : 'next';
+ say(ev, line(T.complete ? (T.wkDone && T.runDone && T.waterDone ? 'done' : 'train') : 'next'));
+}
 const greetLine = ev => line(ev) + (ev.startsWith('greet') && S.today.theme ? ' ' + line('themeIntro', {theme:S.today.theme}) : '');
 // What the coach should be talking about right now
 function opener() {
@@ -1123,7 +1130,7 @@ function showChoices() { const el = $('#vnCh'); if (el) el.innerHTML = CL.shown 
 function say(ev, text, choices) {
  CL.queue = []; CL.choices = choices || [];
  const ch = $('#vnCh'); if (ch) ch.innerHTML = '';
- CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0; CL.ev = ev;
+ CL.text = text || line(ev); CL.expr = EXPR[ev] || 'smile'; CL.shown = 0; CL.ev = ev; CL.sig = liveSig();
  { const sa = $('#storyArt'), vn = document.querySelector('.panel.vn');
    if (ev !== 'story') { if (sa) sa.remove(); storyNow = 0; }
    else if (!sa && vn && storyNow) vn.insertAdjacentHTML('beforebegin', storyArtHTML()); }
@@ -2058,6 +2065,7 @@ const holdCancel = () => { if (holdRaf) { cancelAnimationFrame(holdRaf); holdRaf
 /* ================= motion polish ================= */
 let lastTab = null, lastQ = {id:null, p:null};
 function afterRender() {
+ if (tab === 'quests' && tab !== lastTab) refreshCoach();
  if (tab !== lastTab) {
   const order = ['quests', 'train', 'status', 'log'], dir = lastTab ? Math.sign(order.indexOf(tab) - order.indexOf(lastTab)) : 0, v = $('#view');
   if (dir && !reducedMotion) { v.style.setProperty('--dir', dir); v.classList.remove('tabin'); void v.offsetWidth; v.classList.add('tabin'); }
